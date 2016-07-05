@@ -1,6 +1,13 @@
 arch ?= x86_64
 kernel := build/kernel-$(arch).bin
 iso := build/os-$(arch).iso
+uname := $(shell sh -c 'uname -s 2>/dev/null')
+
+ifeq ($(uname),Linux)
+	LD=ld
+else
+	LD=x86_64-elf-ld
+endif
 
 linker_script := src/arch/$(arch)/linker.ld
 grub_cfg := src/arch/$(arch)/grub.cfg
@@ -28,7 +35,7 @@ $(iso): $(kernel) $(grub_cfg)
 	@rm -r build/isofiles
 
 $(kernel): $(assembly_object_files) $(linker_script)
-	@ld -n -T $(linker_script) -o $(kernel) $(assembly_object_files)
+	@$(LD) -n -T $(linker_script) -o $(kernel) $(assembly_object_files)
 
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	@mkdir -p $(shell dirname $@)

@@ -1,0 +1,18 @@
+[package]
+name = "os"
+version = "0.0.1"
+authors = ["flex1988"]
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+rlibc = "0.1.4"
+
+# The development profile, used for `cargo build`.
+[profile.dev]
+panic = "abort"
+
+# The release profile, used for `cargo build --release`.
+[profile.release]
+panic = "abort"

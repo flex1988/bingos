@@ -5,16 +5,16 @@ use spin::Mutex;
 
 pub static WRITER: Mutex<Writer> = Mutex::new(Writer {
     column_position: 0,
-    color_code: ColorCode::new(Color::LightGreen,Color::Black),
-    buffer: unsafe {Unique::new(0xb8000 as *mut _)},
+    color_code: ColorCode::new(Color::LightGreen, Color::Black),
+    buffer: unsafe { Unique::new(0xb8000 as *mut _) },
 });
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum Color {
-    Black =0,
-    Blue =1,
+    Black = 0,
+    Blue = 1,
     Green = 2,
     Cyan = 3,
     Red = 4,
@@ -35,8 +35,8 @@ pub enum Color {
 struct ColorCode(u8);
 
 impl ColorCode {
-    const fn new(foreground: Color,background:Color)-> ColorCode {
-        ColorCode((background as u8)<<4 |(foreground as u8))
+    const fn new(foreground: Color, background: Color) -> ColorCode {
+        ColorCode((background as u8) << 4 | (foreground as u8))
     }
 }
 
@@ -51,7 +51,7 @@ const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
 struct Buffer {
-    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH];BUFFER_HEIGHT],
+    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
 use core::ptr::Unique;
@@ -63,7 +63,7 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn write_byte(&mut self,byte:u8){
+    pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
             byte => {
@@ -76,47 +76,46 @@ impl Writer {
 
                 let color_code = self.color_code;
                 self.buffer().chars[row][col].write(ScreenChar {
-                    ascii_character:byte,
+                    ascii_character: byte,
                     color_code: color_code,
                 });
-                self.column_position+=1;
+                self.column_position += 1;
             }
         }
-       
+
     }
 
     fn buffer(&mut self) -> &mut Buffer {
-        unsafe {self.buffer.get_mut()}
+        unsafe { self.buffer.get_mut() }
     }
 
-    fn new_line(&mut self){ 
+    fn new_line(&mut self) {
         for row in 1..BUFFER_HEIGHT {
             for col in 0..BUFFER_WIDTH {
                 let buffer = self.buffer();
                 let character = buffer.chars[row][col].read();
-                buffer.chars[row-1][col].write(character);
+                buffer.chars[row - 1][col].write(character);
             }
         }
 
-        self.clear_row(BUFFER_HEIGHT-1);
+        self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
     }
 
-    fn clear_row(&mut self,row: usize) {
+    fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
-            ascii_character:b' ',
-            color_code:self.color_code,
+            ascii_character: b' ',
+            color_code: self.color_code,
         };
 
         for col in 0..BUFFER_WIDTH {
             self.buffer().chars[row][col].write(blank);
         }
     }
-
 }
 
 impl fmt::Write for Writer {
-    fn write_str(&mut self,s: &str) -> fmt::Result {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
         for byte in s.bytes() {
             self.write_byte(byte)
         }
@@ -131,7 +130,7 @@ pub fn print_something() {
         buffer: unsafe { Unique::new(0xb8000 as *mut _) },
     };
 
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0);
+    write!(writer, "The numbers are {} and {}", 42, 1.0 / 3.0);
 }
 
 macro_rules! println {
@@ -151,7 +150,7 @@ pub fn clear_screen() {
     }
 }
 
-pub fn print(args: fmt::Arguments){
+pub fn print(args: fmt::Arguments) {
     use core::fmt::Write;
     WRITER.lock().write_fmt(args).unwrap();
 }

@@ -20,13 +20,15 @@ assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst src/arch/$(arch)/%.asm,\
 	build/arch/$(arch)/%.o,$(assembly_source_files))
 
+source_files := $(wildcard src/*.c)
+obj_files := $(patsubst src/%.c,build/%.o,$(source_files))
+
 .PHONY: all clean run iso
 
 all: $(kernel) iso
 
 clean:
 	@-rm -r build
-	@rm src/*.o
 
 run: $(iso)
 	@qemu-system-x86_64 -cdrom $(iso)
@@ -40,15 +42,15 @@ $(iso): $(kernel) $(grub_cfg)
 	@grub2-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	@rm -r build/isofiles
 
-$(kernel):$(assembly_object_files) $(linker_script) src/kernel.o src/vga.o
-	@$(LD) -n --gc-sections -T $(linker_script) -o $(kernel) $(assembly_object_files) src/kernel.o src/vga.o
+obj = src/kernel.o
+
+$(kernel):$(assembly_object_files) $(linker_script) $(obj_files)
+	@$(LD) -n --gc-sections -T $(linker_script) -o $(kernel) $(assembly_object_files) $(obj_files)
 	
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	@mkdir -p $(shell dirname $@)
 	@nasm -felf64 $< -o $@
 
-src/kernel.o:
-	@gcc -c src/kernel.c -std=c99 -o $@
+build/%.o: src/%.c
+	@gcc -c $< -o $@
 
-src/vga.o:
-	@gcc -c src/vga.c -std=c99 -o $@

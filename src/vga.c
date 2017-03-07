@@ -39,4 +39,5 @@ void printc(char c) {
 
 void println(char* s) {
     while (*s != '\0') printc(*s++);
+    printc('\n');
 }

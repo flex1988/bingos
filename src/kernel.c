@@ -2,7 +2,7 @@
 
 void kernel_main() {
     vga_init();
-    println("hello world!");
+    println("vga buffer init.");
     while (1)
         ;
 }

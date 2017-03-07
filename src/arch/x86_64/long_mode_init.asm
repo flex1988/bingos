@@ -10,8 +10,8 @@ long_mode_start:
 	mov fs,ax
 	mov gs,ax
 
-	extern rust_main
-	call rust_main
+	extern kernel_main
+	call kernel_main
 
 	mov rax,0x4f724f204f534f4f
 	mov [0xb8000], rax

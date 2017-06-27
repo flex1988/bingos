@@ -1,18 +1,18 @@
-arch ?= x86_64
-kernel := build/kernel-$(arch).bin
-iso := build/os-$(arch).iso
-uname := $(shell sh -c 'uname -s 2>/dev/null')
-target ?= $(arch)-unknown-linux-gnu
+arch := x86_64
 
-ifeq ($(uname),Linux)
-	LD=ld
-else
-	LD=x86_64-elf-ld
-endif
+iso := build/os-$(arch).iso
+
+kernel := build/kernel-$(arch).bin
+
+modules := src/init src/vga
+
+obj_dir:= build/objs
 
 CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
 		 -finline-functions -finline-small-functions -findirect-inlining \
 		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ -fdump-rtl-expand
+
+.PHONY: all clean run iso
 
 linker_script := src/arch/$(arch)/linker.ld
 grub_cfg := src/arch/$(arch)/grub.cfg
@@ -20,20 +20,18 @@ assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst src/arch/$(arch)/%.asm,\
 	build/arch/$(arch)/%.o,$(assembly_source_files))
 
-source_files := $(wildcard src/*.c)
-obj_files := $(patsubst src/%.c,build/%.o,$(source_files))
+all: $(modules) $(kernel) $(iso)
 
-.PHONY: all clean run iso
+$(modules): Makefile
+	test -d build/objs || mkdir -p build/objs
+	cd $@ && $(MAKE) $(MFLAGS)
 
-all: $(kernel) iso
+build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
+	@mkdir -p $(shell dirname $@)
+	-nasm -felf64 $< -o $@
 
-clean:
-	@-rm -r build
-
-run: $(iso)
-	@qemu-system-x86_64 -cdrom $(iso)
-
-iso: $(iso)
+$(kernel): $(obj_files) $(assembly_object_files) $(linker_script) 
+	$(LD) -n --gc-sections -T $(linker_script) -o $(kernel) $(assembly_object_files) $(wildcard build/objs/*.o)
 
 $(iso): $(kernel) $(grub_cfg)
 	@mkdir -p build/isofiles/boot/grub
@@ -42,15 +40,5 @@ $(iso): $(kernel) $(grub_cfg)
 	@grub2-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	@rm -r build/isofiles
 
-obj = src/kernel.o
-
-$(kernel):$(assembly_object_files) $(linker_script) $(obj_files)
-	@$(LD) -n --gc-sections -T $(linker_script) -o $(kernel) $(assembly_object_files) $(obj_files)
-	
-build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
-	@mkdir -p $(shell dirname $@)
-	@nasm -felf64 $< -o $@
-
-build/%.o: src/%.c
-	@gcc -c $< -o $@
-
+clean:
+	@rm -rf build

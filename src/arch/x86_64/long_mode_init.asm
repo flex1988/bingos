@@ -10,8 +10,8 @@ long_mode_start:
 	mov fs,ax
 	mov gs,ax
 
-	extern kernel_main
-	call kernel_main
+	extern kmain
+	call kmain
 
 	mov rax,0x4f724f204f534f4f
 	mov [0xb8000], rax

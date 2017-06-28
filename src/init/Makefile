@@ -6,3 +6,4 @@ all: $(target)
 
 $(obj_dir)/%.o: %.c
 	$(CC) -I../include -c -o $@ $<
+

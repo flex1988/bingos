@@ -5,5 +5,5 @@ target := $(obj_dir)/vga.o
 all: $(target)
 
 $(obj_dir)/%.o: %.c
-	$(CC) -I../include -c -o $@ $<
+	$(CC) -I../include -I../include/libc -c -o $@ $<
 

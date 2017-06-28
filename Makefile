@@ -4,13 +4,11 @@ iso := build/os-$(arch).iso
 
 kernel := build/kernel-$(arch).bin
 
-modules := src/init src/vga
+modules := src/init src/vga src/print src/libc
 
 obj_dir:= build/objs
 
-CFLAGS = -c -O0 -Wall -Werror -nostdinc -fno-builtin -fno-stack-protector -funsigned-char \
-		 -finline-functions -finline-small-functions -findirect-inlining \
-		 -finline-functions-called-once -Iinc -m32 -ggdb -gstabs+ -fdump-rtl-expand
+CFLAGS_global := -Wall -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D__KERNEL__ -D_X86_
 
 .PHONY: all clean run iso
 
@@ -31,7 +29,7 @@ build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	-nasm -felf64 $< -o $@
 
 $(kernel): $(obj_files) $(assembly_object_files) $(linker_script) 
-	$(LD) -n --gc-sections -T $(linker_script) -o $(kernel) $(assembly_object_files) $(wildcard build/objs/*.o)
+	$(LD) -n -T $(linker_script) -o $(kernel) $(assembly_object_files) $(wildcard build/objs/*.o)
 
 $(iso): $(kernel) $(grub_cfg)
 	@mkdir -p build/isofiles/boot/grub

@@ -4,7 +4,7 @@ iso := build/os-$(arch).iso
 
 kernel := build/kernel-$(arch).bin
 
-modules := src/init src/vga src/print src/libc
+modules := src/init src/vga src/print src/mm src/libc 
 
 obj_dir:= build/objs
 

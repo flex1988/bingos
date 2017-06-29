@@ -12,10 +12,6 @@ static int y;
 
 static void update_cursor() {
     uint16_t cursor = y * 80 + x;
-    /*outportb(0x3D4, 14);*/
-    /*outportb(0x3D5, cursor >> 8);*/
-    /*outportb(0x3D4, 15);*/
-    /*outportb(0x3D5, cursor);*/
 }
 
 void vga_init() {
@@ -36,7 +32,6 @@ void clear_screen() {
 
     x = 0;
     y = 0;
-    update_cursor();
 }
 
 void printc(char c) {

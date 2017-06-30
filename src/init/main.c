@@ -11,12 +11,13 @@ void kmain(unsigned long addr, unsigned long init) {
     printk("vga mode init...\n");
 
     _mbi = (struct multiboot_info *)addr;
-    printk("mbi(0x%x) mods count(%d) %d", _mbi, _mbi->mods_count);
+    printk("mbi(0x%x) mods count(%x)", _mbi, _mbi->mods_addr);
+
+    printk("lower: %d higher: %x", _mbi->flags, _mbi->mem_upper);
 
     page_init(_mbi);
     printk("page init...");
 
-    
     while (1)
         ;
 }

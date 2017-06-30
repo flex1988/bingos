@@ -87,7 +87,7 @@ char *strchr(const char *str, int ch)
 void *memset(void *dst, char val, size_t count)
 {
 	unsigned char *temp = (unsigned char *)dst;
-	for (; count != 0; count--, temp[count] = val);
+    for (; count != 0; count--, temp[count] = val);
 	return dst;
 }
 

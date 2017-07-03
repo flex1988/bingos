@@ -3,19 +3,15 @@
 #include "multiboot.h"
 #include "print/printk.h"
 #include "mm/page.h"
+#include "vga/vga.h"
 
-static struct multiboot_info *_mbi;
-
-void kmain(unsigned long addr, unsigned long init) {
+void kmain() {
     vga_init();
     printk("vga mode init...\n");
 
-    _mbi = (struct multiboot_info *)addr;
-    printk("mbi(0x%x) mods count(%x)", _mbi, _mbi->mods_addr);
+    //printk("magic %x", _mbi->magic);
 
-    printk("lower: %d higher: %x", _mbi->flags, _mbi->mem_upper);
-
-    page_init(_mbi);
+    //page_init(_mbi);
     printk("page init...");
 
     while (1)

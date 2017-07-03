@@ -1,8 +1,10 @@
 obj_dir := ../../build/objs
 
+include ../Makefile.inc
+
 target := $(obj_dir)/string.o
 
-CFLAGS_global := -Wall -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D__KERNEL__ -D_X86_
+CFLAGS := -Wall -nostdlib -nostdinc -fno-stack-protector -D__KERNEL__
 
 all: $(target)
 

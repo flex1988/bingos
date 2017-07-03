@@ -1,5 +1,7 @@
 obj_dir := ../../build/objs
 
+include ../Makefile.inc
+
 target := $(obj_dir)/page.o
 
 CFLAGS := -Wall -nostdlib -nostdinc -fno-builtin

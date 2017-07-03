@@ -1,0 +1,231 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BLACK	src/include/vga/vga.h	/^    BLACK = 0,$/;"	e	enum:__anon2
+BLUE	src/include/vga/vga.h	/^    BLUE,$/;"	e	enum:__anon2
+BROWN	src/include/vga/vga.h	/^    BROWN,$/;"	e	enum:__anon2
+CFLAGS_global	src/libc/Makefile	/^CFLAGS_global := -Wall -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D__KERNEL__ -D_X86_$/;"	m
+CYAN	src/include/vga/vga.h	/^    CYAN,$/;"	e	enum:__anon2
+D_GREY	src/include/vga/vga.h	/^    D_GREY,$/;"	e	enum:__anon2
+FALSE	src/include/libc/types.h	/^#define FALSE	/;"	d
+GREEN	src/include/vga/vga.h	/^    GREEN,$/;"	e	enum:__anon2
+LEFT	src/print/vsprintf.c	/^#define LEFT /;"	d	file:
+L_BLUE	src/include/vga/vga.h	/^    L_BLUE,$/;"	e	enum:__anon2
+L_BROWN	src/include/vga/vga.h	/^    L_BROWN,$/;"	e	enum:__anon2
+L_CYAN	src/include/vga/vga.h	/^    L_CYAN,$/;"	e	enum:__anon2
+L_GREEN	src/include/vga/vga.h	/^    L_GREEN,$/;"	e	enum:__anon2
+L_GREY	src/include/vga/vga.h	/^    L_GREY,$/;"	e	enum:__anon2
+L_MAG	src/include/vga/vga.h	/^    L_MAG,$/;"	e	enum:__anon2
+L_RED	src/include/vga/vga.h	/^    L_RED,$/;"	e	enum:__anon2
+MAGENTA	src/include/vga/vga.h	/^    MAGENTA,$/;"	e	enum:__anon2
+MULTIBOOT_AOUT_KLUDGE	src/include/multiboot.h	/^#define MULTIBOOT_AOUT_KLUDGE /;"	d
+MULTIBOOT_BOOTLOADER_MAGIC	src/include/multiboot.h	/^#define MULTIBOOT_BOOTLOADER_MAGIC /;"	d
+MULTIBOOT_HEADER_MAGIC	src/include/multiboot.h	/^#define MULTIBOOT_HEADER_MAGIC /;"	d
+MULTIBOOT_INFO_ALIGN	src/include/multiboot.h	/^#define MULTIBOOT_INFO_ALIGN /;"	d
+MULTIBOOT_INFO_AOUT_SYMS	src/include/multiboot.h	/^#define MULTIBOOT_INFO_AOUT_SYMS /;"	d
+MULTIBOOT_INFO_APM_TABLE	src/include/multiboot.h	/^#define MULTIBOOT_INFO_APM_TABLE /;"	d
+MULTIBOOT_INFO_BOOTDEV	src/include/multiboot.h	/^#define MULTIBOOT_INFO_BOOTDEV /;"	d
+MULTIBOOT_INFO_BOOT_LOADER_NAME	src/include/multiboot.h	/^#define MULTIBOOT_INFO_BOOT_LOADER_NAME /;"	d
+MULTIBOOT_INFO_CMDLINE	src/include/multiboot.h	/^#define MULTIBOOT_INFO_CMDLINE /;"	d
+MULTIBOOT_INFO_CONFIG_TABLE	src/include/multiboot.h	/^#define MULTIBOOT_INFO_CONFIG_TABLE /;"	d
+MULTIBOOT_INFO_DRIVE_INFO	src/include/multiboot.h	/^#define MULTIBOOT_INFO_DRIVE_INFO /;"	d
+MULTIBOOT_INFO_ELF_SHDR	src/include/multiboot.h	/^#define MULTIBOOT_INFO_ELF_SHDR /;"	d
+MULTIBOOT_INFO_MEMORY	src/include/multiboot.h	/^#define MULTIBOOT_INFO_MEMORY /;"	d
+MULTIBOOT_INFO_MEM_MAP	src/include/multiboot.h	/^#define MULTIBOOT_INFO_MEM_MAP /;"	d
+MULTIBOOT_INFO_MODS	src/include/multiboot.h	/^#define MULTIBOOT_INFO_MODS /;"	d
+MULTIBOOT_INFO_VIDEO_INFO	src/include/multiboot.h	/^#define MULTIBOOT_INFO_VIDEO_INFO /;"	d
+MULTIBOOT_MEMORY_AVAILABLE	src/include/multiboot.h	/^#define MULTIBOOT_MEMORY_AVAILABLE /;"	d
+MULTIBOOT_MEMORY_INFO	src/include/multiboot.h	/^#define MULTIBOOT_MEMORY_INFO /;"	d
+MULTIBOOT_MEMORY_RESERVED	src/include/multiboot.h	/^#define MULTIBOOT_MEMORY_RESERVED /;"	d
+MULTIBOOT_MOD_ALIGN	src/include/multiboot.h	/^#define MULTIBOOT_MOD_ALIGN /;"	d
+MULTIBOOT_PAGE_ALIGN	src/include/multiboot.h	/^#define MULTIBOOT_PAGE_ALIGN /;"	d
+MULTIBOOT_SEARCH	src/include/multiboot.h	/^#define MULTIBOOT_SEARCH /;"	d
+MULTIBOOT_UNSUPPORTED	src/include/multiboot.h	/^#define MULTIBOOT_UNSUPPORTED /;"	d
+MULTIBOOT_VIDEO_MODE	src/include/multiboot.h	/^#define MULTIBOOT_VIDEO_MODE /;"	d
+PAGE_SIZE	src/include/mm/page.h	/^#define PAGE_SIZE /;"	d
+PLUS	src/print/vsprintf.c	/^#define PLUS /;"	d	file:
+RED	src/include/vga/vga.h	/^    RED,$/;"	e	enum:__anon2
+SIGN	src/print/vsprintf.c	/^#define SIGN /;"	d	file:
+SMALL	src/print/vsprintf.c	/^#define SMALL /;"	d	file:
+SPACE	src/print/vsprintf.c	/^#define SPACE /;"	d	file:
+SPECIAL	src/print/vsprintf.c	/^#define SPECIAL /;"	d	file:
+TRUE	src/include/libc/types.h	/^#define TRUE	/;"	d
+WHITE	src/include/vga/vga.h	/^    WHITE$/;"	e	enum:__anon2
+ZEROPAD	src/print/vsprintf.c	/^#define ZEROPAD /;"	d	file:
+__MULTIBOOT_H__	src/include/multiboot.h	/^#define __MULTIBOOT_H__$/;"	d
+__PAGE_H__	src/include/mm/page.h	/^#define __PAGE_H__$/;"	d
+__STRING_H__	src/include/libc/string.h	/^#define __STRING_H__$/;"	d
+__TYPES_H__	src/include/libc/types.h	/^#define __TYPES_H__$/;"	d
+_mbi	src/init/main.c	/^static struct multiboot_info *_mbi;$/;"	v	typeref:struct:multiboot_info	file:
+_pages	src/mm/page.c	/^static uint32_t *_pages;$/;"	v	file:
+_placement_addr	src/mm/page.c	/^static phys_addr_t _placement_addr;$/;"	v	file:
+_total_pages	src/mm/page.c	/^static uint64_t _total_pages;$/;"	v	file:
+addr	src/include/multiboot.h	/^    multiboot_uint32_t addr;$/;"	m	struct:multiboot_aout_symbol_table
+addr	src/include/multiboot.h	/^    multiboot_uint32_t addr;$/;"	m	struct:multiboot_elf_section_header_table
+addr	src/include/multiboot.h	/^    multiboot_uint64_t addr;$/;"	m	struct:multiboot_mmap_entry
+aout_sym	src/include/multiboot.h	/^        multiboot_aout_symbol_table_t aout_sym;$/;"	m	union:multiboot_info::__anon1
+apm_table	src/include/multiboot.h	/^    multiboot_uint32_t apm_table;$/;"	m	struct:multiboot_info
+bg	src/include/vga/vga.h	/^    char bg : 4;$/;"	m	struct:vga_char
+bits	src/arch/x86_64/boot.asm	/^bits 32$/;"	l
+bits	src/arch/x86_64/long_mode_init.asm	/^bits 64$/;"	l
+blank	src/vga/vga.c	/^static vga_char blank;$/;"	v	file:
+bool_t	src/include/libc/types.h	/^typedef int bool_t;$/;"	t
+boolean_t	src/include/libc/types.h	/^typedef char boolean_t;$/;"	t
+boot_device	src/include/multiboot.h	/^    multiboot_uint32_t boot_device;$/;"	m	struct:multiboot_info
+boot_loader_name	src/include/multiboot.h	/^    multiboot_uint32_t boot_loader_name;$/;"	m	struct:multiboot_info
+bss_end_addr	src/include/multiboot.h	/^    multiboot_uint32_t bss_end_addr;$/;"	m	struct:multiboot_header
+buf	src/print/printk.c	/^static char buf[1024];$/;"	v	file:
+ch	src/include/vga/vga.h	/^    char ch : 8;$/;"	m	struct:vga_char
+check_cpuid	src/arch/x86_64/boot.asm	/^check_cpuid:$/;"	l
+check_long_mode	src/arch/x86_64/boot.asm	/^check_long_mode:$/;"	l
+check_multiboot	src/arch/x86_64/boot.asm	/^check_multiboot:$/;"	l
+checksum	src/include/multiboot.h	/^    multiboot_uint32_t checksum;$/;"	m	struct:multiboot_header
+clear_screen	src/vga/vga.c	/^void clear_screen() {$/;"	f
+cmdline	src/include/multiboot.h	/^    multiboot_uint32_t cmdline;$/;"	m	struct:multiboot_info
+cmdline	src/include/multiboot.h	/^    multiboot_uint32_t cmdline;$/;"	m	struct:multiboot_mod_list
+config_table	src/include/multiboot.h	/^    multiboot_uint32_t config_table;$/;"	m	struct:multiboot_info
+depth	src/include/multiboot.h	/^    multiboot_uint32_t depth;$/;"	m	struct:multiboot_header
+dev_t	src/include/libc/types.h	/^typedef uint32_t dev_t;$/;"	t
+do_div	src/print/vsprintf.c	/^#define do_div(/;"	d	file:
+drives_addr	src/include/multiboot.h	/^    multiboot_uint32_t drives_addr;$/;"	m	struct:multiboot_info
+drives_length	src/include/multiboot.h	/^    multiboot_uint32_t drives_length;$/;"	m	struct:multiboot_info
+elf_sec	src/include/multiboot.h	/^        multiboot_elf_section_header_table_t elf_sec;$/;"	m	union:multiboot_info::__anon1
+enable_paging	src/arch/x86_64/boot.asm	/^enable_paging:$/;"	l
+entry_addr	src/include/multiboot.h	/^    multiboot_uint32_t entry_addr;$/;"	m	struct:multiboot_header
+error	src/arch/x86_64/boot.asm	/^error:$/;"	l
+extern	src/arch/x86_64/boot.asm	/^extern long_mode_start$/;"	l
+fg	src/include/vga/vga.h	/^    char fg : 4;$/;"	m	struct:vga_char
+flags	src/include/multiboot.h	/^    multiboot_uint32_t flags;$/;"	m	struct:multiboot_header
+flags	src/include/multiboot.h	/^    multiboot_uint32_t flags;$/;"	m	struct:multiboot_info
+fsblkcnt_t	src/include/libc/types.h	/^typedef uint64_t fsblkcnt_t;$/;"	t
+fsfilcnt_t	src/include/libc/types.h	/^typedef uint64_t fsfilcnt_t;$/;"	t
+gdt64	src/arch/x86_64/boot.asm	/^gdt64:$/;"	l
+gid_t	src/include/libc/types.h	/^typedef uint32_t gid_t;$/;"	t
+global	src/arch/x86_64/boot.asm	/^global start$/;"	l
+global	src/arch/x86_64/long_mode_init.asm	/^global long_mode_start$/;"	l
+header_addr	src/include/multiboot.h	/^    multiboot_uint32_t header_addr;$/;"	m	struct:multiboot_header
+header_end	src/arch/x86_64/multiboot_header.asm	/^header_end:$/;"	l
+header_start	src/arch/x86_64/multiboot_header.asm	/^header_start:$/;"	l
+height	src/include/multiboot.h	/^    multiboot_uint32_t height;$/;"	m	struct:multiboot_header
+ino_t	src/include/libc/types.h	/^typedef uint32_t ino_t;$/;"	t
+ino_t	src/include/libc/types.h	/^typedef uint64_t ino_t;$/;"	t
+int16_t	src/include/libc/types.h	/^typedef short int16_t;$/;"	t
+int32_t	src/include/libc/types.h	/^typedef int int32_t;$/;"	t
+int64_t	src/include/libc/types.h	/^typedef long long int64_t;$/;"	t
+int8_t	src/include/libc/types.h	/^typedef char int8_t;$/;"	t
+is_digit	src/print/vsprintf.c	/^#define is_digit(/;"	d	file:
+kmain	src/init/main.c	/^void kmain(unsigned long addr, unsigned long init) {$/;"	f
+len	src/include/multiboot.h	/^    multiboot_uint64_t len;$/;"	m	struct:multiboot_mmap_entry
+load_addr	src/include/multiboot.h	/^    multiboot_uint32_t load_addr;$/;"	m	struct:multiboot_header
+load_end_addr	src/include/multiboot.h	/^    multiboot_uint32_t load_end_addr;$/;"	m	struct:multiboot_header
+long_mode_start	src/arch/x86_64/long_mode_init.asm	/^long_mode_start:$/;"	l
+magic	src/include/multiboot.h	/^    multiboot_uint32_t magic;$/;"	m	struct:multiboot_header
+mem_lower	src/include/multiboot.h	/^    multiboot_uint32_t mem_lower;$/;"	m	struct:multiboot_info
+mem_upper	src/include/multiboot.h	/^    multiboot_uint32_t mem_upper;$/;"	m	struct:multiboot_info
+memcmp	src/libc/string.c	/^int memcmp(const void *s1, const void *s2, size_t count)$/;"	f
+memcpy	src/libc/string.c	/^void *memcpy(void *dst, const void *src, size_t count)$/;"	f
+memset	src/libc/string.c	/^void *memset(void *dst, char val, size_t count)$/;"	f
+mmap_addr	src/include/multiboot.h	/^    multiboot_uint32_t mmap_addr;$/;"	m	struct:multiboot_info
+mmap_length	src/include/multiboot.h	/^    multiboot_uint32_t mmap_length;$/;"	m	struct:multiboot_info
+mod_end	src/include/multiboot.h	/^    multiboot_uint32_t mod_end;$/;"	m	struct:multiboot_mod_list
+mod_start	src/include/multiboot.h	/^    multiboot_uint32_t mod_start;$/;"	m	struct:multiboot_mod_list
+mode_t	src/include/libc/types.h	/^typedef uint32_t mode_t;$/;"	t
+mode_type	src/include/multiboot.h	/^    multiboot_uint32_t mode_type;$/;"	m	struct:multiboot_header
+mods_addr	src/include/multiboot.h	/^    multiboot_uint32_t mods_addr;$/;"	m	struct:multiboot_info
+mods_count	src/include/multiboot.h	/^    multiboot_uint32_t mods_count;$/;"	m	struct:multiboot_info
+multiboot_aout_symbol_table	src/include/multiboot.h	/^struct multiboot_aout_symbol_table {$/;"	s
+multiboot_aout_symbol_table_t	src/include/multiboot.h	/^typedef struct multiboot_aout_symbol_table multiboot_aout_symbol_table_t;$/;"	t	typeref:struct:multiboot_aout_symbol_table
+multiboot_elf_section_header_table	src/include/multiboot.h	/^struct multiboot_elf_section_header_table {$/;"	s
+multiboot_elf_section_header_table_t	src/include/multiboot.h	/^typedef struct multiboot_elf_section_header_table multiboot_elf_section_header_table_t;$/;"	t	typeref:struct:multiboot_elf_section_header_table
+multiboot_header	src/include/multiboot.h	/^struct multiboot_header {$/;"	s
+multiboot_info	src/include/multiboot.h	/^struct multiboot_info {$/;"	s
+multiboot_info_t	src/include/multiboot.h	/^typedef struct multiboot_info multiboot_info_t;$/;"	t	typeref:struct:multiboot_info
+multiboot_memory_map_t	src/include/multiboot.h	/^typedef struct multiboot_mmap_entry multiboot_memory_map_t;$/;"	t	typeref:struct:multiboot_mmap_entry
+multiboot_mmap_entry	src/include/multiboot.h	/^struct multiboot_mmap_entry {$/;"	s
+multiboot_mod_list	src/include/multiboot.h	/^struct multiboot_mod_list {$/;"	s
+multiboot_module_t	src/include/multiboot.h	/^typedef struct multiboot_mod_list multiboot_module_t;$/;"	t	typeref:struct:multiboot_mod_list
+multiboot_uint16_t	src/include/multiboot.h	/^typedef unsigned short multiboot_uint16_t;$/;"	t
+multiboot_uint32_t	src/include/multiboot.h	/^typedef unsigned int multiboot_uint32_t;$/;"	t
+multiboot_uint64_t	src/include/multiboot.h	/^typedef unsigned long long multiboot_uint64_t;$/;"	t
+nlink_t	src/include/libc/types.h	/^typedef uint32_t nlink_t;$/;"	t
+num	src/include/multiboot.h	/^    multiboot_uint32_t num;$/;"	m	struct:multiboot_elf_section_header_table
+number	src/print/vsprintf.c	/^static char *number(char *str, int num, int base, int size, int precision, int type) {$/;"	f	file:
+obj_dir	src/init/Makefile	/^obj_dir := ..\/..\/build\/objs$/;"	m
+obj_dir	src/libc/Makefile	/^obj_dir := ..\/..\/build\/objs$/;"	m
+obj_dir	src/mm/Makefile	/^obj_dir := ..\/..\/build\/objs$/;"	m
+obj_dir	src/print/Makefile	/^obj_dir := ..\/..\/build\/objs$/;"	m
+obj_dir	src/vga/Makefile	/^obj_dir := ..\/..\/build\/objs$/;"	m
+p2_table	src/arch/x86_64/boot.asm	/^p2_table:$/;"	l
+p3_table	src/arch/x86_64/boot.asm	/^p3_table:$/;"	l
+p4_table	src/arch/x86_64/boot.asm	/^p4_table:$/;"	l
+pad	src/include/multiboot.h	/^    multiboot_uint32_t pad;$/;"	m	struct:multiboot_mod_list
+page_early_alloc	src/mm/page.c	/^static void page_early_alloc(phys_addr_t *phys, size_t size, int align) {$/;"	f	file:
+page_init	src/mm/page.c	/^void page_init(struct multiboot_info *mbi) {$/;"	f
+phys_addr_t	src/include/libc/types.h	/^typedef uint32_t phys_addr_t;$/;"	t
+phys_size_t	src/include/libc/types.h	/^typedef uint32_t phys_size_t;$/;"	t
+pid_t	src/include/libc/types.h	/^typedef int pid_t;$/;"	t
+printc	src/vga/vga.c	/^void printc(char c) {$/;"	f
+printk	src/print/printk.c	/^int printk(const char *fmt, ...)$/;"	f
+println	src/vga/vga.c	/^void println(char* s) {$/;"	f
+ptr_t	src/include/libc/types.h	/^typedef unsigned long ptr_t;$/;"	t
+reserved	src/include/multiboot.h	/^    multiboot_uint32_t reserved;$/;"	m	struct:multiboot_aout_symbol_table
+section	src/arch/x86_64/boot.asm	/^section .bss$/;"	l
+section	src/arch/x86_64/boot.asm	/^section .rodata$/;"	l
+section	src/arch/x86_64/boot.asm	/^section .text$/;"	l
+section	src/arch/x86_64/long_mode_init.asm	/^section .text$/;"	l
+section	src/arch/x86_64/multiboot_header.asm	/^section .multiboot_header$/;"	l
+set_up_SSE	src/arch/x86_64/boot.asm	/^set_up_SSE:$/;"	l
+set_up_page_tables	src/arch/x86_64/boot.asm	/^set_up_page_tables:$/;"	l
+shndx	src/include/multiboot.h	/^    multiboot_uint32_t shndx;$/;"	m	struct:multiboot_elf_section_header_table
+size	src/include/multiboot.h	/^    multiboot_uint32_t size;$/;"	m	struct:multiboot_elf_section_header_table
+size	src/include/multiboot.h	/^    multiboot_uint32_t size;$/;"	m	struct:multiboot_mmap_entry
+skip_atoi	src/print/vsprintf.c	/^static int skip_atoi(const char **s) {$/;"	f	file:
+stack_bottom	src/arch/x86_64/boot.asm	/^stack_bottom:$/;"	l
+stack_top	src/arch/x86_64/boot.asm	/^stack_top:$/;"	l
+start	src/arch/x86_64/boot.asm	/^start:$/;"	l
+strcat	src/libc/string.c	/^char *strcat(char *dst, const char *src)$/;"	f
+strchr	src/libc/string.c	/^char *strchr(const char *str, int ch)$/;"	f
+strcmp	src/libc/string.c	/^int strcmp(const char *str1, const char *str2)$/;"	f
+strcpy	src/libc/string.c	/^char *strcpy(char *dst, const char *src)$/;"	f
+strlen	src/libc/string.c	/^size_t strlen(const char *str)$/;"	f
+strncat	src/libc/string.c	/^char *strncat(char *dst, const char *src, size_t num)$/;"	f
+strncmp	src/libc/string.c	/^int strncmp(const char *str1, const char *str2, size_t num)$/;"	f
+strncpy	src/libc/string.c	/^char *strncpy(char *dst, const char *src, size_t num)$/;"	f
+strnlen	src/libc/string.c	/^size_t strnlen(const char *str, size_t num)$/;"	f
+strsize	src/include/multiboot.h	/^    multiboot_uint32_t strsize;$/;"	m	struct:multiboot_aout_symbol_table
+tabsize	src/include/multiboot.h	/^    multiboot_uint32_t tabsize;$/;"	m	struct:multiboot_aout_symbol_table
+target	src/init/Makefile	/^target := $(obj_dir)\/main.o$/;"	m
+target	src/libc/Makefile	/^target := $(obj_dir)\/string.o$/;"	m
+target	src/mm/Makefile	/^target := $(obj_dir)\/page.o$/;"	m
+target	src/print/Makefile	/^target := $(obj_dir)\/printk.o $(obj_dir)\/vsprintf.o$/;"	m
+target	src/vga/Makefile	/^target := $(obj_dir)\/vga.o$/;"	m
+tid_t	src/include/libc/types.h	/^typedef int tid_t;$/;"	t
+type	src/include/multiboot.h	/^    multiboot_uint32_t type;$/;"	m	struct:multiboot_mmap_entry
+u	src/include/multiboot.h	/^    } u;$/;"	m	struct:multiboot_info	typeref:union:multiboot_info::__anon1
+u_char	src/include/libc/types.h	/^typedef unsigned char u_char;$/;"	t
+u_long	src/include/libc/types.h	/^typedef unsigned long u_long;$/;"	t
+uid_t	src/include/libc/types.h	/^typedef uint32_t uid_t;$/;"	t
+uint16_t	src/include/libc/types.h	/^typedef unsigned short uint16_t;$/;"	t
+uint32_t	src/include/libc/types.h	/^typedef unsigned int uint32_t;$/;"	t
+uint64_t	src/include/libc/types.h	/^typedef unsigned long long uint64_t;$/;"	t
+uint8_t	src/include/libc/types.h	/^typedef unsigned char uint8_t;$/;"	t
+update_cursor	src/vga/vga.c	/^static void update_cursor() {$/;"	f	file:
+useconds_t	src/include/libc/types.h	/^typedef int64_t useconds_t;$/;"	t
+vbe_control_info	src/include/multiboot.h	/^    multiboot_uint32_t vbe_control_info;$/;"	m	struct:multiboot_info
+vbe_interface_len	src/include/multiboot.h	/^    multiboot_uint16_t vbe_interface_len;$/;"	m	struct:multiboot_info
+vbe_interface_off	src/include/multiboot.h	/^    multiboot_uint16_t vbe_interface_off;$/;"	m	struct:multiboot_info
+vbe_interface_seg	src/include/multiboot.h	/^    multiboot_uint16_t vbe_interface_seg;$/;"	m	struct:multiboot_info
+vbe_mode	src/include/multiboot.h	/^    multiboot_uint16_t vbe_mode;$/;"	m	struct:multiboot_info
+vbe_mode_info	src/include/multiboot.h	/^    multiboot_uint32_t vbe_mode_info;$/;"	m	struct:multiboot_info
+vga_buffer	src/vga/vga.c	/^static vga_char* vga_buffer;$/;"	v	file:
+vga_char	src/include/vga/vga.h	/^struct vga_char {$/;"	s
+vga_char	src/vga/vga.c	/^typedef struct vga_char vga_char;$/;"	t	typeref:struct:vga_char	file:
+vga_color	src/include/vga/vga.h	/^} vga_color;$/;"	t	typeref:enum:__anon2
+vga_init	src/vga/vga.c	/^void vga_init() {$/;"	f
+vsprintf	src/print/vsprintf.c	/^int vsprintf(char *buf, const char *fmt, va_list args) {$/;"	f
+width	src/include/multiboot.h	/^    multiboot_uint32_t width;$/;"	m	struct:multiboot_header
+x	src/vga/vga.c	/^static int x;$/;"	v	file:
+y	src/vga/vga.c	/^static int y;$/;"	v	file:

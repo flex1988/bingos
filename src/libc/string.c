@@ -2,7 +2,6 @@
  * string.c
  */
 #include <types.h>
-#include <stdio.h>
 #include <string.h>
 
 int strcmp(const char *str1, const char *str2)

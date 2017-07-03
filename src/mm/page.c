@@ -22,29 +22,29 @@ static void page_early_alloc(phys_addr_t *phys, size_t size, int align) {
     _placement_addr += size;
 }
 
-void page_init(struct multiboot_info *mbi) {
-    phys_addr_t addr;
-    phys_size_t mem_size = 0;
+/*void page_init(struct multiboot_info *mbi) {*/
+    /*phys_addr_t addr;*/
+    /*phys_size_t mem_size = 0;*/
 
-    struct multiboot_mmap_entry *mmap;
-    _placement_addr = *((uint32_t *)(mbi->mods_addr + 4));
+    /*struct multiboot_mmap_entry *mmap;*/
+    /*_placement_addr = *((uint32_t *)(mbi->mods_addr + 4));*/
 
-    printk("page: placement address at 0x%x\n", _placement_addr);
+    /*printk("page: placement address at 0x%x\n", _placement_addr);*/
 
-    printk("memory ares:\n");
-    for (addr = mbi->mmap_addr; addr < (mbi->mmap_addr + mbi->mmap_length); addr += (mmap->size + sizeof(mmap->size))) {
-        mmap = (struct multiboot_mmap_entry *)addr;
-        mem_size += mmap->len;
-        printk("    start: 0x%x, length: 0x%x\n", mmap->addr, mmap->len);
-    }
+    /*printk("memory ares:\n");*/
+    /*for (addr = mbi->mmap_addr; addr < (mbi->mmap_addr + mbi->mmap_length); addr += (mmap->size + sizeof(mmap->size))) {*/
+        /*mmap = (struct multiboot_mmap_entry *)addr;*/
+        /*mem_size += mmap->len;*/
+        /*printk("    start: 0x%x, length: 0x%x\n", mmap->addr, mmap->len);*/
+    /*}*/
 
-    _total_pages = mem_size / PAGE_SIZE;
+    /*_total_pages = mem_size / PAGE_SIZE;*/
 
-    printk("page: available physical memory size:%uMB, total_pages: %u\n", mem_size / (1024 * 1024), _total_pages);
+    /*printk("page: available physical memory size:%uMB, total_pages: %u\n", mem_size / (1024 * 1024), _total_pages);*/
 
-    page_early_alloc(&addr, _total_pages / (4 * 8), 0);
+    /*page_early_alloc(&addr, _total_pages / (4 * 8), 0);*/
 
-    _pages = (uint32_t *)addr;
+    /*_pages = (uint32_t *)addr;*/
 
-    // memset(_pages, 0, _total_pages / (4 * 8));
-}
+    /*// memset(_pages, 0, _total_pages / (4 * 8));*/
+/*}*/

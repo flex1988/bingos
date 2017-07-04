@@ -27,7 +27,11 @@ align 4
 ; stack is properly aligned and failure to align the stack will result in
 ; undefined behavior.
 section .bss
-align 4
+align 4096
+pagedir:
+	resb 4096
+pagetabl:
+	resb 4096
 stack_bottom:
 resb 16384 ; 16 KiB
 stack_top:
@@ -54,7 +58,9 @@ _start:
 	; stack (as it grows downwards on x86 systems). This is necessarily done
 	; in assembly as languages such as C cannot function without a stack.
 	mov esp, stack_top
- 
+
+	call setup_pages
+	call enable_paging
 	; This is a good place to initialize crucial processor state before the
 	; high-level kernel is entered. It's best to minimize the early
 	; environment where crucial features are offline. Note that the
@@ -71,6 +77,8 @@ _start:
 	; stack since (pushed 0 bytes so far) and the alignment is thus
 	; preserved and the call is well defined.
         ; note, that if you are building on Windows, C functions may have "_" prefix in assembly: _kernel_main
+	push ebx
+
 	extern kmain
 	call kmain
  
@@ -88,3 +96,30 @@ _start:
 .hang:	hlt
 	jmp .hang
 .end:
+
+enable_paging:
+	mov eax, pagedir
+	mov cr3, eax
+
+	mov eax, cr0
+	or eax,0x80000001
+	mov cr0, eax
+
+setup_pages:
+	mov eax, pagetabl
+	or eax, 3
+	mov [pagedir], eax
+
+	mov ecx, 0
+.map_pagetabl:
+	mov eax, 4096
+	mul ecx
+	or eax, 3
+	mov [pagetabl + ecx*4], eax
+
+	inc ecx
+	cmp ecx,1024
+	jne .map_pagetabl
+	
+	ret
+

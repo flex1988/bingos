@@ -9,6 +9,8 @@ static uint64_t _total_pages;
 
 static uint32_t *_pages;
 
+#define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
+
 static void page_early_alloc(phys_addr_t *phys, size_t size, int align) {
     if (align && (_placement_addr & 0xFFF)) {
         _placement_addr &= 0xFFFFF000;
@@ -22,29 +24,38 @@ static void page_early_alloc(phys_addr_t *phys, size_t size, int align) {
     _placement_addr += size;
 }
 
-/*void page_init(struct multiboot_info *mbi) {*/
-    /*phys_addr_t addr;*/
-    /*phys_size_t mem_size = 0;*/
+void page_init(struct multiboot_info *mbi) {
+    phys_addr_t addr;
+    phys_size_t mem_size = 0;
+    unsigned long long int i;
 
-    /*struct multiboot_mmap_entry *mmap;*/
-    /*_placement_addr = *((uint32_t *)(mbi->mods_addr + 4));*/
+    if (CHECK_FLAG(mbi->flags, 0)) {
+        printk("mem_lower = %uKB, mem_upper = %uKB\n", (unsigned)mbi->mem_lower, (unsigned)mbi->mem_upper);
+    }
 
-    /*printk("page: placement address at 0x%x\n", _placement_addr);*/
+    if (!CHECK_FLAG(mbi->flags, 6)) {
+        printk("mmap not valid!");
+        return;
+    }
 
-    /*printk("memory ares:\n");*/
-    /*for (addr = mbi->mmap_addr; addr < (mbi->mmap_addr + mbi->mmap_length); addr += (mmap->size + sizeof(mmap->size))) {*/
-        /*mmap = (struct multiboot_mmap_entry *)addr;*/
-        /*mem_size += mmap->len;*/
-        /*printk("    start: 0x%x, length: 0x%x\n", mmap->addr, mmap->len);*/
-    /*}*/
+    multiboot_memory_map_t *mmap;
 
-    /*_total_pages = mem_size / PAGE_SIZE;*/
+    for (mmap = (multiboot_memory_map_t *)mbi->mmap_addr; mmap < (mbi->mmap_addr + mbi->mmap_length);
+         mmap = (multiboot_memory_map_t *)((unsigned int)mmap + mmap->size + sizeof(unsigned int))) {
+        if (mmap->type == 2) {
+            printk("memory  base_addr 0x%x%x length: 0x%x%x",mmap->addr,mmap->len);
+            for (i = 0; i < mmap->len; i += 0x1000) {
+                if (mmap->addr + i > 0xFFFFFFFF)
+                    break;
+            }
+        }
+    }
 
-    /*printk("page: available physical memory size:%uMB, total_pages: %u\n", mem_size / (1024 * 1024), _total_pages);*/
+    _total_pages = mem_size / PAGE_SIZE;
 
-    /*page_early_alloc(&addr, _total_pages / (4 * 8), 0);*/
+    page_early_alloc(&addr, _total_pages / (4 * 8), 0);
 
-    /*_pages = (uint32_t *)addr;*/
+    _pages = (uint32_t *)addr;
 
-    /*// memset(_pages, 0, _total_pages / (4 * 8));*/
-/*}*/
+    // memset(_pages, 0, _total_pages / (4 * 8));
+}

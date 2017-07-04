@@ -5,13 +5,18 @@
 #include "mm/page.h"
 #include "vga/vga.h"
 
-void kmain() {
+struct multiboot_info *_mbi;
+
+void kmain(unsigned long addr,unsigned long magic) {
     vga_init();
-    printk("vga mode init...\n");
 
-    //printk("magic %x", _mbi->magic);
+    printk("vga mode init...");
 
-    //page_init(_mbi);
+    printk("multiboot_info start at 0x%x",addr);
+
+    _mbi = (struct multiboot_info *)addr;
+
+    page_init(_mbi);
     printk("page init...");
 
     while (1)

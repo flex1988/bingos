@@ -43,6 +43,7 @@ void printc(char c) {
         case '\n':
             y++;
             x = 0;
+            if(y > 80) clear_screen();
             break;
 
         case '\t':

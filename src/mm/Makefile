@@ -2,11 +2,11 @@ obj_dir := ../../build/objs
 
 include ../Makefile.inc
 
-target := $(obj_dir)/page.o
+target := $(obj_dir)/page.o $(obj_dir)/frame.o
 
 CFLAGS := -Wall -nostdlib -nostdinc -fno-builtin
 
 all: $(target)
 
 $(obj_dir)/%.o: %.c
-	$(CC) -I../include -I../include/libc -fno-builtin -c -o $@ $< 
+	$(CC) -I../include -I../include/libc -c -o $@ $< 

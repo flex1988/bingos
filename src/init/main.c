@@ -1,13 +1,13 @@
-#include <stdint.h>
+#include <types.h>
 
 #include "multiboot.h"
 #include "print/printk.h"
-#include "mm/page.h"
+#include "mm/frame.h"
 #include "vga/vga.h"
 
-struct multiboot_info *_mbi;
+static struct multiboot_info *_mbi;
 
-void kmain(unsigned long addr,unsigned long magic) {
+void kmain(unsigned long addr) {
     vga_init();
 
     printk("vga mode init...");
@@ -16,7 +16,12 @@ void kmain(unsigned long addr,unsigned long magic) {
 
     _mbi = (struct multiboot_info *)addr;
 
-    page_init(_mbi);
+    frame_init(_mbi);
+
+    uint32_t a = 0xfffff000;
+    ptr_t b = get_physaddr(a);
+    printk("b 0x%x",b);
+    
     printk("page init...");
 
     while (1)

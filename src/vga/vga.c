@@ -11,7 +11,7 @@ static int x;
 static int y;
 
 static void update_cursor() {
-    //uint16_t cursor = y * 80 + x;
+    // uint16_t cursor = y * 80 + x;
 }
 
 void vga_init() {
@@ -43,7 +43,8 @@ void printc(char c) {
         case '\n':
             y++;
             x = 0;
-            if(y > 80) clear_screen();
+            if (y > 80)
+                clear_screen();
             break;
 
         case '\t':

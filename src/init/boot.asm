@@ -106,6 +106,11 @@ enable_paging:
 	mov cr0, eax
 
 setup_pages:
+	;page dir最后一个entry指向自己，这样就可以通过地址0xfffff000直接访问page dir
+	mov eax, pagedir
+	or eax, 3
+	mov [pagedir + 1023*4], eax
+
 	mov eax, pagetabl
 	or eax, 3
 	mov [pagedir], eax

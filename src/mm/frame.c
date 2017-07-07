@@ -12,9 +12,6 @@ static uint32_t *_frame_map = 0;
 static ptr_t _placement_addr;
 extern uint32_t kernel_end;
 
-// pd最后一个entry指向自己，所以pd的地址是0xfffff000
-static page_dir_t *_pd = (page_dir_t *)0xfffff000;
-
 inline void bitmap_set(int bit) { _frame_map[bit / 32] |= (1 << (bit % 32)); }
 
 inline void bitmap_unset(int bit) { _frame_map[bit / 32] &= ~(1 << (bit % 32)); }
@@ -124,19 +121,4 @@ void frame_init(struct multiboot_info *mbi) {
     bitmap_set(0);  // protect kernel memory
 
     printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
-
-    printk("alloc frame 0x%x", alloc_frame());
-    printk("alloc frame 0x%x", alloc_frame());
-    printk("alloc frame 0x%x", alloc_frame());
-}
-
-ptr_t get_physaddr(ptr_t virtualaddr) {
-    int pdidx = virtualaddr >> 22;
-    int ptidx = virtualaddr >> 12 & 0x03ff;
-    int offset = virtualaddr & 0xfff;
-
-    page_tabl_t *pt = (page_tabl_t *)(_pd->tabls[pdidx].addr << 12);
-    ptr_t page = pt->pages[ptidx].addr << 12;
-
-    return page + offset;
 }

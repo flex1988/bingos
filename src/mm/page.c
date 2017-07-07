@@ -4,34 +4,25 @@
 #include "mm/page.h"
 #include "multiboot.h"
 
-static phys_addr_t _placement_addr;
-static uint64_t _total_pages;
+// pd最后一个entry指向自己，所以pd的地址是0xfffff000
+static page_dir_t *_pd = (page_dir_t *)0xfffff000;
 
-static uint32_t *_pages;
+static inline void enable_paging() {}
 
-static void page_early_alloc(phys_addr_t *phys, size_t size, int align) {
-    if (align && (_placement_addr & 0xFFF)) {
-        _placement_addr &= 0xFFFFF000;
-        _placement_addr += 0x1000;
-    }
+static inline void setup_pages() {}
 
-    if (phys) {
-        *phys = _placement_addr;
-    }
-
-    _placement_addr += size;
+void page_init() {
+    setup_pages();
+    enable_paging();
 }
 
-void page_init(struct multiboot_info *mbi) {
-    phys_addr_t addr;
-    phys_size_t mem_size = 0;
-    unsigned long long int i;
+ptr_t get_physaddr(ptr_t virtualaddr) {
+    int pdidx = virtualaddr >> 22;
+    int ptidx = virtualaddr >> 12 & 0x03ff;
+    int offset = virtualaddr & 0xfff;
 
-    multiboot_memory_map_t *mmap;
+    page_tabl_t *pt = (page_tabl_t *)(_pd->tabls[pdidx].addr << 12);
+    ptr_t page = pt->pages[ptidx].addr << 12;
 
-    _total_pages = mem_size / PAGE_SIZE;
-
-    page_early_alloc(&addr, _total_pages / (4 * 8), 0);
-
-    _pages = (uint32_t *)addr;
+    return page + offset;
 }

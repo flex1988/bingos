@@ -13,16 +13,13 @@ void kmain(unsigned long addr) {
     printk("vga mode init...");
 
     printk("multiboot_info start at 0x%x",addr);
-
     _mbi = (struct multiboot_info *)addr;
 
     frame_init(_mbi);
+    printk("frame init...");
 
-    uint32_t a = 0xfffff000;
-    ptr_t b = get_physaddr(a);
-    printk("b 0x%x",b);
-    
-    printk("page init...");
+    page_init();
+    printk("paging init...");
 
     while (1)
         ;

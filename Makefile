@@ -4,7 +4,7 @@ iso := build/os-$(arch).iso
 
 kernel := build/kernel-$(arch).bin
 
-modules := src/init src/vga src/print src/mm src/libc
+modules := src/init src/vga src/print src/libc src/mm
 
 obj_dir:= build/objs
 
@@ -17,10 +17,6 @@ CC = /root/opt/cross/bin/i686-elf-gcc
 linker_script := boot/linker.ld
 
 grub_cfg := boot/grub.cfg
-
-assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
-assembly_object_files := $(patsubst src/arch/$(arch)/%.asm,\
-	build/arch/$(arch)/%.o,$(assembly_source_files))
 
 all: $(modules) $(kernel) $(iso)
 

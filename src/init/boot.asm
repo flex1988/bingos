@@ -60,7 +60,7 @@ _start:
 	mov esp, stack_top
 
 	call setup_pages
-	call enable_paging
+	;call enable_paging
 	; This is a good place to initialize crucial processor state before the
 	; high-level kernel is entered. It's best to minimize the early
 	; environment where crucial features are offline. Note that the

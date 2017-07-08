@@ -2,7 +2,7 @@ obj_dir := ../../build/objs
 
 include ../Makefile.inc
 
-target := $(obj_dir)/page.o $(obj_dir)/frame.o
+target := $(obj_dir)/mmu.o $(obj_dir)/frame.o
 
 CFLAGS := -Wall -nostdlib -nostdinc -fno-builtin
 

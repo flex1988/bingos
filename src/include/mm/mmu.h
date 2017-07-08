@@ -1,7 +1,21 @@
-#ifndef __PAGE_H__
-#define __PAGE_H__
+#ifndef __MMU_H__
+#define __MMU_H__
 
 #define PAGE_SIZE (4096)
+
+/* Read CR0 */
+static inline uint32_t x86_read_cr0() {
+    uint32_t r;
+
+    asm volatile("mov %%cr0, %0" : "=r"(r));
+    return r;
+}
+
+/* Write CR0 */
+static inline void x86_write_cr0(uint32_t val) { asm volatile("mov %0, %%cr0" ::"r"(val)); }
+
+/* Write CR3 */
+static inline void x86_write_cr3(uint32_t val) { asm volatile("mov %0, %%cr3" ::"r"(val)); }
 
 typedef struct {
     unsigned int present : 1;
@@ -32,6 +46,5 @@ typedef struct { page_tabl_refer_t tabls[1024]; } page_dir_t;
 
 typedef struct { page_t pages[1024]; } page_tabl_t;
 
-extern void page_init();
-void enable_paging();
+void page_init();
 #endif

@@ -1,6 +1,7 @@
 #include <types.h>
 
 #include "mm/frame.h"
+#include "kernel.h"
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 #define FRAME_SIZE 4096
@@ -9,8 +10,9 @@ static uint64_t _total_memory_size = 0;
 static uint32_t _used_frames = 0;
 static uint32_t _max_frames = 0;
 static uint32_t *_frame_map = 0;
-static ptr_t _placement_addr;
-extern uint32_t kernel_end;
+
+extern void *kernel_end;
+ptr_t _placement_addr = (ptr_t)&kernel_end;
 
 inline void bitmap_set(int bit) { _frame_map[bit / 32] |= (1 << (bit % 32)); }
 
@@ -20,8 +22,15 @@ inline int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)
 
 static inline uint32_t get_frame_count() { return _max_frames; }
 
-static ptr_t pre_alloc(size_t size) {
-    ptr_t t = _placement_addr;
+ptr_t pre_alloc(size_t size, int align) {
+    ptr_t t;
+
+    if (align && (_placement_addr & 0xfff)) {
+        _placement_addr &= 0xfffff000;
+        _placement_addr += 0x1000;
+    }
+
+    t = _placement_addr;
     _placement_addr += size;
     return t;
 }
@@ -59,26 +68,29 @@ int get_first_frame() {
     }
 }
 
-ptr_t alloc_frame() {
-    if (get_frame_count() <= 0)
-        return 0;
+uint32_t alloc_frame() {
+    if (get_frame_count() <= 0) {
+        PANIC("no more frames");
+    }
 
     int frame = get_first_frame();
 
-    if (frame == -1)
-        return 0;
+    if (frame == -1) {
+        PANIC("get free frame failed");
+    }
 
     bitmap_set(frame);
 
     _used_frames++;
 
-    return frame << 12;
+    return frame;
 }
 
 void frame_init(struct multiboot_info *mbi) {
-    phys_addr_t addr;
     uint64_t mem_size = 0;
     unsigned long long int i;
+
+    printk("_placement_addr 0x%x", _placement_addr);
 
     if (!CHECK_FLAG(mbi->flags, 0)) {
         return;
@@ -91,13 +103,6 @@ void frame_init(struct multiboot_info *mbi) {
         return;
     }
 
-    if (mbi->mods_count > 0) {
-        multiboot_module_t *mod = (multiboot_module_t *)mbi->mods_addr + mbi->mods_count - 1;
-        _placement_addr = mod->mod_end;
-    } else {
-        _placement_addr = 0x200000;
-    }
-
     mem_size = mbi->mem_lower << 10 + mbi->mem_upper << 10;
 
     _total_memory_size = mem_size;
@@ -105,7 +110,7 @@ void frame_init(struct multiboot_info *mbi) {
     _used_frames = _max_frames;
 
     // pre_alloc frame bitmap
-    _frame_map = pre_alloc((_max_frames / 8) * sizeof(char));
+    _frame_map = pre_alloc((_max_frames / 8) * sizeof(char), 1);
 
     memset(_frame_map, 0xf, _used_frames);
 
@@ -118,7 +123,9 @@ void frame_init(struct multiboot_info *mbi) {
         }
     }
 
-    bitmap_set(0);  // protect kernel memory
+    //bitmap_set(0);  // protect kernel memory
 
     printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
+
+    printk("frame init...");
 }

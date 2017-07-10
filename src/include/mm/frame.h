@@ -5,7 +5,7 @@
 
 void frame_init(struct multiboot_info *mbi);
 ptr_t get_physaddr(ptr_t virtualaddr);
-uint32_t alloc_frame();
+void* alloc_frame();
 void free_frame(ptr_t frame);
 int get_first_frame();
 void memory_region_init(ptr_t base, uint64_t size);

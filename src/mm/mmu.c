@@ -8,7 +8,8 @@
 #include "multiboot.h"
 
 // pd最后一个entry指向自己，所以pd的地址是0xfffff000
-static page_dir_t* _pd;
+page_dir_t* _pd;
+uint32_t _pdbr;
 
 extern ptr_t _placement_addr;
 
@@ -69,25 +70,40 @@ page_t* mmu_get_page(ptr_t virtual, int alloc, int flags) {
 }
 
 void mmu_init() {
-    _pd = (page_dir_t*)pre_alloc(sizeof(page_dir_t), 1);
+    _pd = (page_dir_t*)alloc_frame();
     memset(_pd, 0x0, sizeof(page_dir_t));
 
-    ptr_t i;
+    ptr_t phys, virt, i;
 
-    page_t* page;
-    for (i = 0; i <  0x110000 + PAGE_SIZE; i += PAGE_SIZE) {
-        page = mmu_get_page(i, 1, 0);
-        page_alloc(page, 0);
-        page->user = 0;
-        page->rw = 0;
+    page_tabl_t* tabl = alloc_frame();
+    memset(tabl, 0, sizeof(page_tabl_t));
+
+    /*page_tabl_t* tabl2 = alloc_frame();*/
+    /*memset(tabl, 0, sizeof(page_tabl_t));*/
+
+    // idenitify map first 4MB
+    for (i = 0, phys = 0x0, virt = 0x0; i < 1024; i++, phys += PAGE_SIZE, virt += PAGE_SIZE) {
+        uint32_t* page = &tabl->pages[PAGE_TABLE_INDEX(virt)];
+        *page = 0;
+        *page |= 0x11;
+        *page |= phys;
     }
 
-    for (i = KERNEL_KMEM_START; i < KERNEL_KMEM_START + KERNEL_KMEM_SIZE; i += PAGE_SIZE) {
-        page = mmu_get_page(i, 0, 0);
-        page_alloc(page, 0);
-        page->user = 0;
-        page->rw = 0;
-    }
+    // map 0x100000 physic to virtual 0xc0000000
+    /*for (i = 0, phys = 0x100000, virt = 0xc0000000; i < 1024; i++, phys += PAGE_SIZE, virt += PAGE_SIZE) {*/
+        /*uint32_t* page = &tabl->pages[PAGE_TABLE_INDEX(virt)];*/
+        /**page = 0;*/
+        /**page |= 0x11;*/
+        /**page |= phys;*/
+    /*}*/
+
+    uint32_t* ref = &_pd->tabls[PAGE_DIRECTORY_INDEX(0x00000000)];
+    *ref |= 3;
+    *ref |= (ptr_t)tabl;
+
+    /*ref = &_pd->tabls[PAGE_DIRECTORY_INDEX(0xc0000000)];*/
+    /**ref |= 3;*/
+    /**ref |= (ptr_t)tabl2;*/
 
     x86_write_cr3(_pd);
 

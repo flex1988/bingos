@@ -1,7 +1,7 @@
 #include <types.h>
 
-#include "mm/frame.h"
 #include "kernel.h"
+#include "mm/frame.h"
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 #define FRAME_SIZE 4096
@@ -68,7 +68,7 @@ int get_first_frame() {
     }
 }
 
-uint32_t alloc_frame() {
+void *alloc_frame() {
     if (get_frame_count() <= 0) {
         PANIC("no more frames");
     }
@@ -83,7 +83,7 @@ uint32_t alloc_frame() {
 
     _used_frames++;
 
-    return frame;
+    return (void *)(frame << 12);
 }
 
 void frame_init(struct multiboot_info *mbi) {
@@ -123,7 +123,7 @@ void frame_init(struct multiboot_info *mbi) {
         }
     }
 
-    //bitmap_set(0);  // protect kernel memory
+    // bitmap_set(0);  // protect kernel memory
 
     printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
 

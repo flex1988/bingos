@@ -3,6 +3,9 @@
 
 #define PAGE_SIZE (4096)
 
+#define PAGE_TABLE_INDEX(x) ((x) >> 12) & 0x03ff
+#define PAGE_DIRECTORY_INDEX(x) (((x) >> 22) & 0x3ff)
+
 /* Read CR0 */
 static inline uint32_t x86_read_cr0() {
     uint32_t r;
@@ -41,6 +44,12 @@ typedef struct {
     unsigned int unused : 4;
     unsigned int addr : 20;
 } page_t;
+
+enum PAGE_PDE_FLAGS {
+    I86_PDE_PRESENT = 1,
+    I86_PDE_WRITABLE = 2,
+    I86_PDE_FRAME = 0x7FFFF000,
+};
 
 typedef struct { page_tabl_refer_t tabls[1024]; } page_dir_t;
 

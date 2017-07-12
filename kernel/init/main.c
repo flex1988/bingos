@@ -5,18 +5,17 @@
 #include "mm/frame.h"
 #include "mm/mmu.h"
 #include "vga/vga.h"
-
-static struct multiboot_info *_mbi;
+#include "hal/hal.h"
 
 void kmain(unsigned long addr) {
     vga_init();
     clear_screen();
     printk("vga mode init...");
 
-    printk("multiboot_info start at 0x%x",addr);
-    _mbi = (struct multiboot_info *)addr;
+    hal_init();
+    printk("interrupt init...");
 
-    frame_init(_mbi);
+    frame_init((struct multiboot_info *)addr);
 
     mmu_init();
 

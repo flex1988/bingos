@@ -96,35 +96,3 @@ _start:
 .hang:	hlt
 	jmp .hang
 .end:
-
-enable_paging:
-	mov eax, pagedir
-	mov cr3, eax
-
-	mov eax, cr0
-	or eax,0x80000001
-	mov cr0, eax
-
-setup_pages:
-	;page dir最后一个entry指向自己，这样就可以通过地址0xfffff000直接访问page dir
-	mov eax, pagedir
-	or eax, 3
-	mov [pagedir + 1023*4], eax
-
-	mov eax, pagetabl
-	or eax, 3
-	mov [pagedir], eax
-
-	mov ecx, 0
-.map_pagetabl:
-	mov eax, 4096
-	mul ecx
-	or eax, 3
-	mov [pagetabl + ecx*4], eax
-
-	inc ecx
-	cmp ecx,1024
-	jne .map_pagetabl
-	
-	ret
-

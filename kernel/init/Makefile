@@ -1,6 +1,6 @@
 obj_dir := ../../build/objs
 
-include ../../Makefile.config
+include ../Makefile.config
 
 target := $(obj_dir)/main.o $(obj_dir)/boot.o
 

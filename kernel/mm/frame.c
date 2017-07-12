@@ -58,7 +58,7 @@ void memory_region_deinit(ptr_t base, uint64_t size) {
 int get_first_frame() {
     uint32_t i, j;
 
-    for (i = 0; i < get_frame_count() / 32; i++) {
+    for (i = 0; i < get_frame_count(); i++) {
         if (_frame_map[i] != 0xffffffff) {
             for (j = 0; j < 32; j++) {
                 if (!(_frame_map[i] & (1 << j)))
@@ -66,6 +66,32 @@ int get_first_frame() {
             }
         }
     }
+}
+
+int get_first_frames(size_t size) {
+    uint32_t i, j;
+
+    for (i = 0; i < get_frame_count(); i++) {
+        if (_frame_map[i] != 0xffffffff) {
+            for (j = 0; j < 32; j++) {
+                if (!(_frame_map[i] & (1 << j))) {
+                    int bit = i * 32;
+                    bit += (1 << j);
+
+                    uint32_t free = 0;
+                    uint32_t count = 0;
+                    for (count = 0; count <= size; count++) {
+                        if (bitmap_test(bit + count))
+                            free++;
+                        if (free == size)
+                            return i * 32 + j;
+                    }
+                }
+            }
+        }
+    }
+
+    return -1;
 }
 
 void *alloc_frame() {
@@ -82,6 +108,26 @@ void *alloc_frame() {
     bitmap_set(frame);
 
     _used_frames++;
+
+    return (void *)(frame << 12);
+}
+
+void *alloc_frames(size_t size) {
+    if (get_frame_count() <= 0) {
+        PANIC("no more frames");
+    }
+
+    int frame = get_first_frames(size);
+
+    if (frame == -1) {
+        PANIC("get free frame failed");
+    }
+
+    uint32_t i;
+    for (i = 0; i < size; i++) {
+        bitmap_set(frame + i);
+    }
+    _used_frames += size;
 
     return (void *)(frame << 12);
 }
@@ -122,8 +168,6 @@ void frame_init(struct multiboot_info *mbi) {
             memory_region_init(mmap->addr, mmap->len);
         }
     }
-
-    // bitmap_set(0);  // protect kernel memory
 
     printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
 

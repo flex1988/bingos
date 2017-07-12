@@ -1,11 +1,11 @@
 obj_dir := ../../build/objs
 
-include ../Makefile.inc
+include ../../Makefile.config
 
 target := $(obj_dir)/printk.o $(obj_dir)/vsprintf.o
 
 all: $(target)
 
 $(obj_dir)/%.o: %.c
-	$(CC) -I../include/libc -c -o $@ $< 
+	$(CC) $(CFLAGS) -c -o $@ $< 
 

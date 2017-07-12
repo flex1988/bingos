@@ -1,3 +1,5 @@
+#ifndef __VGA_H__
+#define __VGA_H__
 typedef enum {
     BLACK = 0,
     BLUE,
@@ -27,3 +29,4 @@ void println(char *msg);
 void printc(char c);
 void vga_init();
 void clear_screen();
+#endif

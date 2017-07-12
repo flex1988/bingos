@@ -30,7 +30,7 @@ typedef struct {
     unsigned int size : 1;
     unsigned int unused : 5;
     unsigned int addr : 20;
-} page_tabl_refer_t;
+} __attribute__((packed)) paged_entry_t;
 
 typedef struct {
     unsigned int present : 1;
@@ -43,7 +43,7 @@ typedef struct {
     unsigned int global : 1;
     unsigned int unused : 4;
     unsigned int addr : 20;
-} page_t;
+} __attribute__((packed)) page_t;
 
 enum PAGE_PDE_FLAGS {
     I86_PDE_PRESENT = 1,
@@ -51,9 +51,11 @@ enum PAGE_PDE_FLAGS {
     I86_PDE_FRAME = 0x7FFFF000,
 };
 
-typedef struct { page_tabl_refer_t tabls[1024]; } page_dir_t;
+typedef struct { paged_entry_t tabls[1024]; } page_dir_t;
 
 typedef struct { page_t pages[1024]; } page_tabl_t;
 
 void page_init();
+
+void *alloc_frames(size_t size);
 #endif

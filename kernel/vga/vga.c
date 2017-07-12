@@ -1,5 +1,14 @@
 #include "vga/vga.h"
 #include "types.h"
+#include "vga/io.h"
+
+/* The I/O ports */
+#define FB_COMMAND_PORT 0x3D4
+#define FB_DATA_PORT 0x3D5
+
+/* The I/O port commands */
+#define FB_HIGH_BYTE_COMMAND 14
+#define FB_LOW_BYTE_COMMAND 15
 
 typedef struct vga_char vga_char;
 
@@ -10,8 +19,27 @@ static vga_char blank;
 static int x;
 static int y;
 
-static void update_cursor() {
-    // uint16_t cursor = y * 80 + x;
+static void move_cursor() {
+    uint16_t cursor = y * 80 + x;
+    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+    outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
+    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+    outb(FB_DATA_PORT, cursor & 0x00FF);
+}
+
+static void scroll_screen() {
+    if (y >= 25) {
+        int i;
+        for (i = 0; i < 24 * 80; i++) {
+            vga_buffer[i] = vga_buffer[i + 80];
+        }
+
+        for (i = 24 * 80; i < 25 * 80; i++) {
+            vga_buffer[i] = blank;
+        }
+
+        y = 24;
+    }
 }
 
 void vga_init() {
@@ -32,26 +60,21 @@ void clear_screen() {
 
     x = 0;
     y = 0;
-    update_cursor();
+    move_cursor();
 }
 
 void printc(char c) {
     switch (c) {
         case '\r':
             x = 0;
-            break;
         case '\n':
             y++;
             x = 0;
-            if (y > 80)
-                clear_screen();
-            break;
 
         case '\t':
             do
                 printc(' ');
             while (x % 4 != 0);
-            break;
         default: {
             int location = y * 80 + x;
             vga_buffer[location].ch = c;
@@ -61,6 +84,13 @@ void printc(char c) {
             x = (x + 1) % 80;
         }
     }
+
+    if (x >= 80) {
+        x = 0;
+        y++;
+    }
+
+    move_cursor();
 }
 
 void println(char* s) {

@@ -2,8 +2,7 @@
 #define __GDT_H__
 
 #include <stdint.h>
-//! maximum amount of descriptors allowed
-#define MAX_DESCRIPTORS 3
+#define GDT_LENGTH 5
 
 /***	 gdt descriptor access bit flags.	***/
 
@@ -51,5 +50,11 @@ typedef struct {
     uint8_t flags;
     uint8_t grand;
     uint8_t base_high;
-} __attribute__((packed)) gdt_descriptor_t;
+} __attribute__((packed)) gdt_t;
+
+typedef struct {
+    uint16_t limit;
+    uint32_t base;
+} __attribute__((packed)) gdtr_t;
+
 #endif

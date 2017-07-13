@@ -12,8 +12,13 @@ void kmain(unsigned long addr) {
     clear_screen();
     printk("vga mode init...");
 
-    hal_init();
-    printk("interrupt init...");
+    gdt_init();
+    printk("gdt init...");
+
+    idt_init();
+    printk("idt init...");
+
+    asm volatile("sti");
 
     frame_init((struct multiboot_info *)addr);
 

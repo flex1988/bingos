@@ -4,7 +4,7 @@ iso := build/os-$(arch).iso
 
 kernel := build/kernel-$(arch).bin
 
-modules := kernel/init kernel/print kernel/mm kernel/vga libc hal
+modules := kernel/init kernel/print kernel/mm kernel/vga hal libc
 
 obj_dir:= build/objs
 

@@ -1,17 +1,12 @@
 #include "hal/gdt.h"
 
-typedef struct {
-    uint16_t m_limit;
-    uint32_t m_base;
-} __attribute__((packed)) gdtr_t;
-
-static gdt_descriptor_t _gdt[MAX_DESCRIPTORS];
+static gdt_t _gdt[GDT_LENGTH];
 static gdtr_t _gdtr;
 
-static void gdt_install() { asm volatile("lgdt (%0)" ::"m"(_gdtr)); }
+static void gdt_install() { asm volatile("lgdt %0" ::"m"(_gdtr)); }
 
-static void gdt_set_descriptor(uint32_t i, uint64_t base, uint64_t limit, uint8_t access, uint8_t grand) {
-    memset((void *)&_gdt[i], 0, sizeof(gdt_descriptor_t));
+static void gdt_set_gate(uint32_t i, uint32_t base, uint32_t limit, uint8_t access, uint8_t grand) {
+    memset((void *)&_gdt[i], 0, sizeof(gdt_t));
 
     _gdt[i].base_low = base & 0xffff;
     _gdt[i].base_mid = (base >> 16) & 0xff;
@@ -24,17 +19,14 @@ static void gdt_set_descriptor(uint32_t i, uint64_t base, uint64_t limit, uint8_
 }
 
 void gdt_init() {
-    _gdtr.m_limit = (sizeof(gdtr_t) * 3) - 1;
-    _gdtr.m_base = (uint32_t)&_gdt[0];
+    _gdtr.limit = sizeof(gdt_t) * GDT_LENGTH - 1;
+    _gdtr.base = (uint32_t)&_gdt;
 
-    gdt_set_descriptor(0, 0, 0, 0, 0);
-
-    //! set default code descriptor
-    gdt_set_descriptor(1, 0, 0xffffffff, I86_GDT_DESC_READWRITE | I86_GDT_DESC_EXEC_CODE | I86_GDT_DESC_CODEDATA | I86_GDT_DESC_MEMORY,
-                       I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT | I86_GDT_GRAND_LIMITHI_MASK);
-    //! set default data descriptor
-    gdt_set_descriptor(2, 0, 0xffffffff, I86_GDT_DESC_READWRITE | I86_GDT_DESC_CODEDATA | I86_GDT_DESC_MEMORY,
-                       I86_GDT_GRAND_4K | I86_GDT_GRAND_32BIT | I86_GDT_GRAND_LIMITHI_MASK);
+    gdt_set_gate(0, 0, 0, 0, 0);
+    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);  // kernel code segment
+    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);  // kernel data segment
+    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);  // user code segment
+    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);  // user data segment
 
     gdt_install();
 }

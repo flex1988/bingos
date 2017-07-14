@@ -6,6 +6,7 @@ extern void hal_exit();
 extern void gdt_init();
 
 extern void idt_init();
+extern void irqs_init();
 
 extern void isr0();
 extern void isr1();
@@ -39,4 +40,25 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
+extern void isr128();
+
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+extern void irq240();	// Interrupt handler for APIC
+extern void irq241();
+extern void irq242();
 #endif

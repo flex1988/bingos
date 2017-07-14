@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#include "hal/idt.h"
 #include "hal/hal.h"
+#include "hal/idt.h"
 
 static idt_t _idt[I86_MAX_INTERRUPTS];
 
@@ -61,6 +61,31 @@ void idt_init() {
     idt_set_gate(29, (uint32_t)isr29, 0x08, 0x8E);
     idt_set_gate(30, (uint32_t)isr30, 0x08, 0x8E);
     idt_set_gate(31, (uint32_t)isr31, 0x08, 0x8E);
+
+    /* The following are all IRQs */
+    idt_set_gate(32, (uint32_t)irq0, 0x08, 0x8E);
+    idt_set_gate(33, (uint32_t)irq1, 0x08, 0x8E);
+    idt_set_gate(34, (uint32_t)irq2, 0x08, 0x8E);
+    idt_set_gate(35, (uint32_t)irq3, 0x08, 0x8E);
+    idt_set_gate(36, (uint32_t)irq4, 0x08, 0x8E);
+    idt_set_gate(37, (uint32_t)irq5, 0x08, 0x8E);
+    idt_set_gate(38, (uint32_t)irq6, 0x08, 0x8E);
+    idt_set_gate(39, (uint32_t)irq7, 0x08, 0x8E);
+    idt_set_gate(40, (uint32_t)irq8, 0x08, 0x8E);
+    idt_set_gate(41, (uint32_t)irq9, 0x08, 0x8E);
+    idt_set_gate(42, (uint32_t)irq10, 0x08, 0x8E);
+    idt_set_gate(43, (uint32_t)irq11, 0x08, 0x8E);
+    idt_set_gate(44, (uint32_t)irq12, 0x08, 0x8E);
+    idt_set_gate(45, (uint32_t)irq13, 0x08, 0x8E);
+    idt_set_gate(46, (uint32_t)irq14, 0x08, 0x8E);
+    idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
+    /* IRQ for APIC interrupts */
+    idt_set_gate(240, (uint32_t)irq240, 0x08, 0x8E);
+    idt_set_gate(241, (uint32_t)irq241, 0x08, 0x8E);
+    idt_set_gate(242, (uint32_t)irq242, 0x08, 0x8E);
+
+    /* The following interrupt number is for system call */
+    idt_set_gate(128, (uint32_t)isr128, 0x08, 0x8E);
 
     idt_install();
 }

@@ -46,11 +46,7 @@ typedef struct {
 
 typedef void (*isr_t)(registers_t *);
 
-/*
- * IRQ hook chain for precess the interrupt
- */
 typedef struct {
-    irq_hook_t *next;
     isr_t handler;
     uint8_t irq;
 } irq_hook_t;

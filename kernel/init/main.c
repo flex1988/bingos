@@ -18,6 +18,8 @@ void kmain(unsigned long addr) {
     idt_init();
     printk("idt init...");
 
+    irqs_init();
+
     asm volatile("sti");
 
     frame_init((struct multiboot_info *)addr);

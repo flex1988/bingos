@@ -17,7 +17,7 @@ CFLAGS_global := -Wall -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D_
 
 CC = /root/opt/cross/bin/i686-elf-gcc
 
-.PHONY: all clean run iso
+.PHONY: all $(modules) run iso
 
 linker_script := boot/linker.ld
 

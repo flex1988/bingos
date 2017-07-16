@@ -1,6 +1,6 @@
 #include "vga/vga.h"
+#include "kernel.h"
 #include "types.h"
-#include "vga/io.h"
 
 /* The I/O ports */
 #define FB_COMMAND_PORT 0x3D4
@@ -21,10 +21,10 @@ static int y;
 
 static void move_cursor() {
     uint16_t cursor = y * 80 + x;
-    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
-    outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
-    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
-    outb(FB_DATA_PORT, cursor & 0x00FF);
+    _outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+    _outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
+    _outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+    _outb(FB_DATA_PORT, cursor & 0x00FF);
 }
 
 static void scroll_screen() {

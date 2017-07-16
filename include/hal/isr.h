@@ -30,13 +30,4 @@ typedef struct registers {
 typedef void (*isr_t)(registers_t);
 void register_interrupt_handler(uint8_t n, isr_t handler);
 
-typedef struct {
-    isr_t handler;
-    uint8_t irq;
-} irq_hook_t;
-
-extern void dump_registers(registers_t *regs);
-extern void register_irq_handler(uint8_t irq, irq_hook_t *hook, isr_t handler);
-extern void unregister_irq_handler(irq_hook_t *hook);
-
 #endif /* __ISR_H__ */

@@ -1,6 +1,8 @@
 #ifndef __MMU_H__
 #define __MMU_H__
 
+#include "hal/isr.h"
+
 #define PAGE_SIZE (4096)
 
 #define PAGE_TABLE_INDEX(x) ((x) >> 12) & 0x03ff
@@ -58,4 +60,6 @@ typedef struct { page_t pages[1024]; } page_tabl_t;
 void page_init();
 
 void *alloc_frames(size_t size);
+
+void page_fault(registers_t regs);
 #endif

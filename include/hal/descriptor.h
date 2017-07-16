@@ -1,12 +1,39 @@
-#ifndef __HAL_H__
-#define __HAL_H__
+#ifndef __GDT_H__
+#define __GDT_H__
 
-extern void hal_init();
-extern void hal_exit();
-extern void gdt_init();
+#include <stdint.h>
+#define GDT_LENGTH 5
+// Write a byte out to the specified port.
 
-extern void idt_init();
-extern void irqs_init();
+
+typedef struct {
+    uint16_t limit;
+    uint16_t base_low;
+    uint8_t base_mid;
+    uint8_t flags;
+    uint8_t grand;
+    uint8_t base_high;
+} __attribute__((packed)) gdt_t;
+
+typedef struct {
+    uint16_t limit;
+    uint32_t base;
+} __attribute__((packed)) gdtr_t;
+
+typedef struct {
+    uint16_t base_low;
+    uint16_t selector;
+    uint8_t reserved;
+    uint8_t flags;
+    uint16_t base_high;
+} __attribute__((packed)) idt_t;
+
+typedef struct {
+    uint16_t limit;
+    uint32_t base;
+} __attribute__((packed)) idtr_t;
+
+void init_descriptor_tables();
 
 extern void isr0();
 extern void isr1();
@@ -40,8 +67,6 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
-extern void isr128();
-
 extern void irq0();
 extern void irq1();
 extern void irq2();
@@ -58,7 +83,4 @@ extern void irq12();
 extern void irq13();
 extern void irq14();
 extern void irq15();
-extern void irq240();	// Interrupt handler for APIC
-extern void irq241();
-extern void irq242();
 #endif

@@ -8,8 +8,8 @@ modules := kernel/init \
 	kernel/print \
 	kernel/mm \
 	kernel/vga \
-	hal \
-	libc
+	libc \
+	hal 
 
 obj_dir:= build/objs
 

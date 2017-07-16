@@ -20,38 +20,21 @@
 #define IRQ14 46
 #define IRQ15 47
 
-/*
- * Note that gs, fs segment register was reserved for other
- * purpose, so we don't put it here
- */
-typedef struct {
-    uint32_t es;
-    uint32_t ds;
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t ebp;
-    uint32_t esp;
-    uint32_t ebx;
-    uint32_t edx;
-    uint32_t ecx;
-    uint32_t eax;
-    uint32_t int_no;
-    uint32_t err_code;
-    uint32_t eip;
-    uint32_t cs;
-    uint32_t eflags;
-    uint32_t user_esp;
-    uint32_t ss;
+typedef struct registers {
+    uint32_t ds;                                      // Data segment selector
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;  // Pushed by pusha.
+    uint32_t int_no, err_code;                        // Interrupt number and error code (if applicable)
+    uint32_t eip, cs, eflags, useresp, ss;            // Pushed by the processor automatically.
 } registers_t;
 
-typedef void (*isr_t)(registers_t *);
+typedef void (*isr_t)(registers_t);
+void register_interrupt_handler(uint8_t n, isr_t handler);
 
 typedef struct {
     isr_t handler;
     uint8_t irq;
 } irq_hook_t;
 
-extern void init_irqs();
 extern void dump_registers(registers_t *regs);
 extern void register_irq_handler(uint8_t irq, irq_hook_t *hook, isr_t handler);
 extern void unregister_irq_handler(irq_hook_t *hook);

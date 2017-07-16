@@ -1,15 +1,29 @@
-#include <stdint.h>
+#include "hal/descriptor.h"
+#include "hal/isr.h"
 
-#include "hal/hal.h"
-#include "hal/idt.h"
+static gdt_t _gdt[5];
+static gdtr_t _gdtr;
 
-static idt_t _idt[I86_MAX_INTERRUPTS];
-
+static idt_t _idt[256];
 static idtr_t _idtr;
 
-static void idt_install() { asm volatile("lidt %0" ::"m"(_idtr)); }
+extern isr_t _interrupt_handlers[];
 
-void default_handler() { printk("hello world!"); }
+extern void gdt_flush(uint32_t);
+extern void idt_flush(uint32_t);
+
+static void gdt_install() { asm volatile("lgdt %0" ::"m"(_gdtr)); }
+
+static void gdt_set_gate(int32_t i, uint32_t base, uint32_t limit, uint8_t access, uint8_t grand) {
+    _gdt[i].base_low = base & 0xffff;
+    _gdt[i].base_mid = (base >> 16) & 0xff;
+    _gdt[i].base_high = (base >> 24) & 0xff;
+    _gdt[i].limit = limit & 0xffff;
+
+    _gdt[i].flags = access;
+    _gdt[i].grand = (limit >> 16) & 0x0f;
+    _gdt[i].grand |= grand & 0xf0;
+}
 
 static void idt_set_gate(uint8_t i, uint32_t base, uint16_t selector, uint8_t flags) {
     _idt[i].base_low = base & 0xFFFF;
@@ -20,13 +34,40 @@ static void idt_set_gate(uint8_t i, uint32_t base, uint16_t selector, uint8_t fl
     _idt[i].flags = flags /* | 0x60 */;
 }
 
-void idt_init() {
+static void outbb(uint16_t port, uint8_t value) { asm volatile("outb %1, %0" : : "dN"(port), "a"(value)); }
+
+static void gdt_init() {
+    _gdtr.limit = sizeof(gdt_t) * 5 - 1;
+    _gdtr.base = (uint32_t)&_gdt;
+
+    gdt_set_gate(0, 0, 0, 0, 0);
+    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);  // kernel code segment
+    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);  // kernel data segment
+    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);  // user code segment
+    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);  // user data segment
+
+    gdt_flush((uint32_t)&_gdtr);
+}
+
+static void idt_init() {
     int i;
 
-    _idtr.limit = sizeof(idt_t) * I86_MAX_INTERRUPTS - 1;
+    _idtr.limit = sizeof(idt_t) * 256 - 1;
     _idtr.base = (uint32_t)&_idt;
 
-    memset((void*)&_idt[0], 0, sizeof(idt_t) * I86_MAX_INTERRUPTS - 1);
+    memset((void *)&_idt, 0, sizeof(idt_t) * 256);
+
+    // Remap the irq table.
+    outbb(0x20, 0x11);
+    outbb(0xA0, 0x11);
+    outbb(0x21, 0x20);
+    outbb(0xA1, 0x28);
+    outbb(0x21, 0x04);
+    outbb(0xA1, 0x02);
+    outbb(0x21, 0x01);
+    outbb(0xA1, 0x01);
+    outbb(0x21, 0x0);
+    outbb(0xA1, 0x0);
 
     /* set default interrupt service routine */
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
@@ -79,13 +120,13 @@ void idt_init() {
     idt_set_gate(45, (uint32_t)irq13, 0x08, 0x8E);
     idt_set_gate(46, (uint32_t)irq14, 0x08, 0x8E);
     idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
-    /* IRQ for APIC interrupts */
-    idt_set_gate(240, (uint32_t)irq240, 0x08, 0x8E);
-    idt_set_gate(241, (uint32_t)irq241, 0x08, 0x8E);
-    idt_set_gate(242, (uint32_t)irq242, 0x08, 0x8E);
 
-    /* The following interrupt number is for system call */
-    idt_set_gate(128, (uint32_t)isr128, 0x08, 0x8E);
+    idt_flush((uint32_t)&_idtr);
 
-    idt_install();
+    memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
+}
+
+void init_descriptor_tables() {
+    gdt_init();
+    idt_init();
 }

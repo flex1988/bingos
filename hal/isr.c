@@ -1,4 +1,5 @@
 #include "hal/isr.h"
+#include "hal/common.h"
 #include "kernel.h"
 
 isr_t _interrupt_handlers[256];

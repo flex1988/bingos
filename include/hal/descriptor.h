@@ -1,10 +1,7 @@
-#ifndef __GDT_H__
-#define __GDT_H__
+#ifndef __DESCRIPTOR_H__
+#define __DESCRIPTOR_H__
 
 #include <stdint.h>
-#define GDT_LENGTH 5
-// Write a byte out to the specified port.
-
 
 typedef struct {
     uint16_t limit;

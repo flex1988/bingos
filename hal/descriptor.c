@@ -1,5 +1,6 @@
 #include "hal/descriptor.h"
 #include "hal/isr.h"
+#include "hal/common.h"
 
 static gdt_t _gdt[5];
 static gdtr_t _gdtr;
@@ -123,8 +124,6 @@ static void idt_init() {
 
     memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
 }
-
-void outb(uint16_t port, uint8_t value) { asm volatile("outb %1, %0" : : "dN"(port), "a"(value)); }
 
 void init_descriptor_tables() {
     gdt_init();

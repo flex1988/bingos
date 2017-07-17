@@ -1,4 +1,5 @@
 #include "vga/vga.h"
+#include "hal/common.h"
 #include "kernel.h"
 #include "types.h"
 
@@ -16,19 +17,19 @@ static vga_char* vga_buffer;
 
 static vga_char blank;
 
-static int x;
-static int y;
+static uint8_t cursor_x;
+static uint8_t cursor_y;
 
 static void move_cursor() {
-    uint16_t cursor = y * 80 + x;
-    _outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
-    _outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
-    _outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
-    _outb(FB_DATA_PORT, cursor & 0x00FF);
+    uint16_t cursor = cursor_y * 80 + cursor_x;
+    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+    outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
+    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+    outb(FB_DATA_PORT, cursor & 0x00FF);
 }
 
 static void scroll_screen() {
-    if (y >= 25) {
+    if (cursor_y >= 25) {
         int i;
         for (i = 0; i < 24 * 80; i++) {
             vga_buffer[i] = vga_buffer[i + 80];
@@ -38,17 +39,18 @@ static void scroll_screen() {
             vga_buffer[i] = blank;
         }
 
-        y = 24;
+        cursor_y = 24;
     }
 }
 
 void vga_init() {
     vga_buffer = (vga_char*)0xb8000;
-    x = 0;
-    y = 0;
-    blank.ch = ' ';
-    blank.fg = BLACK;
-    blank.bg = BLACK;
+    cursor_x = 0;
+    cursor_y = 0;
+
+    uint8_t attributeByte = (0 << 4) | (15 & 0x0F);
+    uint16_t v = 0x20 | (attributeByte << 8);
+    memcpy(blank, v, sizeof(uint16_t));
 }
 
 void clear_screen() {
@@ -58,38 +60,48 @@ void clear_screen() {
         vga_buffer[i] = blank;
     }
 
-    x = 0;
-    y = 0;
+    cursor_x = 0;
+    cursor_y = 0;
     move_cursor();
 }
 
 void printc(char c) {
-    switch (c) {
-        case '\r':
-            x = 0;
-        case '\n':
-            y++;
-            x = 0;
+    uint8_t back = 0;
+    uint8_t fore = 15;
 
-        case '\t':
-            do
-                printc(' ');
-            while (x % 4 != 0);
-        default: {
-            int location = y * 80 + x;
-            vga_buffer[location].ch = c;
-            vga_buffer[location].fg = WHITE;
-            vga_buffer[location].bg = BLACK;
-            y += (x + 1) / 80;
-            x = (x + 1) % 80;
-        }
+    uint8_t attribute_byte = (back << 4) | (fore & 0x0F);
+    uint16_t attribute = attribute_byte << 8;
+    uint16_t* location;
+
+    if (c == 0x08 && cursor_x) {
+        cursor_x--;
     }
 
-    if (x >= 80) {
-        x = 0;
-        y++;
+    else if (c == 0x09) {
+        cursor_x = (cursor_x + 8) & ~(8 - 1);
     }
 
+    else if (c == '\r') {
+        cursor_x = 0;
+    }
+
+    else if (c == '\n') {
+        cursor_x = 0;
+        cursor_y++;
+    }
+
+    else if (c >= ' ') {
+        location = vga_buffer + (cursor_y * 80 + cursor_x);
+        *location = c | attribute;
+        cursor_x++;
+    }
+
+    if (cursor_x >= 80) {
+        cursor_x = 0;
+        cursor_y++;
+    }
+
+    scroll_screen();
     move_cursor();
 }
 

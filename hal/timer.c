@@ -1,8 +1,9 @@
 #include <types.h>
 
-#include "kernel.h"
-#include "hal/timer.h"
+#include "hal/common.h"
 #include "hal/isr.h"
+#include "hal/timer.h"
+#include "kernel.h"
 #include "vga/vga.h"
 
 static uint32_t tick = 0;

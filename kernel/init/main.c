@@ -18,7 +18,7 @@ void kmain(unsigned long addr) {
 
     asm volatile("sti");
 
-    timer_init(50);
+    //timer_init(50);
 
     frame_init((struct multiboot_info *)addr);
 

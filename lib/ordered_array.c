@@ -44,3 +44,13 @@ void remove_ordered_array(uint32_t i, ordered_array_t* arr) {
     }
     arr->size--;
 }
+
+ordered_array_t place_ordered_array(void* addr, uint32_t max, comparer_t comparer) {
+    ordered_array_t arr;
+    arr.array = (type_t*)addr;
+    memset(arr.array, 0, max * sizeof(type_t));
+    arr.size = 0;
+    arr.max = max;
+    arr.comparer = comparer;
+    return arr;
+}

@@ -48,6 +48,41 @@ static int8_t header_comparer(void *a, void *b) { return ((header_t *)a)->size <
 heap_t *create_heap(uint32_t start, uint32_t end, uint32_t max, uint8_t supervisor, uint8_t readonly) {
     heap_t *heap = (heap_t *)kmalloc(sizeof(heap_t));
 
-    // heap->index =
+    heap->index = place_ordered_array((void *)start, HEAP_INDEX_SIZE, header_comparer);
+
+    start += sizeof(type_t) * HEAP_INDEX_SIZE;
+
+    if (start & 0xfffff000 != 0) {
+        start &= 0xfffff000;
+        start += 0x1000;
+    }
+
+    heap->start = start;
+    heap->end = end;
+    heap->max = max;
+    heap->supervisor = supervisor;
+    heap->readonly = readonly;
+
+    header_t *hole = (header_t *)start;
+    hole->size = end - start;
+    hole->magic = HEAP_MAGIC;
+    hole->hole = 1;
+    insert_ordered_array((void *)hole, &heap->index);
+
     return heap;
 }
+
+static void expand(uint32_t new, heap_t *heap) {
+    if (new & 0xfffff000) {
+        new &= 0xfffff000;
+        new += 0x1000;
+    }
+
+    uint32_t old = heap->end - heap->start;
+    while (old < new) {
+        ;
+    }
+    heap->end = heap->start + new;
+}
+
+void *alloc(uint32_t size, uint8_t align, heap_t *heap) {}

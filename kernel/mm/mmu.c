@@ -1,11 +1,11 @@
 #include <stddef.h>
 #include <types.h>
 
+#include "hal/isr.h"
 #include "kernel.h"
 #include "mm/frame.h"
 #include "mm/mem_layout.h"
 #include "mm/mmu.h"
-#include "hal/isr.h"
 #include "multiboot.h"
 
 // pd最后一个entry指向自己，所以pd的地址是0xfffff000
@@ -52,6 +52,20 @@ void page_fault(registers_t regs) {
     PANIC("Page fault");
 }
 
+void page_map(uint32_t virt, int make, uint32_t flags) {
+    paged_entry_t* paged = &_pd->tabls[PAGE_DIRECTORY_INDEX(virt)];
+    if (paged->present) {
+        page_tabl_t* tabl = paged->addr << 12;
+        page_t* page = tabl[PAGE_TABLE_INDEX(virt)];
+        page->addr = alloc_frame();
+        page->present = 1;
+    } else if (make) {
+        ;
+    } else {
+        PANIC("page table not present");
+    }
+}
+
 void mmu_init() {
     _pd = (page_dir_t*)alloc_frame();
     memset(_pd, 0x0, sizeof(page_dir_t));
@@ -62,7 +76,7 @@ void mmu_init() {
     memset(tabl, 0, sizeof(page_tabl_t));
 
     page_tabl_t* tabl2 = alloc_frame();
-    memset(tabl, 0, sizeof(page_tabl_t));
+    memset(tabl2, 0, sizeof(page_tabl_t));
 
     // idenitify map first 4MB
     for (i = 0, phys = 0x0, virt = 0x0; i < 1024; i++, phys += PAGE_SIZE, virt += PAGE_SIZE) {

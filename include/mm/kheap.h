@@ -1,6 +1,9 @@
 #ifndef __KHEAP_H__
 #define __KHEAP_H__
 
+#define HEAP_INDEX_SIZE 0x20000
+#define HEAP_MAGIC 0x12345678
+
 typedef struct {
     uint32_t magic;
     uint8_t hole;

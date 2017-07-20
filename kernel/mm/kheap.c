@@ -1,18 +1,19 @@
 #include "mm/kheap.h"
 #include "kernel.h"
+#include "lib/ordered_array.h"
 #include "mm/mmu.h"
 
 heap_t *kheap = 0;
 
-uint32_t kmalloc_i(uint32_t size, int align, uint32_t *phys) {
+uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
     if (kheap != 0) {
-        void *addr = alloc();
+        void *addr = alloc(size, align, kheap);
         if (phys) {
             *phys = (uint32_t)get_physaddr((ptr_t)addr);
         }
         return (uint32_t)addr;
     } else {
-        return pre_alloc(size, align);
+        return pre_alloc(size, align, phys);
     }
 }
 
@@ -23,7 +24,7 @@ static int32_t find_smallest_hole(uint32_t size, uint8_t align, heap_t *heap) {
     while (iterator < heap->index.size) {
         header_t *header = (header_t *)lookup_ordered_array(iterator, &heap->index);
 
-        if (aligin > 0) {
+        if (align > 0) {
             uint32_t location = (uint32_t)header;
             int32_t offset = 0;
             if ((location + sizeof(header_t)) & 0xfffff000 != 0)
@@ -85,4 +86,4 @@ static void expand(uint32_t new, heap_t *heap) {
     heap->end = heap->start + new;
 }
 
-void *alloc(uint32_t size, uint8_t align, heap_t *heap) {}
+void *alloc(uint32_t size, uint8_t align, heap_t *heap) { return 0; }

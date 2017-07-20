@@ -2,6 +2,7 @@
 
 #include "kernel.h"
 #include "mm/frame.h"
+#include "mm/mmu.h"
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 #define FRAME_SIZE 4096
@@ -22,12 +23,16 @@ inline int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)
 
 static inline uint32_t get_frame_count() { return _max_frames; }
 
-ptr_t pre_alloc(size_t size, int align) {
+ptr_t pre_alloc(size_t size, int align, uint32_t *phys) {
     ptr_t t;
 
     if (align && (_placement_addr & 0xfff)) {
         _placement_addr &= 0xfffff000;
         _placement_addr += 0x1000;
+    }
+
+    if (phys) {
+        *phys = _placement_addr;
     }
 
     t = _placement_addr;
@@ -36,8 +41,8 @@ ptr_t pre_alloc(size_t size, int align) {
 }
 
 void memory_region_init(ptr_t base, uint64_t size) {
-    int bit = base >> 12;
-    int frames = size >> 12;
+    uint32_t bit = base >> 12;
+    uint64_t frames = size >> 12;
 
     for (; frames > 0; frames--) {
         bitmap_unset(bit++);
@@ -55,7 +60,7 @@ void memory_region_deinit(ptr_t base, uint64_t size) {
     }
 }
 
-int get_first_frame() {
+uint32_t get_first_frame() {
     uint32_t i, j;
 
     for (i = 0; i < get_frame_count(); i++) {
@@ -68,7 +73,7 @@ int get_first_frame() {
     }
 }
 
-int get_first_frames(size_t size) {
+uint32_t get_first_frames(size_t size) {
     uint32_t i, j;
 
     for (i = 0; i < get_frame_count(); i++) {
@@ -94,12 +99,12 @@ int get_first_frames(size_t size) {
     return -1;
 }
 
-void *alloc_frame() {
+uint32_t alloc_frame() {
     if (get_frame_count() <= 0) {
         PANIC("no more frames");
     }
 
-    int frame = get_first_frame();
+    uint32_t frame = get_first_frame();
 
     if (frame == -1) {
         PANIC("get free frame failed");
@@ -109,15 +114,15 @@ void *alloc_frame() {
 
     _used_frames++;
 
-    return (void *)(frame << 12);
+    return frame;
 }
 
-void *alloc_frames(size_t size) {
+uint32_t alloc_frames(size_t size) {
     if (get_frame_count() <= 0) {
         PANIC("no more frames");
     }
 
-    int frame = get_first_frames(size);
+    uint32_t frame = get_first_frames(size);
 
     if (frame == -1) {
         PANIC("get free frame failed");
@@ -129,11 +134,34 @@ void *alloc_frames(size_t size) {
     }
     _used_frames += size;
 
-    return (void *)(frame << 12);
+    return frame;
+}
+
+void page_map(page_t *page, int kernel, int rw) {
+    if (page->addr != 0)
+        return;
+    else {
+        memset(page, 0, sizeof(page_t));
+        /*page->rw = rw;*/
+        /*page->user = kernel ? 0 : 1;*/
+        page->present = 1;
+        page->addr = alloc_frame();
+    }
+}
+
+void page_identical_map(page_t *page, int kernel, int rw, uint32_t virt) {
+    if (page->addr != 0)
+        return;
+    else {
+        memset(page, 0, sizeof(page_t));
+        page->rw = rw;
+        page->user = kernel ? 0 : 1;
+        page->present = 1;
+        page->addr = virt >> 12;
+    }
 }
 
 void frame_init(struct multiboot_info *mbi) {
-    uint64_t mem_size = 0;
     unsigned long long int i;
 
     printk("_placement_addr 0x%x", _placement_addr);
@@ -149,16 +177,14 @@ void frame_init(struct multiboot_info *mbi) {
         return;
     }
 
-    mem_size = mbi->mem_lower << 10 + mbi->mem_upper << 10;
-
-    _total_memory_size = mem_size;
-    _max_frames = _total_memory_size >> 12;
+    _total_memory_size = mbi->mem_lower << 10 + mbi->mem_upper << 10;
+    _max_frames = (uint32_t)(_total_memory_size >> 12);
     _used_frames = _max_frames;
 
     // pre_alloc frame bitmap
-    _frame_map = pre_alloc((_max_frames / 8) * sizeof(char), 1);
+    _frame_map = pre_alloc((_max_frames / 8) * sizeof(char), 1, 0);
 
-    memset(_frame_map, 0xf, _used_frames);
+    memset(_frame_map, 0xff, _used_frames);
 
     multiboot_memory_map_t *mmap;
     for (mmap = (multiboot_memory_map_t *)mbi->mmap_addr; mmap < (multiboot_memory_map_t *)(mbi->mmap_addr + mbi->mmap_length);

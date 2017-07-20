@@ -4,12 +4,13 @@
 #include "hal/isr.h"
 #include "kernel.h"
 #include "mm/frame.h"
+#include "mm/kheap.h"
 #include "mm/mem_layout.h"
 #include "mm/mmu.h"
 #include "multiboot.h"
 
-// pd最后一个entry指向自己，所以pd的地址是0xfffff000
-page_dir_t* _pd;
+page_dir_t* _kernel_pd;
+
 uint32_t _pdbr;
 
 extern ptr_t _placement_addr;
@@ -21,15 +22,14 @@ static inline void enable_paging() {
     asm volatile("mov %0, %%cr0" ::"r"(r));
 }
 
-static inline void setup_pages() { asm volatile("mov %0, %%cr3" ::"r"((uint32_t)_pd)); }
+static inline void setup_pages() { asm volatile("mov %0, %%cr3" ::"r"((uint32_t)_kernel_pd)); }
 
 ptr_t get_physaddr(ptr_t virtualaddr) {
     int pdidx = virtualaddr >> 22;
     int ptidx = virtualaddr >> 12 & 0x03ff;
     int offset = virtualaddr & 0xfff;
 
-    page_tabl_t* pt = (page_tabl_t*)(_pd->tabls[pdidx].addr << 12);
-    ptr_t page = pt->pages[ptidx].addr << 12;
+    ptr_t page = _kernel_pd->entries[pdidx].addr << 12;
 
     return page + offset;
 }
@@ -52,61 +52,61 @@ void page_fault(registers_t regs) {
     PANIC("Page fault");
 }
 
-void page_map(uint32_t virt, int make, uint32_t flags) {
-    paged_entry_t* paged = &_pd->tabls[PAGE_DIRECTORY_INDEX(virt)];
-    if (paged->present) {
-        page_tabl_t* tabl = paged->addr << 12;
-        page_t* page = tabl[PAGE_TABLE_INDEX(virt)];
-        page->addr = alloc_frame();
-        page->present = 1;
+// get page from page table
+page_t* get_page(uint32_t virt, int make, uint32_t flags) {
+    uint32_t pdidx = PAGE_DIRECTORY_INDEX(virt);
+    ASSERT(pdidx < 1024);
+    page_tabl_t* tabl = _kernel_pd->tabls[pdidx];
+    if (tabl) {
+        return &tabl->pages[PAGE_TABLE_INDEX(virt)];
     } else if (make) {
-        ;
+        // memory before _placement_addr must be identical mapped, so page table always can be accessed
+        uint32_t phys;
+        page_tabl_t* new = (page_tabl_t*)kmalloc_i(sizeof(page_tabl_t), 1, &phys);
+        memset(new, 0, 4096);
+        _kernel_pd->tabls[PAGE_DIRECTORY_INDEX(virt)] = new;
+        paged_entry_t* entry = (paged_entry_t*)&_kernel_pd->entries[PAGE_DIRECTORY_INDEX(virt)];
+        entry->present = 1;
+        entry->rw = 1;
+        entry->addr = phys >> 12;
+        return &new->pages[PAGE_TABLE_INDEX(virt)];
     } else {
-        PANIC("page table not present");
+        return 0;
     }
 }
 
 void mmu_init() {
-    _pd = (page_dir_t*)alloc_frame();
-    memset(_pd, 0x0, sizeof(page_dir_t));
+    _kernel_pd = (page_dir_t*)kmalloc_i(sizeof(page_dir_t), 1, 0);
+    ASSERT(!((uint32_t)_kernel_pd & 0x00000fff));
+    memset(_kernel_pd, 0x0, sizeof(page_dir_t));
 
-    ptr_t phys, virt, i;
+    ptr_t phys, virt;
+    page_t* page;
 
-    page_tabl_t* tabl = alloc_frame();
-    memset(tabl, 0, sizeof(page_tabl_t));
+    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE; virt += 0x1000) {
+        get_page(virt, 1, 0);
+    }
 
-    page_tabl_t* tabl2 = alloc_frame();
-    memset(tabl2, 0, sizeof(page_tabl_t));
-
-    // idenitify map first 4MB
-    for (i = 0, phys = 0x0, virt = 0x0; i < 1024; i++, phys += PAGE_SIZE, virt += PAGE_SIZE) {
-        uint32_t* page = &tabl->pages[PAGE_TABLE_INDEX(virt)];
-        *page = 0;
-        *page |= 0x11;
-        *page |= phys;
+    virt = 0;
+    // idenitify map memory before _placement_addr
+    while (virt < _placement_addr + 0x1000) {
+        page = get_page(virt, 1, 0);
+        ASSERT(page != 0);
+        ASSERT(page->addr == 0);
+        page_identical_map(page, 0, 0, virt);
+        virt += 0x1000;
     }
 
     // map 0x100000 physic to virtual 0xc0000000
-    for (i = 0, phys = 0x100000, virt = 0xc0000000; i < 1024; i++, phys += PAGE_SIZE, virt += PAGE_SIZE) {
-        uint32_t* page = &tabl2->pages[PAGE_TABLE_INDEX(virt)];
-        *page = 0;
-        *page |= 0x11;
-        *page |= phys;
+    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE; virt += 0x1000) {
+        page = get_page(virt, 1, 0);
+        ASSERT(page != 0);
+        page_map(page, 0, 0);
     }
-
-    paged_entry_t* paged = &_pd->tabls[PAGE_DIRECTORY_INDEX(0x00000000)];
-    paged->present = 1;
-    paged->rw = 1;
-    paged->addr = (ptr_t)tabl >> 12;
-
-    page_t* page = &_pd->tabls[PAGE_DIRECTORY_INDEX(0xc0000000)];
-    page->present = 1;
-    page->rw = 1;
-    page->addr = (ptr_t)tabl2 >> 12;
 
     register_interrupt_handler(14, page_fault);
 
-    x86_write_cr3(_pd);
+    x86_write_cr3((uint32_t)&_kernel_pd->entries);
     x86_write_cr0(x86_read_cr0() | (1 << 31));
 
     printk("paging init...");

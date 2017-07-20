@@ -5,8 +5,8 @@
 
 #define PANIC(msg) panic(__FILE__, __LINE__, msg)
 
-extern void panic(const char *file, uint32_t line, const char *msg);
+#define ASSERT(b) ((b) ? (void)0 : panic(__FILE__, __LINE__, #b))
 
-extern ptr_t kmalloc(size_t size);
+extern void panic(const char *file, uint32_t line, const char *msg);
 
 #endif

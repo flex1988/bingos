@@ -21,4 +21,5 @@ void destroy_ordered_array(ordered_array_t* array);
 void insert_ordered_array(type_t item, ordered_array_t* array);
 type_t lookup_ordered_array(uint32_t i, ordered_array_t* array);
 void remove_ordered_array(uint32_t i, ordered_array_t* array);
+ordered_array_t place_ordered_array(void* addr, uint32_t max, comparer_t comparer);
 #endif

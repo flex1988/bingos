@@ -53,13 +53,14 @@ enum PAGE_PDE_FLAGS {
     I86_PDE_FRAME = 0x7FFFF000,
 };
 
-typedef struct { paged_entry_t tabls[1024]; } page_dir_t;
-
 typedef struct { page_t pages[1024]; } page_tabl_t;
 
-void page_init();
+typedef struct {
+    page_tabl_t *tabls[1024]; // virtual page table address
+    paged_entry_t entries[1024]; //page table entry used by cr3
+} page_dir_t;
 
-void *alloc_frames(size_t size);
+void page_init();
 
 void page_fault(registers_t regs);
 #endif

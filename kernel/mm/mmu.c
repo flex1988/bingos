@@ -14,6 +14,7 @@ page_dir_t* _kernel_pd;
 uint32_t _pdbr;
 
 extern ptr_t _placement_addr;
+extern heap_t *kheap;
 
 static inline void enable_paging() {
     uint32_t r;
@@ -75,6 +76,35 @@ page_t* get_page(uint32_t virt, int make, uint32_t flags) {
     }
 }
 
+void page_map(page_t* page, int kernel, int rw) {
+    if (page->addr != 0)
+        return;
+    else {
+        memset(page, 0, sizeof(page_t));
+        page->rw = rw;
+        page->user = kernel ? 0 : 1;
+        page->present = 1;
+        page->addr = alloc_frame();
+    }
+}
+
+void page_unmap(page_t* page) {
+    free_frame(page->addr);
+    memset(page, 0, sizeof(page_t));
+}
+
+void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt) {
+    if (page->addr != 0)
+        return;
+    else {
+        memset(page, 0, sizeof(page_t));
+        page->rw = rw;
+        page->user = kernel ? 0 : 1;
+        page->present = 1;
+        page->addr = virt >> 12;
+    }
+}
+
 void mmu_init() {
     _kernel_pd = (page_dir_t*)kmalloc_i(sizeof(page_dir_t), 1, 0);
     ASSERT(!((uint32_t)_kernel_pd & 0x00000fff));
@@ -108,6 +138,8 @@ void mmu_init() {
 
     x86_write_cr3((uint32_t)&_kernel_pd->entries);
     x86_write_cr0(x86_read_cr0() | (1 << 31));
+
+    kheap = create_heap(KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
 
     printk("paging init...");
 }

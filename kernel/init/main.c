@@ -24,6 +24,9 @@ void kmain(unsigned long addr) {
 
     mmu_init();
 
+    uint32_t b = kmalloc(8);
+    printk("kmalloc 0x%x",b);
+    kfree(b);
     uint32_t *ptr = (uint32_t *)0xA0000000;
     /*uint32_t do_page_fault = *ptr;*/
 

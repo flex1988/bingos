@@ -56,11 +56,17 @@ enum PAGE_PDE_FLAGS {
 typedef struct { page_t pages[1024]; } page_tabl_t;
 
 typedef struct {
-    page_tabl_t *tabls[1024]; // virtual page table address
-    paged_entry_t entries[1024]; //page table entry used by cr3
+    page_tabl_t* tabls[1024];     // virtual page table address
+    paged_entry_t entries[1024];  // page table entry used by cr3
 } page_dir_t;
 
 void page_init();
 
 void page_fault(registers_t regs);
+
+page_t* get_page(uint32_t virt, int make, uint32_t flags);
+
+void page_map(page_t* page, int kernel, int rw);
+void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt);
+void page_unmap(page_t* page);
 #endif

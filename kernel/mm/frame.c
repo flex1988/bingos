@@ -117,6 +117,12 @@ uint32_t alloc_frame() {
     return frame;
 }
 
+void free_frame(uint32_t frame) {
+    bitmap_unset(frame);
+
+    _used_frames--;
+}
+
 uint32_t alloc_frames(size_t size) {
     if (get_frame_count() <= 0) {
         PANIC("no more frames");
@@ -135,30 +141,6 @@ uint32_t alloc_frames(size_t size) {
     _used_frames += size;
 
     return frame;
-}
-
-void page_map(page_t *page, int kernel, int rw) {
-    if (page->addr != 0)
-        return;
-    else {
-        memset(page, 0, sizeof(page_t));
-        /*page->rw = rw;*/
-        /*page->user = kernel ? 0 : 1;*/
-        page->present = 1;
-        page->addr = alloc_frame();
-    }
-}
-
-void page_identical_map(page_t *page, int kernel, int rw, uint32_t virt) {
-    if (page->addr != 0)
-        return;
-    else {
-        memset(page, 0, sizeof(page_t));
-        page->rw = rw;
-        page->user = kernel ? 0 : 1;
-        page->present = 1;
-        page->addr = virt >> 12;
-    }
 }
 
 void frame_init(struct multiboot_info *mbi) {

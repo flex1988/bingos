@@ -8,6 +8,7 @@
 
 #define KHEAP_START 0xc0000000
 #define KHEAP_INITIAL_SIZE 0x100000
+#define HEAP_MIN_SIZE 0x70000
 
 typedef struct {
     uint32_t magic;
@@ -33,8 +34,7 @@ heap_t *create_heap(uint32_t start, uint32_t end, uint32_t max, uint8_t supervis
 
 void *alloc(uint32_t size, uint8_t page_align, heap_t *heap);
 
-void free(void *p, heap_t *heap);
 uint32_t kmalloc_i(uint32_t size, int align, uint32_t *phys);
 uint32_t kmalloc(uint32_t size);
-
+void kfree(void *p);
 #endif

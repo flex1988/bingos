@@ -10,7 +10,8 @@ modules := kernel/init \
 	kernel/vga \
 	libc \
 	hal \
-	lib
+	lib	\
+	fs
 
 obj_dir:= build/objs
 

@@ -13,6 +13,7 @@ void isr_handler(registers_t regs) {
         handler(regs);
     } else {
         printk("unhandled interrupt: %d", regs.int_no);
+        PANIC("unhandled interrupt");
     }
 }
 

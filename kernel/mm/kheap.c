@@ -3,14 +3,17 @@
 #include "lib/ordered_array.h"
 #include "mm/mmu.h"
 
+extern page_dir_t *_kernel_pd;
 heap_t *kheap = 0;
 
 uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
     if (kheap != 0) {
         void *addr = alloc(size, align, kheap);
+
         if (phys) {
             *phys = (uint32_t)get_physaddr((ptr_t)addr);
         }
+        
         return (uint32_t)addr;
     } else {
         return pre_alloc(size, align, phys);
@@ -81,7 +84,7 @@ static void expand(uint32_t new, heap_t *heap) {
 
     uint32_t old = heap->end - heap->start;
     while (old < new) {
-        page_map(get_page(heap->start + old, 1, 0), heap->supervisor ? 1 : 0, heap->readonly ? 0 : 1);
+        page_map(get_page(heap->start + old, 1, _kernel_pd), heap->supervisor ? 1 : 0, heap->readonly ? 0 : 1);
         old += 0x1000;
     }
     heap->end = heap->start + new;
@@ -100,7 +103,7 @@ static uint32_t contract(uint32_t new, heap_t *heap) {
 
     uint32_t old = heap->end - heap->start;
     while (new < old) {
-        page_unmap(get_page(heap->start + old, 0, 0));
+        page_unmap(get_page(heap->start + old, 0, _kernel_pd));
         old -= 0x1000;
     }
     heap->end = heap->start + new;
@@ -164,14 +167,17 @@ void *alloc(uint32_t size, uint8_t align, heap_t *heap) {
     }
 
     if (align && pos & 0xfffff000) {
-        uint32_t location = pos + 0x1000 - pos & 0xfff - sizeof(header_t);
+        uint32_t location = pos + 0x1000 - (pos & 0xfff) - sizeof(header_t);
+        
         header_t *hole_header = (header_t *)pos;
         hole_header->size = 0x1000 - pos & 0xfff - sizeof(header_t);
         hole_header->magic = HEAP_MAGIC;
         hole_header->hole = 1;
+        
         footer_t *hole_footer = (footer_t *)((uint32_t)location - sizeof(footer_t));
         hole_footer->magic = HEAP_MAGIC;
         hole_footer->header = hole_header;
+        
         pos = location;
         hole_size = hole_size - hole_header->size;
     } else {

@@ -15,6 +15,7 @@ SECTIONS
 	   Next we'll put the .text section. */
 	.text BLOCK(4K) : ALIGN(4K)
 	{
+        code = .; _code = .; __code = .;
 		*(.multiboot)
 		*(.text)
 	}
@@ -23,17 +24,13 @@ SECTIONS
 	.data ALIGN(4K) :
 	{
 		*(.data)
-	}
-
-	/* Read-only data. */
-	.rodata ALIGN(4K) :
-	{
-		*(.rodata)
+        *(.rodata)
 	}
 
 	/* Read-write data (uninitialized) and stack */
 	.bss ALIGN(4K) :
 	{
+        bss = .; _bss = .;
 		*(COMMON)
 		*(.bss)
         kernel_end = .;

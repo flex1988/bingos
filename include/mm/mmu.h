@@ -58,15 +58,18 @@ typedef struct { page_t pages[1024]; } page_tabl_t;
 typedef struct {
     page_tabl_t* tabls[1024];     // virtual page table address
     paged_entry_t entries[1024];  // page table entry used by cr3
+    uint32_t physical;
 } page_dir_t;
 
 void page_init();
 
 void page_fault(registers_t regs);
 
-page_t* get_page(uint32_t virt, int make, uint32_t flags);
+page_t* get_page(uint32_t virt, int make, page_dir_t *pd);
 
 void page_map(page_t* page, int kernel, int rw);
 void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt);
 void page_unmap(page_t* page);
+page_dir_t* page_dir_clone(page_dir_t* src);
+page_tabl_t* table_clone(page_tabl_t* src, uint32_t* phys);
 #endif

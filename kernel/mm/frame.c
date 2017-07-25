@@ -152,6 +152,7 @@ void frame_init(struct multiboot_info *mbi) {
         return;
     }
 
+    _placement_addr = *((uint32_t *)(mbi->mods_addr + 4));
     printk("mem_lower = %uKB, mem_upper = %uKB\n", (unsigned)mbi->mem_lower, (unsigned)mbi->mem_upper);
 
     if (!CHECK_FLAG(mbi->flags, 6)) {
@@ -159,23 +160,17 @@ void frame_init(struct multiboot_info *mbi) {
         return;
     }
 
-    _total_memory_size = mbi->mem_lower << 10 + mbi->mem_upper << 10;
-    _max_frames = (uint32_t)(_total_memory_size >> 12);
-    _used_frames = _max_frames;
-
-    // pre_alloc frame bitmap
-    _frame_map = pre_alloc((_max_frames / 8) * sizeof(char), 1, 0);
-
-    memset(_frame_map, 0xff, _used_frames);
-
     multiboot_memory_map_t *mmap;
     for (mmap = (multiboot_memory_map_t *)mbi->mmap_addr; mmap < (multiboot_memory_map_t *)(mbi->mmap_addr + mbi->mmap_length);
-         mmap = (multiboot_memory_map_t *)((unsigned int)mmap + mmap->size + sizeof(unsigned int))) {
-        if (mmap->type == 1) {
-            printk("memory_region_init  base_addr 0x%x%x length: 0x%x%x type: %d", mmap->addr, mmap->len, mmap->type);
-            memory_region_init(mmap->addr, mmap->len);
-        }
+         mmap = (multiboot_memory_map_t *)((unsigned int)mmap + mmap->size + sizeof(mmap->size))) {
+        _total_memory_size += mmap->len;
     }
+
+    _max_frames = (uint32_t)(_total_memory_size >> 12);
+
+    // pre_alloc frame bitmap
+    _frame_map = pre_alloc(_max_frames / 32, 0, 0);
+    memset(_frame_map, 0x0, _max_frames / 8);
 
     printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
 

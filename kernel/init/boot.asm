@@ -15,6 +15,12 @@ align 4
 	dd MAGIC
 	dd FLAGS
 	dd CHECKSUM
+
+[BITS 32]
+
+[EXTERN code]
+[EXTERN bss]
+[EXTERN kernel_end]
  
 ; The multiboot standard does not define the value of the stack pointer register
 ; (esp) and it is up to the kernel to provide a stack. This allocates room for a
@@ -26,15 +32,6 @@ align 4
 ; System V ABI standard and de-facto extensions. The compiler will assume the
 ; stack is properly aligned and failure to align the stack will result in
 ; undefined behavior.
-section .bss
-align 4096
-pagedir:
-	resb 4096
-pagetabl:
-	resb 4096
-stack_bottom:
-resb 16384 ; 16 KiB
-stack_top:
  
 ; The linker script specifies _start as the entry point to the kernel and the
 ; bootloader will jump to this position once the kernel has been loaded. It
@@ -57,10 +54,8 @@ _start:
 	; To set up a stack, we set the esp register to point to the top of our
 	; stack (as it grows downwards on x86 systems). This is necessarily done
 	; in assembly as languages such as C cannot function without a stack.
-	mov esp, stack_top
+	;mov esp, stack_top
 
-	;call setup_pages
-	;call enable_paging
 	; This is a good place to initialize crucial processor state before the
 	; high-level kernel is entered. It's best to minimize the early
 	; environment where crucial features are offline. Note that the
@@ -77,6 +72,7 @@ _start:
 	; stack since (pushed 0 bytes so far) and the alignment is thus
 	; preserved and the call is well defined.
         ; note, that if you are building on Windows, C functions may have "_" prefix in assembly: _kernel_main
+	push esp
 	push ebx
 
 	extern kmain
@@ -92,7 +88,5 @@ _start:
 	;    Since they are disabled, this will lock up the computer.
 	; 3) Jump to the hlt instruction if it ever wakes up due to a
 	;    non-maskable interrupt occurring or due to system management mode.
-	cli
-.hang:	hlt
-	jmp .hang
+	jmp $
 .end:

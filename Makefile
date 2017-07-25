@@ -8,6 +8,7 @@ modules := kernel/init \
 	kernel/print \
 	kernel/mm \
 	kernel/vga \
+	kernel/proc	\
 	libc \
 	hal \
 	lib	\

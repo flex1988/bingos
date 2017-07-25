@@ -4,7 +4,7 @@ CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfil
 
 obj_dir := ../build/objs
 
-target := $(obj_dir)/fs.o
+target := $(obj_dir)/fs.o $(obj_dir)/initrd.o
  
 all: $(target)
 

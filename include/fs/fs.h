@@ -1,7 +1,32 @@
 #ifndef __FS_H__
 #define __FS_H__
 
-typedef struct {
+#include "types.h"
+
+#define VFS_FILE 0x01
+#define VFS_DIRECTORY 0x02
+#define VFS_CHARDEVICE 0x03
+#define VFS_BLOCKDEVICE 0x04
+#define VFS_PIPE 0x05
+#define VFS_SYMLINK 0x06
+#define VFS_MOUNTPOINT 0x08
+
+typedef struct vfs_node_s vfs_node_t;
+typedef struct dirent dirent_t;
+
+typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
+typedef uint32_t (*write_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
+typedef void (*open_type_t)(vfs_node_t *);
+typedef void (*close_type_t)(vfs_node_t *);
+typedef dirent_t *(*readdir_type_t)(vfs_node_t *, uint32_t);
+typedef vfs_node_t *(*finddir_type_t)(vfs_node_t *, char *name);
+
+struct dirent {
+    char name[128];
+    uint32_t ino;
+};
+
+typedef struct vfs_node_s {
     char name[128];
     uint32_t mask;
     uint32_t uid;
@@ -19,11 +44,12 @@ typedef struct {
     vfs_node_t *ptr;
 } vfs_node_t;
 
-typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
-typedef uint32_t (*write_type_t)(struct vfs_node_t *, uint32_t, uint32_t, uint8_t *);
+extern vfs_node_t *vfs_root;
 
-struct dirent {
-    char name[128];
-    uint32_t ino;
-};
+uint32_t vfs_read(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
+uint32_t vfs_write(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
+void vfs_open(vfs_node_t *node, uint8_t read, uint8_t write);
+void vfs_close(vfs_node_t *node);
+dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
+vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
 #endif

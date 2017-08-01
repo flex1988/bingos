@@ -1,8 +1,8 @@
 #include "hal/descriptor.h"
-#include "hal/isr.h"
 #include "hal/common.h"
+#include "hal/isr.h"
 
-static gdt_t _gdt[5];
+static gdt_t _gdt[6];
 static gdtr_t _gdtr;
 
 static idt_t _idt[256];
@@ -12,6 +12,12 @@ extern isr_t _interrupt_handlers[];
 
 extern void gdt_flush(uint32_t);
 extern void idt_flush(uint32_t);
+
+extern void tss_flush();
+
+tss_entry_t tss_entry;
+
+void set_kernel_stack(uint32_t stack) { tss_entry.esp0 = stack; }
 
 static void gdt_install() { asm volatile("lgdt %0" ::"m"(_gdtr)); }
 
@@ -32,11 +38,25 @@ static void idt_set_gate(uint8_t i, uint32_t base, uint16_t selector, uint8_t fl
 
     _idt[i].selector = selector;
     _idt[i].reserved = 0;
-    _idt[i].flags = flags /* | 0x60 */;
+    _idt[i].flags = flags | 0x60;
+}
+
+static void write_tss(int32_t num, uint16_t ss0, uint32_t esp0) {
+    uint32_t base = (uint32_t)&tss_entry;
+    uint32_t limit = base + sizeof(tss_entry_t);
+
+    gdt_set_gate(num, base, limit, 0xe9, 0x00);
+    memset(&tss_entry, 0, sizeof(tss_entry_t));
+
+    tss_entry.ss0 = ss0;
+    tss_entry.esp0 = esp0;
+
+    tss_entry.cs = 0x0b;
+    tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs = 0x13;
 }
 
 static void gdt_init() {
-    _gdtr.limit = sizeof(gdt_t) * 5 - 1;
+    _gdtr.limit = sizeof(gdt_t) * 6 - 1;
     _gdtr.base = (uint32_t)&_gdt;
 
     gdt_set_gate(0, 0, 0, 0, 0);
@@ -45,7 +65,10 @@ static void gdt_init() {
     gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);  // user code segment
     gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);  // user data segment
 
+    write_tss(5, 0x10, 0);
+
     gdt_flush((uint32_t)&_gdtr);
+    tss_flush();
 }
 
 static void idt_init() {
@@ -119,13 +142,13 @@ static void idt_init() {
     idt_set_gate(45, (uint32_t)irq13, 0x08, 0x8E);
     idt_set_gate(46, (uint32_t)irq14, 0x08, 0x8E);
     idt_set_gate(47, (uint32_t)irq15, 0x08, 0x8E);
+    idt_set_gate(128, (uint32_t)isr128, 0x08, 0x8E);
 
     idt_flush((uint32_t)&_idtr);
-
-    memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
 }
 
 void init_descriptor_tables() {
     gdt_init();
     idt_init();
+    memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
 }

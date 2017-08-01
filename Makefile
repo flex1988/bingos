@@ -9,6 +9,7 @@ modules := kernel/init \
 	kernel/mm \
 	kernel/vga \
 	kernel/proc	\
+	kernel/sys	\
 	libc \
 	hal \
 	lib	\

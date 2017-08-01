@@ -11,6 +11,7 @@ typedef struct task {
     uint32_t eip;
     page_dir_t *pd;
     struct task *next;
+    uint32_t kstack;
 } task_t;
 
 void tasking_init();
@@ -22,4 +23,8 @@ int fork();
 void move_stack(uint32_t new_stack_start, uint32_t size);
 
 int getpid();
+
+void switch_to_user_mode();
+
+int say();
 #endif

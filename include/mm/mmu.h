@@ -63,7 +63,7 @@ typedef struct {
 
 void page_init();
 
-void page_fault(registers_t regs);
+void page_fault(registers_t *regs);
 
 page_t* get_page(uint32_t virt, int make, page_dir_t *pd);
 

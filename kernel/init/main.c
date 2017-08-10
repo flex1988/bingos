@@ -10,6 +10,7 @@
 #include "multiboot.h"
 #include "print/printk.h"
 #include "proc/task.h"
+#include "sys/syscall.h"
 #include "vga/vga.h"
 
 extern ptr_t _placement_addr;
@@ -32,6 +33,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     printk("init_descriptor_tables init...");
 
     asm volatile("sti");
+    timer_init(50);
 
     ASSERT(boot_info->mods_count > 0);
 
@@ -47,19 +49,18 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     task_init();
 
-    timer_init(50);
-
     vfs_root = initrd_init(initrd);
     printk("initrd init...");
 
-    int ret = fork();
-    printk("ret eip 0x%x", read_eip());
+    syscalls_init();
+    printk("syscalls init...");
 
-    if (ret == 0) {
-        while (1) printk("AAA");
-    } else {
-        while (1) printk("BBB");
-    }
+    switch_to_user_mode();
+    
+    /*int a;*/
+    /*asm volatile("int $0x80":"=a"(a):"0"(0));*/
+    syscall_say();
+
 
     while (1)
         ;

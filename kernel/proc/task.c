@@ -1,5 +1,6 @@
 #include "proc/task.h"
 #include "kernel.h"
+#include "mm/kheap.h"
 #include "mm/mmu.h"
 
 volatile task_t *_current_task;
@@ -13,12 +14,25 @@ extern uint32_t read_eip();
 
 uint32_t _next_pid = 1;
 
-void print_esp_ebp(char *msg) {
-    uint32_t esp;
-    asm volatile("mov %%esp, %0" : "=r"(esp));
-    uint32_t ebp;
-    asm volatile("mov %%ebp, %0" : "=r"(ebp));
-    printk("%s esp 0x%x, ebp 0x%x", msg, esp, ebp);
+void switch_to_user_mode() {
+    set_kernel_stack(_current_task->kstack + KERNEL_STACK_SIZE);
+
+    asm volatile("\
+            cli;    \
+            mov $0x23, %ax; \
+            mov %ax, %ds;   \
+            mov %ax, %es;   \
+            mov %ax, %fs;   \
+            mov %ax, %gs;   \
+            \
+            mov %esp, %eax; \
+            pushl $0x23;    \
+            pushl %esp;     \
+            pushf;          \
+            pushl $0x1b;    \
+            push $1f;   \
+            iret;   \
+            1: ");
 }
 
 void move_stack(uint32_t new_stack_start, uint32_t size) {
@@ -26,7 +40,7 @@ void move_stack(uint32_t new_stack_start, uint32_t size) {
 
     for (i = new_stack_start - size; i < new_stack_start + 0x1000; i += 0x1000) {
         page_t *p = get_page(i, 1, _current_pd);
-        page_map(p, 1, 1);
+        page_map(p, 0, 1);
     }
 
     // flush the TLB by reading and writing the page directory address again
@@ -72,21 +86,20 @@ void task_init() {
     task->eip = 0;
     task->pd = _current_pd;
     task->next = 0;
-
-    uint32_t esp;
-    asm volatile("mov %%esp, %0" : "=r"(esp));
-    uint32_t ebp;
-    asm volatile("mov %%ebp, %0" : "=r"(ebp));
-    printk("init esp 0x%x, ebp 0x%x", esp, ebp);
-
+    task->kstack = kmalloc_i(KERNEL_STACK_SIZE, 1, 0);
     _current_task = _ready_queue = task;
     asm volatile("sti");
+}
+
+int say() {
+    printk("hello world!");
+    return 0;
 }
 
 int fork() {
     asm volatile("cli");
 
-    task_t *parent = _current_task;
+    task_t *parent = (task_t *)_current_task;
 
     page_dir_t *pd = page_dir_clone(_current_pd);
 
@@ -96,8 +109,9 @@ int fork() {
     new->eip = 0;
     new->pd = pd;
     new->next = 0;
+    _current_task->kstack = kmalloc_i(KERNEL_STACK_SIZE, 1, 0);
 
-    task_t *t = _ready_queue;
+    task_t *t = (task_t *)_ready_queue;
     while (t->next) t = t->next;
     t->next = new;
 
@@ -155,6 +169,8 @@ void task_switch() {
     ebp = _current_task->ebp;
 
     _current_pd = _current_task->pd;
+
+    set_kernel_stack(_current_task->kstack + KERNEL_STACK_SIZE);
 
     asm volatile(
         "         \

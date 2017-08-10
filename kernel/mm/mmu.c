@@ -43,18 +43,18 @@ ptr_t get_physaddr(ptr_t virtualaddr) {
     return page->addr << 12 + offset;
 }
 
-void page_fault(registers_t regs) {
+void page_fault(registers_t *regs) {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
     uint32_t faulting_address;
     asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
     // The error code gives us details of what happened.
-    int present = !(regs.err_code & 0x1);  // Page not present
-    int rw = regs.err_code & 0x2;          // Write operation?
-    int us = regs.err_code & 0x4;          // Processor was in user-mode?
-    int reserved = regs.err_code & 0x8;    // Overwritten CPU-reserved bits of page entry?
-    int id = regs.err_code & 0x10;         // Caused by an instruction fetch?
+    int present = !(regs->err_code & 0x1);  // Page not present
+    int rw = regs->err_code & 0x2;          // Write operation?
+    int us = regs->err_code & 0x4;          // Processor was in user-mode?
+    int reserved = regs->err_code & 0x8;    // Overwritten CPU-reserved bits of page entry?
+    int id = regs->err_code & 0x10;         // Caused by an instruction fetch?
 
     // Output an error message.
     printk("Page fault! ( ) at 0x%x", faulting_address);
@@ -92,7 +92,7 @@ void page_map(page_t* page, int kernel, int rw) {
     } else {
         memset(page, 0, sizeof(page_t));
         page->rw = rw;
-        page->user = kernel ? 0 : 1;
+        page->user = 1;//kernel ? 0 : 1;
         page->present = 1;
         page->addr = alloc_frame();
     }

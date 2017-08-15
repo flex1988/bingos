@@ -14,6 +14,7 @@ modules := kernel/init \
 	hal \
 	lib	\
 	fs	\
+	drivers \
 	tools
 
 obj_dir:= build/objs

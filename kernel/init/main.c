@@ -55,12 +55,13 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     syscalls_init();
     printk("syscalls init...");
 
-    switch_to_user_mode();
-    
+    kbd_init();
+
+    /*switch_to_user_mode();*/
+
     /*int a;*/
     /*asm volatile("int $0x80":"=a"(a):"0"(0));*/
-    syscall_say();
-
+    /*syscall_say();*/
 
     while (1)
         ;

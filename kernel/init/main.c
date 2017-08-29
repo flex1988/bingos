@@ -9,7 +9,6 @@
 #include "mm/mmu.h"
 #include "multiboot.h"
 #include "print/printk.h"
-#include "proc/task.h"
 #include "sys/syscall.h"
 #include "vga/vga.h"
 
@@ -47,7 +46,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     mmu_init();
 
-    task_init();
+    process_init();
 
     vfs_root = initrd_init(initrd);
     printk("initrd init...");

@@ -2,7 +2,7 @@
 #include <types.h>
 #include "hal/common.h"
 #include "hal/isr.h"
-#include "print/printk.h"
+#include "kernel/printk.h"
 
 #define KBD_STATUS_PORT 0x64
 #define KBD_DATA_BUF 0x01

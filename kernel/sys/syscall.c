@@ -1,6 +1,6 @@
-#include "sys/syscall.h"
+#include "kernel/syscall.h"
 #include "hal/isr.h"
-#include "proc/process.h"
+#include "kernel/process.h"
 
 DEFN_SYSCALL0(say, 0);
 

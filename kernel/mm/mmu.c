@@ -3,10 +3,9 @@
 
 #include "hal/isr.h"
 #include "kernel.h"
-#include "mm/frame.h"
-#include "mm/kheap.h"
-#include "mm/mem_layout.h"
-#include "mm/mmu.h"
+#include "kernel/frame.h"
+#include "kernel/kheap.h"
+#include "kernel/mmu.h"
 #include "multiboot.h"
 
 page_dir_t* _kernel_pd = 0;

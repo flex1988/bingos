@@ -1,7 +1,7 @@
 #ifndef __FRAME_H__
 #define __FRAME_H__
 
-#include "mm/mmu.h"
+#include "kernel/mmu.h"
 #include "multiboot.h"
 
 void frame_init(struct multiboot_info *mbi);

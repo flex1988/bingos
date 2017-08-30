@@ -2,7 +2,7 @@
 #define __PROCESS_H__
 
 #include <types.h>
-#include "mm/mmu.h"
+#include "kernel/mmu.h"
 
 #define KSTACK_SIZE 0x2000
 #define USTACK_SIZE 0x10000

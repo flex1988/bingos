@@ -1,16 +1,20 @@
-#include "proc/process.h"
+#include "kernel/process.h"
 #include "kernel.h"
-#include "mm/kheap.h"
-#include "mm/mmu.h"
+#include "kernel/kheap.h"
+#include "kernel/mmu.h"
+#include "kernel/sched.h"
 
-volatile process_t *_current_process;
-volatile process_t *_ready_queue;
+/*volatile process_t *_current_process;*/
+/*volatile process_t *_ready_queue;*/
 
 extern page_dir_t *_kernel_pd;
 extern page_dir_t *_current_pd;
 extern void page_map(page_t *, int, int);
 extern uint32_t _initial_esp;
 extern uint32_t read_eip();
+
+extern process_t *_current_process;
+extern process_t *_ready_queue;
 
 uint32_t _next_pid = 1;
 
@@ -20,7 +24,7 @@ process_t *process_create(process_t *parent) {
     p->uid = 500;
     p->gid = 500;
     p->next = 0;
-    memcpy(p->name,"init",sizeof("init"));
+    memcpy(p->name, "init", sizeof("init"));
 
     p->esp = 0;
     p->ebp = 0;
@@ -122,9 +126,7 @@ int fork() {
     process_t *new = process_create(parent);
     new->pd = page_dir_clone(_current_pd);
 
-    process_t *t = (process_t *)_ready_queue;
-    while (t->next) t = t->next;
-    t->next = new;
+    sched_enqueue(new);
 
     uint32_t eip = read_eip();
 
@@ -198,3 +200,8 @@ void context_switch() {
 }
 
 int getpid() { return _current_process->id; }
+
+int exec(char *path, int argc, char **argv) {
+    int ret = -1;
+    
+}

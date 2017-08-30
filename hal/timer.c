@@ -4,8 +4,8 @@
 #include "hal/isr.h"
 #include "hal/timer.h"
 #include "kernel.h"
-#include "proc/process.h"
-#include "vga/vga.h"
+#include "kernel/process.h"
+#include "kernel/vga.h"
 
 static uint32_t tick = 0;
 

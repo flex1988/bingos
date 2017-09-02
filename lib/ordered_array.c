@@ -1,5 +1,5 @@
 #include "lib/ordered_array.h"
-#include "mm/kheap.h"
+#include "kernel/kheap.h"
 
 int8_t default_comparer(type_t a, type_t b) { return *(uint32_t*)a - *(uint32_t*)b; }
 
@@ -13,8 +13,8 @@ ordered_array_t create_ordered_array(uint32_t max, comparer_t comparer) {
 }
 
 void destroy_ordered_array(ordered_array_t* arr) {
-    ;//kfree(arr->array);
-    //kfree(arr);
+    ;  // kfree(arr->array);
+    // kfree(arr);
 }
 
 void insert_ordered_array(type_t item, ordered_array_t* arr) {

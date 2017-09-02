@@ -1,4 +1,4 @@
-#include "vga/vga.h"
+#include "kernel/vga.h"
 #include "hal/common.h"
 #include "kernel.h"
 #include "types.h"

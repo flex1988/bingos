@@ -1,7 +1,7 @@
-#include "mm/kheap.h"
+#include "kernel/kheap.h"
 #include "kernel.h"
+#include "kernel/mmu.h"
 #include "lib/ordered_array.h"
-#include "mm/mmu.h"
 
 extern page_dir_t *_kernel_pd;
 heap_t *kheap = 0;
@@ -13,7 +13,7 @@ uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
         if (phys) {
             *phys = (uint32_t)get_physaddr((ptr_t)addr);
         }
-        
+
         return (uint32_t)addr;
     } else {
         return pre_alloc(size, align, phys);
@@ -168,16 +168,16 @@ void *alloc(uint32_t size, uint8_t align, heap_t *heap) {
 
     if (align && pos & 0xfffff000) {
         uint32_t location = pos + 0x1000 - (pos & 0xfff) - sizeof(header_t);
-        
+
         header_t *hole_header = (header_t *)pos;
         hole_header->size = 0x1000 - pos & 0xfff - sizeof(header_t);
         hole_header->magic = HEAP_MAGIC;
         hole_header->hole = 1;
-        
+
         footer_t *hole_footer = (footer_t *)((uint32_t)location - sizeof(footer_t));
         hole_footer->magic = HEAP_MAGIC;
         hole_footer->header = hole_header;
-        
+
         pos = location;
         hole_size = hole_size - hole_header->size;
     } else {

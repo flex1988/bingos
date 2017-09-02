@@ -4,14 +4,14 @@
 #include "hal/isr.h"
 #include "hal/timer.h"
 #include "kernel.h"
-#include "proc/task.h"
-#include "vga/vga.h"
+#include "kernel/process.h"
+#include "kernel/vga.h"
 
 static uint32_t tick = 0;
 
 static void timer_callback(registers_t *regs) {
     tick++;
-    task_switch();
+    context_switch();
 }
 
 void timer_init(uint32_t frequency) {

@@ -1,8 +1,8 @@
 #include <types.h>
 
 #include "kernel.h"
-#include "mm/frame.h"
-#include "mm/mmu.h"
+#include "kernel/frame.h"
+#include "kernel/mmu.h"
 
 #define CHECK_FLAG(flags, bit) ((flags) & (1 << (bit)))
 #define FRAME_SIZE 4096

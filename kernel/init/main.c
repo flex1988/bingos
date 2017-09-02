@@ -5,13 +5,12 @@
 #include "hal/descriptor.h"
 #include "hal/timer.h"
 #include "kernel.h"
-#include "mm/frame.h"
-#include "mm/mmu.h"
+#include "kernel/frame.h"
+#include "kernel/mmu.h"
+#include "kernel/printk.h"
+#include "kernel/syscall.h"
+#include "kernel/vga.h"
 #include "multiboot.h"
-#include "print/printk.h"
-#include "proc/task.h"
-#include "sys/syscall.h"
-#include "vga/vga.h"
 
 extern ptr_t _placement_addr;
 extern vfs_node_t *vfs_root;
@@ -19,6 +18,11 @@ extern vfs_node_t *vfs_root;
 extern uint32_t _ip;
 
 uint32_t _initial_esp;
+
+
+static void init(void){
+    
+}
 
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
@@ -47,7 +51,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     mmu_init();
 
-    task_init();
+    process_init();
 
     vfs_root = initrd_init(initrd);
     printk("initrd init...");
@@ -57,11 +61,15 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     kbd_init();
 
+    // logo();
+
     /*switch_to_user_mode();*/
 
-    /*int a;*/
-    /*asm volatile("int $0x80":"=a"(a):"0"(0));*/
-    /*syscall_say();*/
+    // run();
+    //
+    if (!fork()) {
+        ;//exec();
+    }
 
     while (1)
         ;

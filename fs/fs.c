@@ -1,4 +1,5 @@
 #include "fs/fs.h"
+#include "kernel.h"
 
 vfs_node_t* vfs_root = 0;
 
@@ -41,10 +42,19 @@ vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
 
 vfs_node_t* vfs_lookup(const char* path, int type) {
     char* dup = NULL;
-    vfs_node_t n = NULL;
-    vfs_node_t c = NULL;
+    vfs_node_t *n = NULL;
+    vfs_node_t *c = NULL;
 
+    // only support absolute path
     ASSERT(path[0] == '/');
+
+    c = vfs_root;
+
+    dup = kmalloc(strlen(path) + 1);
+
+    strcpy(dup, path);
+
+    // n = vfs_lookup_internal(c,dup);
 
     return n;
 }

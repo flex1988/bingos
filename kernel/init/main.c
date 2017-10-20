@@ -19,9 +19,20 @@ extern uint32_t _ip;
 
 uint32_t _initial_esp;
 
+static void init(void) {}
 
-static void init(void){
-    
+static void message() {
+    clear_screen();
+    printk(
+        "       _                _\n"
+        " _ __ | |__   ___ _ __ (_)_  __\n"
+        "| '_ \\| '_ \\ / _ \\ '_ \\| \\ \\/ /\n"
+        "| |_) | | | |  __/ | | | |>  <\n"
+        "| .__/|_| |_|\\___|_| |_|_/_/\\_\\\n"
+        "|_|\n");
+    printk("This is a mini x86 kernel\n");
+    printk("Author: flex1988, gao_chenfei@163.com, beijing China\n");
+    printk("2017.10.20\n");
 }
 
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
@@ -61,15 +72,17 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     kbd_init();
 
-    // logo();
-
     /*switch_to_user_mode();*/
 
     // run();
     //
+    message();
+
     if (!fork()) {
-        ;//exec();
+        ;  // exec();
     }
+
+    
 
     while (1)
         ;

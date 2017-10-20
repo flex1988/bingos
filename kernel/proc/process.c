@@ -201,7 +201,4 @@ void context_switch() {
 
 int getpid() { return _current_process->id; }
 
-int exec(char *path, int argc, char **argv) {
-    int ret = -1;
-    
-}
+int exec(char *path, int argc, char **argv) { int ret = -1; }

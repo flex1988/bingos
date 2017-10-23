@@ -31,8 +31,8 @@ static void message() {
         "| .__/|_| |_|\\___|_| |_|_/_/\\_\\\n"
         "|_|\n");
     printk("This is a mini x86 kernel\n");
-    printk("Author: flex1988, gao_chenfei@163.com, beijing China\n");
-    printk("2017.10.20\n");
+    printk("Author: flex1988 <gao_chenfei@163.com> beijing China\n");
+    printk("On 2017.10.20\n");
 }
 
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
@@ -79,10 +79,8 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     message();
 
     if (!fork()) {
-        ;  // exec();
+        exec("/bin/hello", 0, NULL);
     }
-
-    
 
     while (1)
         ;

@@ -3,6 +3,34 @@
 
 vfs_node_t* vfs_root = 0;
 
+static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path) {
+    char* dir = NULL;
+    int ret;
+
+    while (path[0] == '/') path++;
+
+    if (!path[0])
+        return n;
+
+    while (1) {
+        dir = path;
+
+        if (path) {
+            path = strchr(path, '/');
+            if (path) {
+                path[0] = '\0';
+                path++;
+            }
+        }
+
+        if (!dir) {
+            return n;
+        }
+
+        n = vfs_finddir(n, dir);
+    }
+}
+
 uint32_t vfs_read(vfs_node_t* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
     if (node->read)
         return node->read(node, offset, size, buffer);
@@ -42,19 +70,22 @@ vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
 
 vfs_node_t* vfs_lookup(const char* path, int type) {
     char* dup = NULL;
-    vfs_node_t *n = NULL;
-    vfs_node_t *c = NULL;
+    vfs_node_t* n = NULL;
+    vfs_node_t* c = NULL;
 
-    // only support absolute path
+    // support absolute path only
     ASSERT(path[0] == '/');
 
     c = vfs_root;
+    // ref
 
     dup = kmalloc(strlen(path) + 1);
 
     strcpy(dup, path);
 
-    // n = vfs_lookup_internal(c,dup);
+    n = vfs_lookup_internal(c, dup);
+
+    kfree(dup);
 
     return n;
 }

@@ -3,6 +3,7 @@
 #include "kernel/kheap.h"
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
+#include "fs/fs.h"
 
 /*volatile process_t *_current_process;*/
 /*volatile process_t *_ready_queue;*/
@@ -201,4 +202,13 @@ void context_switch() {
 
 int getpid() { return _current_process->id; }
 
-int exec(char *path, int argc, char **argv) { int ret = -1; }
+int exec(char *path, int argc, char **argv) {
+    int ret = -1;
+    vfs_node_t *n;
+
+    n = vfs_lookup(path, 0);
+
+    printk("%x", n);
+
+    return -1;
+}

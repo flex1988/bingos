@@ -1,14 +1,13 @@
 #include <stdio.h>
 
 struct initrd_header {
-    unsigned char magic; // The magic number is there to check for consistency.
+    unsigned char magic;  // The magic number is there to check for consistency.
     char name[64];
-    unsigned int offset; // Offset in the initrd the file starts.
-    unsigned int length; // Length of the file.
+    unsigned int offset;  // Offset in the initrd the file starts.
+    unsigned int length;  // Length of the file.
 };
 
-int main(char argc, char** argv)
-{
+int main(char argc, char** argv) {
     int nheaders = (argc - 1) / 2;
     struct initrd_header headers[64];
     printf("size of header: %d\n", sizeof(struct initrd_header));

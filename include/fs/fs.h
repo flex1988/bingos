@@ -52,4 +52,5 @@ void vfs_open(vfs_node_t *node, uint8_t read, uint8_t write);
 void vfs_close(vfs_node_t *node);
 dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
 vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
+vfs_node_t *vfs_lookup(const char *path, int type);
 #endif

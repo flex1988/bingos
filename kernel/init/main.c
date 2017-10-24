@@ -79,7 +79,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     message();
 
     if (!fork()) {
-        exec("/bin/hello", 0, NULL);
+        exec("/init", 0, NULL);
     }
 
     while (1)

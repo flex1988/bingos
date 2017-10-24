@@ -2,7 +2,7 @@ obj_dir := ../../build/objs
 
 include ../Makefile.config
 
-target := $(obj_dir)/process.o $(obj_dir)/misc.o $(obj_dir)/sched.o
+target := $(obj_dir)/process.o $(obj_dir)/misc.o $(obj_dir)/sched.o $(obj_dir)/elf.o
 
 all: $(target)
 

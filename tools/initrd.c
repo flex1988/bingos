@@ -7,11 +7,14 @@ struct initrd_header {
     unsigned int length;  // Length of the file.
 };
 
-int main(char argc, char** argv) {
+int main(int argc, char** argv) {
     int nheaders = (argc - 1) / 2;
+
     struct initrd_header headers[64];
     printf("size of header: %d\n", sizeof(struct initrd_header));
+
     unsigned int off = sizeof(struct initrd_header) * 64 + sizeof(int);
+
     int i;
     for (i = 0; i < nheaders; i++) {
         printf("writing file %s->%s at 0x%x\n", argv[i * 2 + 1], argv[i * 2 + 2], off);

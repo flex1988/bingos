@@ -156,11 +156,9 @@ page_dir_t* page_dir_clone(page_dir_t* src) {
             continue;
 
         if (_kernel_pd->tabls[i] == src->tabls[i]) {
-            printk("link table %d", i);
             dir->tabls[i] = src->tabls[i];
             dir->entries[i] = src->entries[i];
         } else {
-            printk("clone table %d", i);
             uint32_t tabl_phys;
             dir->tabls[i] = table_clone(src->tabls[i], &tabl_phys);
             paged_entry_t* entry = &dir->entries[i];

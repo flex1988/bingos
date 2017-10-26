@@ -20,7 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ===============================================================================
 */
+
+#ifndef __ELF_H__
+#define __ELF_H__
+
 #include <stdint.h>
+#include <types.h>
+
 #define ELF_MAGIC 0x464C457FU  // "\x7FELF" in little endian
 /* e_type definitions */
 #define ET_NONE 0
@@ -30,7 +36,7 @@ SOFTWARE.
 #define ET_CORE 4  // Core file
 #define EM_386 3   // Intel x86
 typedef struct {
-    uint32_t e_ident[4];  /* Magic number and other info */
+    unsigned char e_ident[16];  /* Magic number and other info */
     uint16_t e_type;      /* Object file type */
     uint16_t e_machine;   /* Architecture */
     uint32_t e_version;   /* Object file version */
@@ -98,3 +104,17 @@ typedef struct {
 #define STT_FUNC 2
 #define STT_SECTION 3
 #define STT_FILE 4
+
+#define ELF_LITTLE_ENDIAN 1
+#define ELF_BIG_ENDIAN 2
+
+#define ELF_EI_CLASS 4
+#define ELF_EI_DATA 5
+#define ELF_EI_VERSION 6
+
+#define ELF_CLASS32 1
+#define ELF_CLASS64 2
+
+bool_t elf_ehdr_check(elf32_ehdr *ehdr);
+
+#endif

@@ -91,7 +91,7 @@ void page_map(page_t* page, int kernel, int rw) {
     } else {
         memset(page, 0, sizeof(page_t));
         page->rw = rw;
-        page->user = 1;//kernel ? 0 : 1;
+        page->user = kernel ? 0 : 1;
         page->present = 1;
         page->addr = alloc_frame();
     }

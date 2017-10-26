@@ -1,10 +1,10 @@
 #include "kernel/process.h"
 #include "fs/fs.h"
 #include "kernel.h"
+#include "kernel/elf.h"
 #include "kernel/kheap.h"
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
-#include "kernel/elf.h"
 
 /*volatile process_t *_current_process;*/
 /*volatile process_t *_ready_queue;*/
@@ -225,7 +225,12 @@ int exec(char *path, int argc, char **argv) {
     ehdr = (elf32_ehdr *)0x30000000;
 
     ret = vfs_read(n, 0, n->length, (uint8_t *)ehdr);
-    ASSERT(ret);
+    ASSERT(ret >= sizeof(elf32_ehdr));
+
+    if (!elf_ehdr_check(ehdr)) {
+        printk("invalid elf header");
+        return -1;
+    }
 
     return -1;
 }

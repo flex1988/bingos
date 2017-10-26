@@ -1,9 +1,10 @@
 #include "kernel/process.h"
+#include "fs/fs.h"
 #include "kernel.h"
+#include "kernel/elf.h"
 #include "kernel/kheap.h"
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
-#include "fs/fs.h"
 
 /*volatile process_t *_current_process;*/
 /*volatile process_t *_ready_queue;*/
@@ -205,10 +206,31 @@ int getpid() { return _current_process->id; }
 int exec(char *path, int argc, char **argv) {
     int ret = -1;
     vfs_node_t *n;
+    elf32_ehdr *ehdr;
 
     n = vfs_lookup(path, 0);
 
-    printk("%x", n);
+    ASSERT(n);
+
+    ptr_t virt;
+    page_t *page;
+
+    for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
+        page = get_page(virt, 1, _current_pd);
+        ASSERT(page);
+
+        page_map(page, 1, 1);
+    }
+
+    ehdr = (elf32_ehdr *)0x30000000;
+
+    ret = vfs_read(n, 0, n->length, (uint8_t *)ehdr);
+    ASSERT(ret >= sizeof(elf32_ehdr));
+
+    if (!elf_ehdr_check(ehdr)) {
+        printk("invalid elf header");
+        return -1;
+    }
 
     return -1;
 }

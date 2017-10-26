@@ -11,4 +11,7 @@ extern void panic(const char *file, uint32_t line, const char *msg);
 
 #define NULL 0
 
+#define true 1
+#define false 0
+
 #endif

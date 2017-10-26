@@ -16,6 +16,7 @@ static uint32_t initrd_read(vfs_node_t *node, uint32_t offset, uint32_t size, ui
         return 0;
     if (offset + size > header.length)
         size = header.length - offset;
+
     memcpy(buffer, (uint8_t *)(header.offset + offset), size);
     return size;
 }

@@ -91,7 +91,7 @@ void page_map(page_t* page, int kernel, int rw) {
     } else {
         memset(page, 0, sizeof(page_t));
         page->rw = rw;
-        page->user = 1;//kernel ? 0 : 1;
+        page->user = kernel ? 0 : 1;
         page->present = 1;
         page->addr = alloc_frame();
     }
@@ -156,11 +156,9 @@ page_dir_t* page_dir_clone(page_dir_t* src) {
             continue;
 
         if (_kernel_pd->tabls[i] == src->tabls[i]) {
-            printk("link table %d", i);
             dir->tabls[i] = src->tabls[i];
             dir->entries[i] = src->entries[i];
         } else {
-            printk("clone table %d", i);
             uint32_t tabl_phys;
             dir->tabls[i] = table_clone(src->tabls[i], &tabl_phys);
             paged_entry_t* entry = &dir->entries[i];

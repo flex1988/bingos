@@ -15,6 +15,7 @@ modules := kernel/init \
 	lib	\
 	fs	\
 	drivers \
+	userspace	\
 	tools
 
 obj_dir:= build/objs
@@ -35,6 +36,7 @@ all: $(modules) $(kernel) $(iso)
 
 $(modules): Makefile
 	test -d build/objs || mkdir -p build/objs
+	test -d build/bin || mkdir -p build/bin
 	cd $@ && $(MAKE) $(MFLAGS)
 
 $(kernel): $(obj_files) $(linker_script) 

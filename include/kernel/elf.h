@@ -36,20 +36,20 @@ SOFTWARE.
 #define ET_CORE 4  // Core file
 #define EM_386 3   // Intel x86
 typedef struct {
-    unsigned char e_ident[16];  /* Magic number and other info */
-    uint16_t e_type;      /* Object file type */
-    uint16_t e_machine;   /* Architecture */
-    uint32_t e_version;   /* Object file version */
-    uint32_t e_entry;     /* Entry point virtual address */
-    uint32_t e_phoff;     /* Program header table file offset */
-    uint32_t e_shoff;     /* Section header table file offset */
-    uint32_t e_flags;     /* Processor-specific flags */
-    uint16_t e_ehsize;    /* ELF header size in bytes */
-    uint16_t e_phentsize; /* Program header table entry size */
-    uint16_t e_phnum;     /* Program header table entry count */
-    uint16_t e_shentsize; /* Section header table entry size */
-    uint16_t e_shnum;     /* Section header table entry count */
-    uint16_t e_shstrndx;  /* Section header string table index */
+    unsigned char e_ident[16]; /* Magic number and other info */
+    uint16_t e_type;           /* Object file type */
+    uint16_t e_machine;        /* Architecture */
+    uint32_t e_version;        /* Object file version */
+    uint32_t e_entry;          /* Entry point virtual address */
+    uint32_t e_phoff;          /* Program header table file offset */
+    uint32_t e_shoff;          /* Section header table file offset */
+    uint32_t e_flags;          /* Processor-specific flags */
+    uint16_t e_ehsize;         /* ELF header size in bytes */
+    uint16_t e_phentsize;      /* Program header table entry size */
+    uint16_t e_phnum;          /* Program header table entry count */
+    uint16_t e_shentsize;      /* Section header table entry size */
+    uint16_t e_shnum;          /* Section header table entry count */
+    uint16_t e_shstrndx;       /* Section header string table index */
 } elf32_ehdr;
 #define SHT_NULL 0     /* inactive */
 #define SHT_PROGBITS 1 /* Program defined */
@@ -116,5 +116,6 @@ typedef struct {
 #define ELF_CLASS64 2
 
 bool_t elf_ehdr_check(elf32_ehdr *ehdr);
+bool_t elf_load_sections(elf32_ehdr *ehdr);
 
 #endif

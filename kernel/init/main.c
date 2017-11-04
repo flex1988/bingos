@@ -30,8 +30,8 @@ static void message() {
         "| |_) | | | |  __/ | | | |>  <\n"
         "| .__/|_| |_|\\___|_| |_|_/_/\\_\\\n"
         "|_|\n");
-    printk("This is a mini x86 kernel\n");
-    printk("Author: flex1988 <gao_chenfei@163.com> beijing China\n");
+    printk("This is a mini x86 kernel");
+    printk("Author: flex1988 <gao_chenfei@163.com> beijing China");
     printk("On 2017.10.20\n");
 }
 
@@ -72,14 +72,12 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     kbd_init();
 
-    /*switch_to_user_mode();*/
-
-    // run();
-    //
     message();
 
-    if (!fork()) {
+    if (fork() == 0) {
         exec("/init", 0, NULL);
+    } else {
+        context_switch();
     }
 
     while (1)

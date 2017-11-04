@@ -4,6 +4,8 @@ iso := build/os-$(arch).iso
 
 kernel := build/kernel-$(arch).bin
 
+libc := build/libc.a
+
 modules := kernel/init \
 	kernel/print \
 	kernel/mm \
@@ -40,7 +42,7 @@ $(modules): Makefile
 	cd $@ && $(MAKE) $(MFLAGS)
 
 $(kernel): $(obj_files) $(linker_script) 
-	$(CC) -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o)
+	$(CC) -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub

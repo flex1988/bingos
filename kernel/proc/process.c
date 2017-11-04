@@ -40,26 +40,30 @@ process_t *process_create(process_t *parent) {
     p->status = 0;
 }
 
-void switch_to_user_mode() {
+void switch_to_user_mode(uint32_t location, uint32_t ustack) {
+    printk("switch user mode 0x%x 0x%x", location, ustack);
     set_kernel_stack(_current_process->kstack + KERNEL_STACK_SIZE);
 
     asm volatile(
-        "\
-            cli;    \
-            mov $0x23, %ax; \
-            mov %ax, %ds;   \
-            mov %ax, %es;   \
-            mov %ax, %fs;   \
-            mov %ax, %gs;   \
-            \
-            mov %esp, %eax; \
-            pushl $0x23;    \
-            pushl %esp;     \
-            pushf;          \
-            pushl $0x1b;    \
-            push $1f;   \
-            iret;   \
-            1: ");
+        "cli\n"
+        "mov %1, %%esp\n"
+        "mov $0x23, %%ax\n" /* Segment selector */
+        "mov %%ax, %%ds\n"
+        "mov %%ax, %%es\n"
+        "mov %%ax, %%fs\n"
+        "mov %%ax, %%gs\n"
+        "mov %%esp, %%eax\n" /* Move stack to EAX */
+        "pushl $0x23\n"      /* Segment selector again */
+        "pushl %%eax\n"
+        "pushf\n"     /* Push flags */
+        "pop %%eax\n" /* Enable the interrupt flag */
+        "orl $0x200, %%eax\n"
+        "push %%eax\n"
+        "pushl $0x1B\n"
+        "pushl %0\n" /* Push the entry point */
+        "iret\n" ::"m"(location),
+        "r"(ustack)
+        : "%ax", "%esp", "%eax");
 }
 
 void move_stack(uint32_t new_stack_start, uint32_t size) {
@@ -213,6 +217,7 @@ int exec(char *path, int argc, char **argv) {
     ASSERT(n);
 
     ptr_t virt;
+    ptr_t entry;
     page_t *page;
 
     for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
@@ -231,6 +236,32 @@ int exec(char *path, int argc, char **argv) {
         printk("invalid elf header");
         return -1;
     }
+
+    if (!elf_load_sections(ehdr)) {
+        printk("load elf sections error");
+        return -1;
+    }
+
+    entry = ehdr->e_entry;
+    printk("entry point 0x%x", entry);
+
+    // free user mode stack and file
+    for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
+        page = get_page(virt, 0, _current_pd);
+        ASSERT(page);
+        page_unmap(page);
+    }
+
+    for (virt = USTACK_BOTTOM; virt <= (USTACK_BOTTOM + USTACK_SIZE); virt += PAGE_SIZE) {
+        page = get_page(virt, 1, _current_pd);
+        ASSERT(page);
+
+        page_map(page, 0, 1);
+    }
+
+    _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
+
+    switch_to_user_mode(entry, _current_process->ustack);
 
     return -1;
 }

@@ -1,8 +1,6 @@
 #ifndef __SYSCALL_H__
 #define __SYSCALL_H__
 
-#include "kernel.h"
-
 void syscalls_init();
 
 #define DECL_SYSCALL0(fn) int syscall_##fn();
@@ -20,5 +18,14 @@ int syscall_##fn() \
   return a; \
 }
 
+#define DEFN_SYSCALL1(fn,num,P1)   \
+int syscall_##fn(P1 p1)  { \
+int a;  \
+asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1));  \
+return a; }  \
+
+
 DECL_SYSCALL0(say);
+DECL_SYSCALL1(exit,int);
+DECL_SYSCALL1(println,const char *);
 #endif

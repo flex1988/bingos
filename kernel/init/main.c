@@ -8,7 +8,6 @@
 #include "kernel/frame.h"
 #include "kernel/mmu.h"
 #include "kernel/printk.h"
-#include "kernel/syscall.h"
 #include "kernel/vga.h"
 #include "multiboot.h"
 
@@ -76,6 +75,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     if (fork() == 0) {
         exec("/init", 0, NULL);
+        printk("hello");
     } else {
         context_switch();
     }

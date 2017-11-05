@@ -32,16 +32,26 @@ process_t *process_create(process_t *parent) {
     p->ebp = 0;
     p->eip = 0;
 
-    p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0) + KSTACK_SIZE;
-    memset((void *)p->kstack, 0, KSTACK_SIZE);
+    if (parent) {
+        p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0) + KSTACK_SIZE;
+        memset((void *)p->kstack, 0, KSTACK_SIZE);
 
-    p->ustack = 0;
+        p->ustack = parent->ustack;
+    } else {
+        p->ustack = 0;
+    }
 
     p->status = 0;
 }
 
+void process_exit(int ret) {
+    _current_process->status = ret;
+    _current_process->state = PROCESS_FINISHED;
+
+    context_switch();
+}
+
 void switch_to_user_mode(uint32_t location, uint32_t ustack) {
-    printk("switch user mode 0x%x 0x%x", location, ustack);
     set_kernel_stack(_current_process->kstack + KERNEL_STACK_SIZE);
 
     asm volatile(
@@ -243,7 +253,6 @@ int exec(char *path, int argc, char **argv) {
     }
 
     entry = ehdr->e_entry;
-    printk("entry point 0x%x", entry);
 
     // free user mode stack and file
     for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
@@ -263,5 +272,6 @@ int exec(char *path, int argc, char **argv) {
 
     switch_to_user_mode(entry, _current_process->ustack);
 
+    printk("exec end");
     return -1;
 }

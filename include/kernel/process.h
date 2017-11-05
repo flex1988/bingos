@@ -14,6 +14,8 @@
 
 #define MAX_THREAD 5
 
+#define PROCESS_FINISHED 0
+
 typedef struct process_s process_t;
 
 typedef struct process_s {
@@ -38,6 +40,7 @@ typedef struct process_s {
 
     process_t *next;
     page_dir_t *pd;
+    registers_t *syscall_regs;
     // thread threads[MAX_THREAD];
 } process_t;
 

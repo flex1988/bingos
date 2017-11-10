@@ -22,10 +22,18 @@ int syscall_##fn() \
 int syscall_##fn(P1 p1)  { \
 int a;  \
 asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1));  \
-return a; }  \
+return a; } 
+
+#define DEFN_SYSCALL3(fn,num,P1,P2,P3)   \
+int syscall_##fn(P1 p1,P2 p2,P3 p3)  { \
+int a;  \
+asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1),"c"((int)p2),"d"((int)p3));  \
+return a; } 
 
 
 DECL_SYSCALL0(say);
+DECL_SYSCALL3(exec,char *,int,char **);
+DECL_SYSCALL0(fork);
 DECL_SYSCALL1(exit,int);
 DECL_SYSCALL1(println,const char *);
 #endif

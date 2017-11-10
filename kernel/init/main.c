@@ -8,6 +8,7 @@
 #include "kernel/frame.h"
 #include "kernel/mmu.h"
 #include "kernel/printk.h"
+#include "kernel/process.h"
 #include "kernel/vga.h"
 #include "multiboot.h"
 
@@ -20,6 +21,8 @@ uint32_t _initial_esp;
 
 static void init(void) {}
 
+extern process_t *_current_process;
+
 static void message() {
     clear_screen();
     printk(
@@ -30,7 +33,7 @@ static void message() {
         "| .__/|_| |_|\\___|_| |_|_/_/\\_\\\n"
         "|_|\n");
     printk("This is a mini x86 kernel");
-    printk("Author: flex1988 <gao_chenfei@163.com> beijing China");
+    printk("Author: github.com/flex1988 <gao_chenfei@163.com> beijing China");
     printk("On 2017.10.20\n");
 }
 
@@ -73,9 +76,8 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     message();
 
-    if (fork() == 0) {
-        exec("/init", 0, NULL);
-        printk("hello");
+    if (sys_fork() == 0) {
+        sys_exec("/init", 0, NULL);
     } else {
         context_switch();
     }

@@ -52,5 +52,9 @@ $(iso): $(kernel) $(grub_cfg) $(modules)
 	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles
 
+run:
+	dd if=build/os-x86_64.iso of=build/os.img bs=512 count=1 conv=notrunc
+	bochs -q -f bochsrc.txt
+
 clean:
 	@rm -rf build

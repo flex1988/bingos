@@ -8,21 +8,23 @@ uint32_t nsyscalls = 6;
 extern process_t *_current_process;
 
 static void syscall_handler(registers_t *regs);
+
 static int exit(int ret);
 
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
 
-static void *syscalls[6] = {&println, NULL, NULL, NULL, NULL, exit};
+static void *syscalls[6] = {&println, &sys_exec, NULL, &sys_fork, NULL, &exit};
 
 void syscall_handler(registers_t *regs) {
     if (regs->eax >= nsyscalls)
         return;
 
     void *location = syscalls[regs->eax];
+    printk("syscall %d", regs->eax);
 
     int ret;
-
     _current_process->syscall_regs = regs;
+
     asm volatile(
         "\
             push %1;    \
@@ -45,7 +47,10 @@ void syscall_handler(registers_t *regs) {
 }
 
 // must not return ,switch process instead
-int exit(int ret) {
+static int exit(int ret) {
+    printk("exit");
+    process_exit(ret);
+
     while (1)
         ;
     return ret;

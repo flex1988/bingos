@@ -14,7 +14,9 @@
 
 #define MAX_THREAD 5
 
-#define PROCESS_FINISHED 0
+#define PROCESS_READY 0
+#define PROCESS_RUNING 1
+#define PROCESS_FINISHED 2
 
 typedef struct process_s process_t;
 
@@ -26,6 +28,7 @@ typedef struct process_s {
 
     int priority;
     int state;
+    int interrupt;
 
     int flags;
     char name[32];
@@ -52,7 +55,7 @@ void process_init();
 
 void context_switch();
 
-int fork();
+int sys_fork();
 
 void move_stack(uint32_t new_stack_start, uint32_t size);
 
@@ -61,5 +64,7 @@ int getpid();
 void switch_to_user_mode(uint32_t location, uint32_t ustack);
 
 int say();
+
+int sys_exec(char *path, int argc, char **argv);
 
 #endif

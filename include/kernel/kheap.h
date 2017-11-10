@@ -10,8 +10,6 @@
 #define KHEAP_INITIAL_SIZE 0x100000
 #define HEAP_MIN_SIZE 0x70000
 
-#define KERNEL_STACK_SIZE 0x2000
-
 typedef struct {
     uint32_t magic;
     uint8_t hole;

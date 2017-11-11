@@ -22,7 +22,7 @@ modules := kernel/init \
 
 obj_dir:= build/objs
 
-CFLAGS_global := -Wall -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D__KERNEL__ 
+CFLAGS_global := -Wall -g -nostdlib -nostdinc -fno-builtin -fno-stack-protector -D__KERNEL__ 
 
 CC = /root/opt/cross/bin/i686-elf-gcc
 
@@ -48,9 +48,14 @@ $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub
 	cp $(kernel) build/isofiles/boot/kernel.bin
 	cp $(grub_cfg) build/isofiles/boot/grub
-	mv $(initrd) build/isofiles/boot/initrd.img
+	cp $(initrd) build/isofiles/boot/initrd.img
+	cp $(initrd) build/initrd.img
 	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles
+
+run:
+	dd if=build/os-x86_64.iso of=build/os.img bs=512 count=1 conv=notrunc
+	bochs -q -f bochsrc.txt
 
 clean:
 	@rm -rf build

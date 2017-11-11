@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
     }
 
     FILE* wstream = fopen("./initrd.img", "w");
-    unsigned char* data = (unsigned char*)malloc(off);
     fwrite(&nheaders, sizeof(int), 1, wstream);
     fwrite(headers, sizeof(struct initrd_header), 64, wstream);
 
@@ -47,7 +46,6 @@ int main(int argc, char** argv) {
     }
 
     fclose(wstream);
-    free(data);
 
     return 0;
 }

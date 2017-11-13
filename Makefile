@@ -42,20 +42,18 @@ $(modules): Makefile
 	cd $@ && $(MAKE) $(MFLAGS)
 
 $(kernel): $(obj_files) $(linker_script) 
-	$(CC) -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
+	$(CC) -g -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub
 	cp $(kernel) build/isofiles/boot/kernel.bin
 	cp $(grub_cfg) build/isofiles/boot/grub
 	cp $(initrd) build/isofiles/boot/initrd.img
-	cp $(initrd) build/initrd.img
 	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles
 
 run:
-	dd if=build/os-x86_64.iso of=build/os.img bs=512 count=1 conv=notrunc
-	bochs -q -f bochsrc.txt
+	bochs -q
 
 clean:
 	@rm -rf build

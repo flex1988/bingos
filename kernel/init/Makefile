@@ -8,5 +8,6 @@ all: $(target)
 
 $(obj_dir)/%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $< 
+
 $(obj_dir)/boot.o:
-	nasm -felf32 -o $(obj_dir)/boot.o boot.asm
+	nasm -g -felf32 -o $(obj_dir)/boot.o boot.asm

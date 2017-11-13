@@ -42,7 +42,7 @@ $(modules): Makefile
 	cd $@ && $(MAKE) $(MFLAGS)
 
 $(kernel): $(obj_files) $(linker_script) 
-	$(CC) -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
+	$(CC) -g -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub

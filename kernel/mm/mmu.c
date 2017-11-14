@@ -42,7 +42,7 @@ ptr_t get_physaddr(ptr_t virtualaddr) {
     return page->addr << 12 + offset;
 }
 
-void page_fault(registers_t *regs) {
+void page_fault(registers_t* regs) {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
     uint32_t faulting_address;
@@ -57,6 +57,7 @@ void page_fault(registers_t *regs) {
 
     // Output an error message.
     printk("Page fault! ( ) at 0x%x", faulting_address);
+    asm volatile("xchg %bx,%bx");
     PANIC("Page fault");
 }
 
@@ -65,12 +66,14 @@ page_t* get_page(uint32_t virt, int make, page_dir_t* pd) {
     uint32_t pdidx = PAGE_DIRECTORY_INDEX(virt);
     ASSERT(pdidx < 1024);
     page_tabl_t* tabl = pd->tabls[pdidx];
+
     if (tabl) {
         return &tabl->pages[PAGE_TABLE_INDEX(virt)];
     } else if (make) {
         // memory before _placement_addr must be identical mapped, so page table always can be accessed
         uint32_t phys;
         page_tabl_t* new = (page_tabl_t*)kmalloc_i(sizeof(page_tabl_t), 1, &phys);
+
         memset(new, 0, 4096);
         pd->tabls[PAGE_DIRECTORY_INDEX(virt)] = new;
         paged_entry_t* entry = (paged_entry_t*)&pd->entries[PAGE_DIRECTORY_INDEX(virt)];
@@ -78,6 +81,7 @@ page_t* get_page(uint32_t virt, int make, page_dir_t* pd) {
         entry->rw = 1;
         entry->user = 1;
         entry->addr = phys >> 12;
+
         return &new->pages[PAGE_TABLE_INDEX(virt)];
     } else {
         return 0;
@@ -99,7 +103,7 @@ void page_map(page_t* page, int kernel, int rw) {
 
 void page_unmap(page_t* page) {
     free_frame(page->addr);
-    memset(page, 0, sizeof(page_t));
+    page->addr = 0;
 }
 
 void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt) {
@@ -123,7 +127,7 @@ page_tabl_t* table_clone(page_tabl_t* src, uint32_t* phys) {
         if (!src->pages[i].addr)
             continue;
 
-        page_map(&tabl->pages[i], 0, 1);
+        page_map(&tabl->pages[i], 0, 0);
 
         if (src->pages[i].present)
             tabl->pages[i].present = 1;
@@ -138,7 +142,6 @@ page_tabl_t* table_clone(page_tabl_t* src, uint32_t* phys) {
 
         copy_page_physical(src->pages[i].addr * 0x1000, tabl->pages[i].addr * 0x1000);
     }
-
     return tabl;
 }
 
@@ -160,7 +163,9 @@ page_dir_t* page_dir_clone(page_dir_t* src) {
             dir->entries[i] = src->entries[i];
         } else {
             uint32_t tabl_phys;
+            /*printk("src 0x%x %d", src->tabls[i], i);*/
             dir->tabls[i] = table_clone(src->tabls[i], &tabl_phys);
+
             paged_entry_t* entry = &dir->entries[i];
             entry->addr = tabl_phys >> 12;
             entry->present = 1;

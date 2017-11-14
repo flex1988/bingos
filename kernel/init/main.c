@@ -76,8 +76,8 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     message();
 
-    if (fork() == 0) {
-        exec("/init", 0, NULL);
+    if (sys_fork() == 0) {
+        sys_exec("/init", 0, NULL);
     } else {
         context_switch();
     }

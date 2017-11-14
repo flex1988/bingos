@@ -6,9 +6,6 @@
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
 
-/*volatile process_t *_current_process;*/
-/*volatile process_t *_ready_queue;*/
-
 extern page_dir_t *_kernel_pd;
 extern page_dir_t *_current_pd;
 extern void page_map(page_t *, int, int);
@@ -17,8 +14,29 @@ extern uint32_t read_eip();
 
 extern process_t *_current_process;
 extern process_t *_ready_queue;
+process_t *_init_process = NULL;
 
 uint32_t _next_pid = 1;
+
+void cmp_page_dir(page_dir_t *a, page_dir_t *b) {
+    int i;
+    for (i = 0; i < 1024; i++) {
+        if (b->tabls[i])
+            printk("%d", i);
+        if (a->tabls[i] != b->tabls[i])
+            printk("tabls %d 0x%x 0x%x", i, a->tabls[i], b->tabls[i]);
+    }
+}
+
+void travse_dir(page_dir_t *dir) {
+    int i;
+    for (i = 0; i < 1024; i++) {
+        if (dir->tabls[i])
+            printk("tabls %d 0x%x", i, dir->tabls[i]);
+    }
+
+    printk("");
+}
 
 process_t *process_create(process_t *parent) {
     process_t *p = kmalloc_i(sizeof(process_t), 0, 0);
@@ -32,11 +50,15 @@ process_t *process_create(process_t *parent) {
     p->ebp = 0;
     p->eip = 0;
 
+    p->state = PROCESS_READY;
+
     if (parent) {
-        p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0) + KSTACK_SIZE;
+        p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0);
         memset((void *)p->kstack, 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
+
+        p->pd = page_dir_clone(parent->pd);
     } else {
         p->ustack = 0;
     }
@@ -48,32 +70,68 @@ void process_exit(int ret) {
     _current_process->status = ret;
     _current_process->state = PROCESS_FINISHED;
 
+    process_t *prev;
+    process_t *iter = _ready_queue;
+    while (iter != _current_process) {
+        prev = iter;
+        iter = iter->next;
+    }
+
+    prev->next = iter->next;
+    _current_process = _current_process->next;
+
     context_switch();
 }
 
 void switch_to_user_mode(uint32_t location, uint32_t ustack) {
-    set_kernel_stack(_current_process->kstack + KERNEL_STACK_SIZE);
+    set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
 
     asm volatile(
         "cli\n"
         "mov %1, %%esp\n"
-        "mov $0x23, %%ax\n" /* Segment selector */
+        "mov $0x23, %%ax\n"
         "mov %%ax, %%ds\n"
         "mov %%ax, %%es\n"
         "mov %%ax, %%fs\n"
         "mov %%ax, %%gs\n"
-        "mov %%esp, %%eax\n" /* Move stack to EAX */
-        "pushl $0x23\n"      /* Segment selector again */
+        "mov %%esp, %%eax\n"
+        "pushl $0x23\n"
         "pushl %%eax\n"
-        "pushf\n"     /* Push flags */
-        "pop %%eax\n" /* Enable the interrupt flag */
+        "pushf\n"
+        "pop %%eax\n"
         "orl $0x200, %%eax\n"
         "push %%eax\n"
         "pushl $0x1B\n"
-        "pushl %0\n" /* Push the entry point */
+        "pushl %0\n"
         "iret\n" ::"m"(location),
         "r"(ustack)
         : "%ax", "%esp", "%eax");
+}
+
+void relocate_stack(uint32_t nstack, uint32_t ostack, uint32_t size) {
+    uint32_t i, tmp, off;
+
+    if (nstack > ostack) {
+        off = nstack - ostack;
+    } else {
+        off = ostack - nstack;
+    }
+
+    for (i = nstack; i > nstack - size; i -= 4) {
+        tmp = *(uint32_t *)i;
+        if (tmp < ostack && tmp > ostack - size) {
+            uint32_t *tmp2;
+
+            if (nstack > ostack) {
+                tmp += off;
+            } else {
+                tmp -= off;
+            }
+
+            tmp2 = (uint32_t *)i;
+            *tmp2 = tmp;
+        }
+    }
 }
 
 void move_stack(uint32_t new_stack_start, uint32_t size) {
@@ -122,9 +180,12 @@ void process_init() {
     move_stack(0xe0000000, 0x2000);
 
     process_t *init = process_create(0);
+
     init->pd = _current_pd;
     init->kstack = 0xe0000000;
-    _current_process = _ready_queue = init;
+    init->state = PROCESS_RUNING;
+
+    _current_process = _ready_queue = _init_process = init;
 
     asm volatile("sti");
 }
@@ -134,14 +195,14 @@ int say() {
     return 0;
 }
 
-int fork() {
+
+int sys_fork() {
     asm volatile("cli");
 
-    process_t *parent = (process_t *)_current_process;
+    process_t *parent = (process_t *)_init_process;
 
     process_t *new = process_create(parent);
-    new->pd = page_dir_clone(_current_pd);
-
+    
     sched_enqueue(new);
 
     uint32_t eip = read_eip();
@@ -152,6 +213,7 @@ int fork() {
         asm volatile("mov %%esp, %0" : "=r"(esp));
         uint32_t ebp;
         asm volatile("mov %%ebp, %0" : "=r"(ebp));
+        uint32_t offset;
 
         new->esp = esp;
         new->ebp = ebp;
@@ -167,7 +229,11 @@ int fork() {
 
 void context_switch() {
     if (!_current_process) {
-        printk("_current_process is null");
+        return;
+    }
+
+    if (_current_process->interrupt) {
+        _current_process->interrupt = 0;
         return;
     }
 
@@ -177,17 +243,17 @@ void context_switch() {
 
     eip = read_eip();
     // hack magic
-    if (eip == 0x12345) {
+    if (eip == 0x12345678) {
         return;
     }
 
-    /*ASSERT(_current_process->eip != eip);*/
     _current_process->eip = eip;
     _current_process->esp = esp;
     _current_process->ebp = ebp;
 
-    _current_process = _current_process->next;
+    _current_process->interrupt = 1;
 
+    _current_process = _current_process->next;
     if (!_current_process) {
         _current_process = _ready_queue;
         ASSERT(_current_process);
@@ -199,7 +265,7 @@ void context_switch() {
 
     _current_pd = _current_process->pd;
 
-    set_kernel_stack(_current_process->kstack + KERNEL_STACK_SIZE);
+    set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
 
     asm volatile(
         "         \
@@ -208,7 +274,7 @@ void context_switch() {
       mov %1, %%esp;       \
       mov %2, %%ebp;       \
       mov %3, %%cr3;       \
-      mov $0x12345, %%eax; \
+      mov $0x12345678, %%eax; \
       sti;                 \
       jmp *%%ecx           " ::"r"(eip),
         "r"(esp), "r"(ebp), "r"(_current_pd->physical)
@@ -217,7 +283,7 @@ void context_switch() {
 
 int getpid() { return _current_process->id; }
 
-int exec(char *path, int argc, char **argv) {
+int sys_exec(char *path, int argc, char **argv) {
     int ret = -1;
     vfs_node_t *n;
     elf32_ehdr *ehdr;
@@ -231,10 +297,10 @@ int exec(char *path, int argc, char **argv) {
     page_t *page;
 
     for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
-        page = get_page(virt, 1, _current_pd);
+        page = get_page(virt, 1, _current_process->pd);
         ASSERT(page);
 
-        page_map(page, 1, 1);
+        page_map(page, 0, 1);
     }
 
     ehdr = (elf32_ehdr *)0x30000000;
@@ -256,13 +322,14 @@ int exec(char *path, int argc, char **argv) {
 
     // free user mode stack and file
     for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
-        page = get_page(virt, 0, _current_pd);
+        page = get_page(virt, 0, _current_process->pd);
         ASSERT(page);
+
         page_unmap(page);
     }
 
     for (virt = USTACK_BOTTOM; virt <= (USTACK_BOTTOM + USTACK_SIZE); virt += PAGE_SIZE) {
-        page = get_page(virt, 1, _current_pd);
+        page = get_page(virt, 1, _current_process->pd);
         ASSERT(page);
 
         page_map(page, 0, 1);
@@ -270,8 +337,7 @@ int exec(char *path, int argc, char **argv) {
 
     _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
-    switch_to_user_mode(entry, _current_process->ustack);
+    switch_to_user_mode(entry, USTACK_BOTTOM + USTACK_SIZE);
 
-    printk("exec end");
     return -1;
 }

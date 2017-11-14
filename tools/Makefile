@@ -8,5 +8,5 @@ all: $(target)
 
 initrd:
 	$(CC) initrd.c -o initrd 
-	./initrd $(bin_dir)/init init
+	./initrd $(bin_dir)/init init $(bin_dir)/sh sh
 	rm initrd

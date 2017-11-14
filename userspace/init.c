@@ -1,7 +1,13 @@
 #include <stdio.h>
+#include <syscall.h>
+#include <types.h>
 
 int main(int argc, char **argv) {
-    printf("hello world!");
-    printf("nihao!!! hahahahaah");
-    return 0;
+    printf("Init process started.");
+
+    int pid = fork();
+
+    /*if (pid == 0) {*/
+        /*printf("child");///exec("/sh", 0, 0);*/
+    /*} */
 }

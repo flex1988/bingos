@@ -57,6 +57,7 @@ void page_fault(registers_t* regs) {
 
     // Output an error message.
     printk("Page fault! ( ) at 0x%x", faulting_address);
+    asm volatile("xchg %bx,%bx");
     PANIC("Page fault");
 }
 

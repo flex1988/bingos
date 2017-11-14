@@ -9,11 +9,11 @@ extern process_t *_current_process;
 
 static void syscall_handler(registers_t *regs);
 
-static int exit(int ret);
+int sys_exit(int ret);
 
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
 
-static void *syscalls[6] = {&println, &sys_exec, NULL, &sys_fork, NULL, &exit};
+static void *syscalls[6] = {&println, &sys_exec, NULL, &sys_fork, NULL, &sys_exit};
 
 void syscall_handler(registers_t *regs) {
     if (regs->eax >= nsyscalls)
@@ -47,7 +47,7 @@ void syscall_handler(registers_t *regs) {
 }
 
 // must not return ,switch process instead
-static int exit(int ret) {
+int sys_exit(int ret) {
     printk("exit");
     process_exit(ret);
 

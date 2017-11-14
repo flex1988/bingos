@@ -8,8 +8,6 @@ int main(int argc, char **argv) {
     int pid = fork();
 
     /*if (pid == 0) {*/
-        /*exec("/sh", 0, 0);*/
-    /*} else {*/
-        /*printf("parent");*/
-    /*}*/
+        /*printf("child");///exec("/sh", 0, 0);*/
+    /*} */
 }

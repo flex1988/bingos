@@ -6,9 +6,6 @@
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
 
-/*volatile process_t *_current_process;*/
-/*volatile process_t *_ready_queue;*/
-
 extern page_dir_t *_kernel_pd;
 extern page_dir_t *_current_pd;
 extern void page_map(page_t *, int, int);
@@ -17,7 +14,7 @@ extern uint32_t read_eip();
 
 extern process_t *_current_process;
 extern process_t *_ready_queue;
-process_t *_init_process;
+process_t *_init_process = NULL;
 
 uint32_t _next_pid = 1;
 
@@ -55,14 +52,16 @@ process_t *process_create(process_t *parent) {
 
     p->state = PROCESS_READY;
 
-    /*if (parent) {*/
+    if (parent) {
         p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0);
         memset((void *)p->kstack, 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
-    /*} else {*/
-        /*p->ustack = 0;*/
-    /*}*/
+
+        p->pd = page_dir_clone(parent->pd);
+    } else {
+        p->ustack = 0;
+    }
 
     p->status = 0;
 }
@@ -79,34 +78,34 @@ void process_exit(int ret) {
     }
 
     prev->next = iter->next;
+    _current_process = _current_process->next;
 
     context_switch();
 }
 
 void switch_to_user_mode(uint32_t location, uint32_t ustack) {
     set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
-    do_switch_to_user_mode();
 
-    /*asm volatile(*/
-        /*"cli\n"*/
-        /*"mov %1, %%esp\n"*/
-        /*"mov $0x23, %%ax\n" [> Segment selector <]*/
-        /*"mov %%ax, %%ds\n"*/
-        /*"mov %%ax, %%es\n"*/
-        /*"mov %%ax, %%fs\n"*/
-        /*"mov %%ax, %%gs\n"*/
-        /*"mov %%esp, %%eax\n" [> Move stack to EAX <]*/
-        /*"pushl $0x23\n"      [> Segment selector again <]*/
-        /*"pushl %%eax\n"*/
-        /*"pushf\n"     [> Push flags <]*/
-        /*"pop %%eax\n" [> Enable the interrupt flag <]*/
-        /*"orl $0x200, %%eax\n"*/
-        /*"push %%eax\n"*/
-        /*"pushl $0x1B\n"*/
-        /*"pushl %0\n" [> Push the entry point <]*/
-        /*"iret\n" ::"m"(location),*/
-        /*"r"(ustack)*/
-        /*: "%ax", "%esp", "%eax");*/
+    asm volatile(
+        "cli\n"
+        "mov %1, %%esp\n"
+        "mov $0x23, %%ax\n"
+        "mov %%ax, %%ds\n"
+        "mov %%ax, %%es\n"
+        "mov %%ax, %%fs\n"
+        "mov %%ax, %%gs\n"
+        "mov %%esp, %%eax\n"
+        "pushl $0x23\n"
+        "pushl %%eax\n"
+        "pushf\n"
+        "pop %%eax\n"
+        "orl $0x200, %%eax\n"
+        "push %%eax\n"
+        "pushl $0x1B\n"
+        "pushl %0\n"
+        "iret\n" ::"m"(location),
+        "r"(ustack)
+        : "%ax", "%esp", "%eax");
 }
 
 void relocate_stack(uint32_t nstack, uint32_t ostack, uint32_t size) {
@@ -196,67 +195,14 @@ int say() {
     return 0;
 }
 
-/*int sys_fork() {*/
-/*asm volatile("cli");*/
-
-/*ASSERT(_init_process);*/
-/*process_t *parent = (process_t *)_init_process;*/
-/*[>process_t *parent = (process_t *)_current_process;<]*/
-
-/*process_t *new = process_create(parent);*/
-
-/*new->pd = page_dir_clone(parent->pd);*/
-
-/*sched_enqueue(new);*/
-
-/*uint32_t eip = read_eip();*/
-
-/*if (_current_process == parent) {*/
-/*// parent*/
-/*uint32_t esp;*/
-/*asm volatile("mov %%esp, %0" : "=r"(esp));*/
-/*uint32_t ebp;*/
-/*asm volatile("mov %%ebp, %0" : "=r"(ebp));*/
-/*uint32_t offset;*/
-
-/*new->esp = esp;*/
-/*new->ebp = ebp;*/
-/*new->eip = eip;*/
-
-/*if (parent->kstack > new->kstack) {*/
-/*offset = parent->kstack - new->kstack;*/
-/*new->esp = esp - offset;*/
-/*new->ebp = ebp - offset;*/
-/*} else {*/
-/*offset = new->kstack - parent->kstack;*/
-/*new->esp = esp + offset;*/
-/*new->ebp = ebp + offset;*/
-/*}*/
-
-/*new->eip = eip;*/
-
-/*memcpy(new->kstack - KSTACK_SIZE, parent->kstack - KSTACK_SIZE, KSTACK_SIZE);*/
-/*relocate_stack(new->kstack, parent->kstack, KSTACK_SIZE);*/
-
-/*offset = parent->kstack - (uint32_t)parent->syscall_regs;*/
-/*new->syscall_regs = (registers_t *)(new->kstack - offset);*/
-
-/*asm volatile("sti");*/
-/*return new->id;*/
-/*} else {*/
-/*// child*/
-/*return 0;*/
-/*}*/
-/*}*/
 
 int sys_fork() {
     asm volatile("cli");
 
-    process_t *parent = (process_t *)_current_process;
+    process_t *parent = (process_t *)_init_process;
 
     process_t *new = process_create(parent);
-    new->pd = page_dir_clone(_current_pd);
-
+    
     sched_enqueue(new);
 
     uint32_t eip = read_eip();
@@ -273,24 +219,6 @@ int sys_fork() {
         new->ebp = ebp;
         new->eip = eip;
 
-        /*if (parent->kstack > new->kstack) {*/
-            /*offset = parent->kstack - new->kstack;*/
-            /*new->esp = esp - offset;*/
-            /*new->ebp = ebp - offset;*/
-        /*} else {*/
-            /*offset = new->kstack - parent->kstack;*/
-            /*new->esp = esp + offset;*/
-            /*new->ebp = ebp + offset;*/
-        /*}*/
-
-        /*new->eip = eip;*/
-
-        /*memcpy(new->kstack - KSTACK_SIZE, parent->kstack - KSTACK_SIZE, KSTACK_SIZE);*/
-        /*relocate_stack(new->kstack, parent->kstack, KSTACK_SIZE);*/
-
-        /*offset = parent->kstack - (uint32_t)parent->syscall_regs;*/
-        /*new->syscall_regs = (registers_t *)(new->kstack - offset);*/
-
         asm volatile("sti");
         return new->id;
     } else {
@@ -300,8 +228,9 @@ int sys_fork() {
 }
 
 void context_switch() {
-    if (!_current_process)
+    if (!_current_process) {
         return;
+    }
 
     if (_current_process->interrupt) {
         _current_process->interrupt = 0;
@@ -314,7 +243,7 @@ void context_switch() {
 
     eip = read_eip();
     // hack magic
-    if (eip == 0x12345) {
+    if (eip == 0x12345678) {
         return;
     }
 
@@ -338,26 +267,18 @@ void context_switch() {
 
     set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
 
-    do_switch_task(
-	    _current_process->eip,
-	    _current_process->esp,
-	    _current_process->ebp,
-	    _current_pd->physical,
-	    _current_process->interrupt
-	);
-
-    /*asm volatile(*/
-        /*"         \*/
-      /*cli;                 \*/
-      /*mov %0, %%ecx;       \*/
-      /*mov %1, %%esp;       \*/
-      /*mov %2, %%ebp;       \*/
-      /*mov %3, %%cr3;       \*/
-      /*mov $0x12345, %%eax; \*/
-      /*sti;                 \*/
-      /*jmp *%%ecx           " ::"r"(eip),*/
-        /*"r"(esp), "r"(ebp), "r"(_current_pd->physical)*/
-        /*: "%ecx", "%esp", "%eax");*/
+    asm volatile(
+        "         \
+      cli;                 \
+      mov %0, %%ecx;       \
+      mov %1, %%esp;       \
+      mov %2, %%ebp;       \
+      mov %3, %%cr3;       \
+      mov $0x12345678, %%eax; \
+      sti;                 \
+      jmp *%%ecx           " ::"r"(eip),
+        "r"(esp), "r"(ebp), "r"(_current_pd->physical)
+        : "%ecx", "%esp", "%eax");
 }
 
 int getpid() { return _current_process->id; }

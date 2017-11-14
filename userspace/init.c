@@ -4,10 +4,14 @@
 
 int main(int argc, char **argv) {
     printf("Init process started.");
+    int pid;
 
-    int pid = fork();
+    if (!(pid = fork())) {
+        execve("/sh", 0, 0);
+        exit(0);
+    }
 
-    /*if (pid == 0) {*/
-        /*printf("child");///exec("/sh", 0, 0);*/
-    /*} */
+    while (1) {
+        ;
+    }
 }

@@ -2,3 +2,4 @@ tags
 build
 *.o
 bochsout.txt
+serial.txt

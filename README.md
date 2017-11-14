@@ -15,57 +15,40 @@
 
 ### Syscall Table
 
-syscall|interrupt number
----|---
-exit|0
-open|2
-read|3
-write|4
-close|5
-gettimeofday|6
-execve|7
-fork|8
-getpid|9
-sbrk|10
-uname|12
-openpty|13
-seek|14
-stat|15
-mkpipe|16
-dup2|17
-getuid|18
-setuid|19
-reboot|20
-readdir|21
-chdir|22
-getcwd|23
-clone|24
-sethostname|25
-gethostname|26
-mkdir|27
-shm_obtain|28
-shm_release|29
-kill|30
-signal|31
-gettid|32
-yield|33
-sysfunc|34
-sleepabs|35
-sleep|36
-ioctl|37
-access|38
-statf|39
-chmod|40
-umask|41
-unlink|42
-waitpid|43
-pipe|44
-mount|45
-symlink|46
-readlink|47
-lstat|48
-fswait|49
-fswait2|50
-
-
+syscall|interrupt number|comment|args
+---|---|---|---
+exit|0|exit user program|int sys_exit(int ret)
+println|1|printk msg|int sys_println(char *)
+open|2|open for reading or writing|int open(const char *path, int oflag, ... /*mode_t mode */)
+read|3|read input|int read(int d, void * buf, size_t nbytes);
+write|4|write output|ssize_t write(int d, const void * buf, size_t nbytes);
+close|5|close a file descriptor
+gettimeofday|6|get/set date and time
+execve|7|transforms the calling process into a new process
+fork|8|copy calling process
+getpid|9|get parent or calling process identification
+sbrk|10|change data segment size
+lseek|11|reposition read/write file offset
+lstat|12|get file status
+dup2|13|duplicate an open file descriptor
+readdir|14|directory operations
+chdir|15|directory operations
+sethostname|16|set the name of the machine
+gethostname|17|get the name of the machine
+mkdir|18|make a directory file
+shm_open|19|open a shared memory object
+shm_unlink|20|unlink a shared memory object
+ioctl|21|control device
+access|22|check access permissions of a file or pathname
+fstatfs|23|get file system statistics
+fsync|24|synchronize a file's in-memory state with that on the physical medium
+ftruncate|25|truncate a file to a specified length
+chmod|26|change mode of file
+umask|27|set file creation mode mask
+link|28|make a hard file link
+unlink|29|remove a directory entry
+pipe|30|create descriptor a pair for interprocess communication
+mount|31|mount or unmount a filesystem
+symlink|32|make a symbolic link to a file
+readlink|33|read value of a symbolic link
 

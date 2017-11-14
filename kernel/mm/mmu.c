@@ -90,7 +90,8 @@ page_t* get_page(uint32_t virt, int make, page_dir_t* pd) {
 
 void page_map(page_t* page, int kernel, int rw) {
     if (page->addr != 0) {
-        PANIC("page frame exists");
+        /*printk("map page already exist frame page->addr 0x%x", page->addr);*/
+        /*PANIC("page frame exists");*/
         return;
     } else {
         memset(page, 0, sizeof(page_t));

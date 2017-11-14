@@ -59,12 +59,9 @@ int sys_fork();
 
 void move_stack(uint32_t new_stack_start, uint32_t size);
 
-int getpid();
-
 void switch_to_user_mode(uint32_t location, uint32_t ustack);
-
-int say();
 
 int sys_exec(char *path, int argc, char **argv);
 
+int sys_getpid();
 #endif

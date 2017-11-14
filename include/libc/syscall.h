@@ -31,9 +31,16 @@ asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1),"c"((int)p2),"d"((int)p3)
 return a; } 
 
 
-DECL_SYSCALL0(say);
-DECL_SYSCALL3(exec,char *,int,char **);
-DECL_SYSCALL0(fork);
 DECL_SYSCALL1(exit,int);
 DECL_SYSCALL1(println,const char *);
+DECL_SYSCALL3(execve,const char *,char **,char **);
+DECL_SYSCALL0(fork);
+DECL_SYSCALL0(getpid);
+
+#define SYSCALL_EXIT 0
+#define SYSCALL_PRINTLN 1
+#define SYSCALL_EXECVE 7
+#define SYSCALL_FORK 8
+#define SYSCALL_GETPID 9
+
 #endif

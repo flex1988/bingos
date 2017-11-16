@@ -1,26 +1,40 @@
+#include <types.h>
+
 #include "hal/isr.h"
 #include "kernel.h"
 #include "kernel/process.h"
+#include "kernel/syscalls.h"
 #include "kernel/vga.h"
 
-uint32_t nsyscalls = 6;
+uint32_t nsyscalls = 13;
 
-extern process_t *_current_process;
+extern process_t* _current_process;
 
-static void syscall_handler(registers_t *regs);
-
-int sys_exit(int ret);
+static void syscall_handler(registers_t* regs);
 
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
 
-static void *syscalls[6] = {&println, &sys_exec, NULL, &sys_fork, NULL, &sys_exit};
+static void* syscalls[] = {
+    sys_exit,   //0
+    sys_println,//1
+    sys_open,   //2
+    sys_read,   //3
+    sys_write,  //4
+    sys_close,  //5
+    sys_gettimeofday,//6
+    sys_execve, //7
+    sys_fork,   //8
+    sys_getpid, //9
+    sys_sbrk,   //10
+    sys_fork,   //11
+    sys_exit    //12
+};
 
-void syscall_handler(registers_t *regs) {
+void syscall_handler(registers_t* regs) {
     if (regs->eax >= nsyscalls)
         return;
 
-    void *location = syscalls[regs->eax];
-    printk("syscall %d", regs->eax);
+    void* location = syscalls[regs->eax];
 
     int ret;
     _current_process->syscall_regs = regs;
@@ -55,3 +69,27 @@ int sys_exit(int ret) {
         ;
     return ret;
 }
+
+int sys_println(const char* msg) {
+    printk(msg);
+    return 0;
+}
+
+int sys_open(const char* path, int oflag, ...) { return 0; }
+int sys_read(int fd, void* buf, size_t nbytes) { return 0; }
+int sys_write(int fd, const void* buf, size_t nbytes) { return 0; }
+int sys_close(int fd) {
+    return 0;
+}
+int sys_gettimeofday() { return 0; }
+
+int sys_execve(const char* filename,char *const argv[],char *const envp[]) {
+    int argc = 0;
+
+    while (argv[argc++])
+        ;
+
+    return sys_exec(filename, argc, argv);
+}
+
+int sys_sbrk() { return 0; }

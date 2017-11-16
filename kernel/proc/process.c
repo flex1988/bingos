@@ -6,6 +6,8 @@
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
 
+#include <errno.h>
+
 extern page_dir_t *_kernel_pd;
 extern page_dir_t *_current_pd;
 extern void page_map(page_t *, int, int);
@@ -67,6 +69,8 @@ process_t *process_create(process_t *parent) {
 }
 
 void process_exit(int ret) {
+    ASSERT(_current_process);
+
     _current_process->status = ret;
     _current_process->state = PROCESS_FINISHED;
 
@@ -190,19 +194,13 @@ void process_init() {
     asm volatile("sti");
 }
 
-int say() {
-    printk("hello world!");
-    return 0;
-}
-
-
 int sys_fork() {
     asm volatile("cli");
 
     process_t *parent = (process_t *)_init_process;
 
     process_t *new = process_create(parent);
-    
+
     sched_enqueue(new);
 
     uint32_t eip = read_eip();
@@ -341,3 +339,24 @@ int sys_exec(char *path, int argc, char **argv) {
 
     return -1;
 }
+
+int sys_getpid() {
+    if (!_current_process)
+        return 0;
+    return _current_process->id;
+}
+
+/*int sys_waitpid(int pid, int *stat, int options) {*/
+    /*process_t *p;*/
+
+/*repeat:*/
+    /*for (p = _ready_queue; p != NULL; p = p->next) {*/
+        /*if (!p || p == _current_process)*/
+            /*continue;*/
+
+        /*if (p->father != _current_process->id)*/
+            /*continue;*/
+    /*}*/
+
+    /*return -ECHILD;*/
+/*}*/

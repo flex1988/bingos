@@ -9,7 +9,7 @@ libc := build/libc.a
 modules := kernel/init \
 	kernel/print \
 	kernel/mm \
-	kernel/vga \
+	kernel/graphic \
 	kernel/proc	\
 	kernel/sys	\
 	libc \

@@ -1,6 +1,7 @@
 #include "kernel/vga.h"
 #include "hal/common.h"
 #include "kernel.h"
+#include "kernel/console.h"
 #include "types.h"
 
 /* The I/O ports */
@@ -20,7 +21,11 @@ static vga_char blank;
 static uint8_t cursor_x;
 static uint8_t cursor_y;
 
-static void move_cursor() {
+static void vga_clear_screen();
+static void vga_printc(char c);
+static void vga_println(char* msg);
+
+static void vga_move_cursor() {
     uint16_t cursor = cursor_y * 80 + cursor_x;
     outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
     outb(FB_DATA_PORT, ((cursor >> 8) & 0x00FF));
@@ -28,7 +33,7 @@ static void move_cursor() {
     outb(FB_DATA_PORT, cursor & 0x00FF);
 }
 
-static void scroll_screen() {
+static void vga_scroll_screen() {
     if (cursor_y >= 25) {
         int i;
         for (i = 0; i < 24 * 80; i++) {
@@ -43,7 +48,7 @@ static void scroll_screen() {
     }
 }
 
-void vga_init() {
+void vga_init(console_t* console) {
     vga_buffer = (vga_char*)0xb8000;
     cursor_x = 0;
     cursor_y = 0;
@@ -51,9 +56,13 @@ void vga_init() {
     uint8_t attributeByte = (0 << 4) | (15 & 0x0F);
     uint16_t v = 0x20 | (attributeByte << 8);
     memcpy(blank, v, sizeof(uint16_t));
+
+    console->println = vga_println;
+    console->printc = vga_printc;
+    console->clear = vga_clear_screen;
 }
 
-void clear_screen() {
+void vga_clear_screen() {
     int i;
 
     for (i = 0; i < 80 * 25; i++) {
@@ -62,10 +71,10 @@ void clear_screen() {
 
     cursor_x = 0;
     cursor_y = 0;
-    move_cursor();
+    vga_move_cursor();
 }
 
-void printc(char c) {
+void vga_printc(char c) {
     uint8_t back = 0;
     uint8_t fore = 15;
 
@@ -101,11 +110,11 @@ void printc(char c) {
         cursor_y++;
     }
 
-    scroll_screen();
-    move_cursor();
+    vga_scroll_screen();
+    vga_move_cursor();
 }
 
-void println(char* s) {
-    while (*s != '\0') printc(*s++);
-    printc('\n');
+void vga_println(char* s) {
+    while (*s != '\0') vga_printc(*s++);
+    vga_printc('\n');
 }

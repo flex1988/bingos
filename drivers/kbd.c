@@ -1,5 +1,6 @@
-#include "drivers/kbd.h"
 #include <types.h>
+
+#include "drivers/kbd.h"
 #include "hal/common.h"
 #include "hal/isr.h"
 #include "kernel/printk.h"
@@ -8,7 +9,7 @@
 #define KBD_DATA_BUF 0x01
 #define KBD_DATA_PORT 0x60
 
-#define isascii(c)	((unsigned)(c) <= 0x7F)
+#define isascii(c) ((unsigned)(c) <= 0x7F)
 
 static char _scancode;
 

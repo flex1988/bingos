@@ -17,6 +17,8 @@ extern ptr_t _placement_addr;
 extern heap_t* kheap;
 extern void copy_page_physical(uint32_t src, uint32_t dst);
 
+extern uint8_t* frame_buffer;
+
 static inline void page_dir_switch(page_dir_t* dir) {
     _current_pd = dir;
     asm volatile("mov %0, %%cr3" ::"r"(dir->physical));
@@ -57,7 +59,6 @@ void page_fault(registers_t* regs) {
 
     // Output an error message.
     printk("Page fault! ( ) at 0x%x", faulting_address);
-    asm volatile("xchg %bx,%bx");
     PANIC("Page fault");
 }
 
@@ -193,6 +194,11 @@ void mmu_init() {
         get_page(virt, 1, _kernel_pd);
     }
 
+    uint32_t fb_length = frame_buffer_length();
+    for (virt = frame_buffer; virt < frame_buffer + fb_length; virt += 0x1000) {
+        get_page(virt, 1, _kernel_pd);
+    }
+
     virt = 0;
     // idenitify map memory before _placement_addr
     while (virt < _placement_addr + 0x1000) {
@@ -208,6 +214,13 @@ void mmu_init() {
         page = get_page(virt, 1, _kernel_pd);
         ASSERT(page != 0);
         page_map(page, 1, 0);
+    }
+
+    // identical map frame buffer, maybe will cause crash?
+    for (virt = frame_buffer; virt < frame_buffer + fb_length; virt += 0x1000) {
+        page = get_page(virt, 1, _kernel_pd);
+        ASSERT(page != 0);
+        page_identical_map(page, 1, 0, virt);
     }
 
     register_interrupt_handler(14, page_fault);

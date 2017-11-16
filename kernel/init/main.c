@@ -5,10 +5,12 @@
 #include "hal/descriptor.h"
 #include "hal/timer.h"
 #include "kernel.h"
+#include "kernel/console.h"
 #include "kernel/frame.h"
 #include "kernel/mmu.h"
 #include "kernel/printk.h"
 #include "kernel/process.h"
+#include "kernel/vesa.h"
 #include "kernel/vga.h"
 #include "multiboot.h"
 
@@ -23,8 +25,9 @@ static void init(void) {}
 
 extern process_t *_current_process;
 
+extern console_t console;
+
 static void message() {
-    clear_screen();
     printk(
         "       _                _\n"
         " _ __ | |__   ___ _ __ (_)_  __\n"
@@ -40,16 +43,14 @@ static void message() {
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
 
-    vga_init();
-    clear_screen();
-    printk("vga mode init...");
+    tty_init(boot_info);
 
-    printk("initial esp 0x%x", _initial_esp);
+    console.clear();
 
     init_descriptor_tables();
-    printk("init_descriptor_tables init...");
 
     asm volatile("sti");
+
     timer_init(50);
 
     ASSERT(boot_info->mods_count > 0);

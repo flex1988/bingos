@@ -95,6 +95,7 @@
 typedef unsigned short multiboot_uint16_t;
 typedef unsigned int multiboot_uint32_t;
 typedef unsigned long long multiboot_uint64_t;
+typedef uint8_t multiboot_uint8_t;
 
 struct multiboot_header {
     /* Must be MULTIBOOT_MAGIC - see above. */
@@ -185,6 +186,31 @@ struct multiboot_info {
     multiboot_uint16_t vbe_interface_seg;
     multiboot_uint16_t vbe_interface_off;
     multiboot_uint16_t vbe_interface_len;
+
+    multiboot_uint64_t framebuffer_addr;
+    multiboot_uint32_t framebuffer_pitch;
+    multiboot_uint32_t framebuffer_width;
+    multiboot_uint32_t framebuffer_height;
+
+    multiboot_uint8_t framebuffer_bpp;
+#define MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED 0
+#define MULTIBOOT_FRAMEBUFFER_TYPE_RGB 1
+#define MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT 2
+    multiboot_uint8_t framebuffer_type;
+    union {
+        struct {
+            multiboot_uint32_t framebuffer_palette_addr;
+            multiboot_uint16_t framebuffer_palette_num_colors;
+        };
+        struct {
+            multiboot_uint8_t framebuffer_red_field_position;
+            multiboot_uint8_t framebuffer_red_mask_size;
+            multiboot_uint8_t framebuffer_green_field_position;
+            multiboot_uint8_t framebuffer_green_mask_size;
+            multiboot_uint8_t framebuffer_blue_field_position;
+            multiboot_uint8_t framebuffer_blue_mask_size;
+        };
+    };
 };
 typedef struct multiboot_info multiboot_info_t;
 

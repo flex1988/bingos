@@ -25,8 +25,5 @@ struct vga_char {
     char bg : 4;
 };
 
-void println(char *msg);
-void printc(char c);
 void vga_init();
-void clear_screen();
 #endif

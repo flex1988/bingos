@@ -2,7 +2,11 @@
 #include <stddef.h>
 #include <types.h>
 
+#include "kernel/console.h"
+
 static char buf[1024];
+
+extern console_t console;
 
 extern int vsprintf(char *buf, const char *fmt, va_list args);
 
@@ -13,7 +17,7 @@ int printk(const char *fmt, ...) {
     va_start(args, fmt);
     i = vsprintf(buf, fmt, args);
     va_end(args);
-    println(buf);
+    console.println(buf);
     return i;
 }
 

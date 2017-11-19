@@ -52,3 +52,9 @@ mount|31|mount or unmount a filesystem
 symlink|32|make a symbolic link to a file
 readlink|33|read value of a symbolic link
 
+### DOCS
+
+- [VESA Tutorial](http://wiki.osdev.org/User:Omarrx024/VESA_Tutorial)
+- [QEMU Debug](http://wiki.osdev.org/QEMU_and_GDB_in_long_mode)
+- [Multiboot](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
+

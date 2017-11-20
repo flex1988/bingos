@@ -11,6 +11,9 @@ color_t BLACK = {0x00, 0x00, 0x00, 0xff};
 color_t GREEN = {0x00, 0xff, 0x00, 0xff};
 color_t BLUE = {0x00, 0x00, 0xff, 0xff};
 
+color_t SOLARIZED_BASE03 = {0x00, 0x2b, 0x36, 0xff};  // 002b36
+color_t SOLARIZED_BASE0 = {0x83, 0x94, 0x96, 0xff};   // 839496
+
 static char *font_data[256];
 
 uint32_t frame_buffer_length() { return frame_height * frame_width * (frame_bpp / 8); }

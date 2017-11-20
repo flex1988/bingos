@@ -28,7 +28,6 @@ extern process_t *_current_process;
 extern console_t console;
 
 static void message() {
-    console.clear();
     printk(
         "       _                _\n"
         " _ __ | |__   ___ _ __ (_)_  __\n"
@@ -46,10 +45,9 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     tty_init(boot_info);
 
-    /*printk("initial esp 0x%x", _initial_esp);*/
+    console.clear();
 
     init_descriptor_tables();
-    /*printk("init_descriptor_tables init...");*/
 
     asm volatile("sti");
 

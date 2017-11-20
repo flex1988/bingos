@@ -14,6 +14,8 @@ static uint8_t char_width;
 
 extern color_t RED;
 extern color_t BLACK;
+extern color_t SOLARIZED_BASE03;
+extern color_t SOLARIZED_BASE0;
 
 static int console_height;
 static int console_width;
@@ -77,7 +79,7 @@ static void vesa_printc(char c) {
     }
 
     else if (c >= ' ') {
-        draw_char(c, cursor_x * char_width, cursor_y * char_height, &RED, &BLACK);
+        draw_char(c, cursor_x * char_width, cursor_y * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
         cursor_x++;
     }
 
@@ -97,4 +99,15 @@ static void vesa_println(char *s) {
 
 static void vesa_scroll_screen() {}
 static void vesa_move_cursor() {}
-static void vesa_clear_screen() {}
+
+static void vesa_clear_screen() {
+    int i, j;
+    for (i = 0; i < console_width; i++) {
+        for (j = 0; j < console_height; j++) {
+            draw_char(' ', i * char_width, j * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
+        }
+    }
+
+    cursor_x = 0;
+    cursor_y = 0;
+}

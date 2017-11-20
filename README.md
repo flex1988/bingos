@@ -57,4 +57,4 @@ readlink|33|read value of a symbolic link
 - [VESA Tutorial](http://wiki.osdev.org/User:Omarrx024/VESA_Tutorial)
 - [QEMU Debug](http://wiki.osdev.org/QEMU_and_GDB_in_long_mode)
 - [Multiboot](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
-
+- [Drawing_In_Protected](http://wiki.osdev.org/Drawing_In_Protected_Mode#Drawing_Text)

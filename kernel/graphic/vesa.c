@@ -99,6 +99,7 @@ static void vesa_println(char *s) {
 
 static void vesa_scroll_screen() {}
 static void vesa_move_cursor() {}
+
 static void vesa_clear_screen() {
     int i, j;
     for (i = 0; i < console_width; i++) {

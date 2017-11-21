@@ -1,5 +1,7 @@
 ### kernel x86
 
+`kernel are magic!`
+
 ### Build && Run
 
 1. http://wiki.osdev.org/GCC_Cross-Compiler
@@ -58,3 +60,4 @@ readlink|33|read value of a symbolic link
 - [QEMU Debug](http://wiki.osdev.org/QEMU_and_GDB_in_long_mode)
 - [Multiboot](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 - [Drawing_In_Protected](http://wiki.osdev.org/Drawing_In_Protected_Mode#Drawing_Text)
+- [Getting_to_Ring_3](http://wiki.osdev.org/Getting_to_Ring_3)

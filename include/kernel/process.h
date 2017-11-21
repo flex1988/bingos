@@ -25,6 +25,7 @@ typedef struct process_s {
     uint32_t id;
     uint32_t uid;
     uint32_t gid;
+    uint32_t parent_id;
 
     int priority;
     int state;

@@ -34,3 +34,38 @@ copy_page_physical:
 read_eip:
 	pop eax
 	jmp eax
+
+MAGIC equ 0xdecade21
+
+[GLOBAL enter_userspace]
+enter_userspace:
+	push ebp
+	mov ebp, esp
+	mov edx,[ebp+12]
+	push MAGIC
+
+	mov ax, 0x23
+
+	mov ds, eax
+	mov es, eax
+	mov fs, eax
+	mov gs, eax
+
+	mov eax, esp
+
+	push 0x23
+	
+	push eax
+	
+	pushf
+	pop eax
+
+	or eax, 0x200
+	push eax
+	push 0x1b
+
+	push long [ebp+8]
+
+	iret
+	pop ebp
+	ret

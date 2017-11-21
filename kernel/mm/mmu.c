@@ -216,7 +216,7 @@ void mmu_init() {
         page_map(page, 1, 0);
     }
 
-    // identical map frame buffer, maybe will cause crash?
+    // identical map frame buffer, maybe will cause crash? but whatever
     for (virt = frame_buffer; virt < frame_buffer + fb_length; virt += 0x1000) {
         page = get_page(virt, 1, _kernel_pd);
         ASSERT(page != 0);

@@ -13,8 +13,8 @@ ordered_array_t create_ordered_array(uint32_t max, comparer_t comparer) {
 }
 
 void destroy_ordered_array(ordered_array_t* arr) {
-    ;  // kfree(arr->array);
-    // kfree(arr);
+    kfree(arr->array);
+    //kfree(arr);
 }
 
 void insert_ordered_array(type_t item, ordered_array_t* arr) {

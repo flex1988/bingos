@@ -247,7 +247,7 @@ void free(void *p, heap_t *heap) {
             iterator++;
         }
 
-        ASSERT(iterator < heap->index.size);
+        ASSERT(iterator <= heap->index.size);
         remove_ordered_array(iterator, &heap->index);
     }
 

@@ -41,12 +41,12 @@ void travse_dir(page_dir_t *dir) {
 }
 
 process_t *process_create(process_t *parent) {
-    process_t *p = kmalloc_i(sizeof(process_t), 0, 0);
+    process_t *p = (process_t *)kmalloc_i(sizeof(process_t), 0, 0);
     p->id = _next_pid++;
     p->uid = 500;
     p->gid = 500;
     p->next = 0;
-    memcpy(p->name, "init", sizeof("init"));
+    memcpy(p->name, "[init]", sizeof("[init]"));
 
     p->esp = 0;
     p->ebp = 0;
@@ -74,22 +74,10 @@ void process_exit(int ret) {
     _current_process->status = ret;
     _current_process->state = PROCESS_FINISHED;
 
-    process_t *prev;
-    process_t *iter = _ready_queue;
-    while (iter != _current_process) {
-        prev = iter;
-        iter = iter->next;
-    }
-
-    prev->next = iter->next;
-    _current_process = _current_process->next;
-
     context_switch();
 }
 
 void switch_to_user_mode(uint32_t location, uint32_t ustack) {
-    set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
-
     asm volatile(
         "cli\n"
         "mov %1, %%esp\n"
@@ -178,10 +166,12 @@ void move_stack(uint32_t new_stack_start, uint32_t size) {
 }
 
 void process_init() {
-    asm volatile("cli");
+    IRQ_OFF;
 
     // relocate the stack to 0xe0000000
     move_stack(0xe0000000, 0x2000);
+
+    sched_init();
 
     process_t *init = process_create(0);
 
@@ -191,17 +181,15 @@ void process_init() {
 
     _current_process = _ready_queue = _init_process = init;
 
-    asm volatile("sti");
+    IRQ_ON;
 }
 
 int sys_fork() {
-    asm volatile("cli");
+    IRQ_OFF;
 
     process_t *parent = (process_t *)_init_process;
 
     process_t *new = process_create(parent);
-
-    sched_enqueue(new);
 
     uint32_t eip = read_eip();
 
@@ -217,7 +205,9 @@ int sys_fork() {
         new->ebp = ebp;
         new->eip = eip;
 
-        asm volatile("sti");
+        sched_enqueue(new);
+
+        IRQ_ON;
         return new->id;
     } else {
         // child
@@ -230,8 +220,7 @@ void context_switch() {
         return;
     }
 
-    if (_current_process->interrupt) {
-        _current_process->interrupt = 0;
+    if (!sched_available()) {
         return;
     }
 
@@ -242,6 +231,7 @@ void context_switch() {
     eip = read_eip();
     // hack magic
     if (eip == 0x12345678) {
+        IRQ_ON;
         return;
     }
 
@@ -249,17 +239,17 @@ void context_switch() {
     _current_process->esp = esp;
     _current_process->ebp = ebp;
 
-    _current_process->interrupt = 1;
+    sched_enqueue(_current_process);
 
-    _current_process = _current_process->next;
-    if (!_current_process) {
-        _current_process = _ready_queue;
-        ASSERT(_current_process);
-    }
+    _current_process = sched_dequeue();
+
+    ASSERT(_current_process);
 
     eip = _current_process->eip;
     esp = _current_process->esp;
     ebp = _current_process->ebp;
+
+    IRQ_OFF;
 
     _current_pd = _current_process->pd;
 
@@ -267,7 +257,6 @@ void context_switch() {
 
     asm volatile(
         "         \
-      cli;                 \
       mov %0, %%ecx;       \
       mov %1, %%esp;       \
       mov %2, %%ebp;       \
@@ -335,6 +324,8 @@ int sys_exec(char *path, int argc, char **argv) {
 
     _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
+    set_kernel_stack(_current_process->kstack + KSTACK_SIZE);
+
     switch_to_user_mode(entry, USTACK_BOTTOM + USTACK_SIZE);
 
     return -1;
@@ -347,16 +338,16 @@ int sys_getpid() {
 }
 
 /*int sys_waitpid(int pid, int *stat, int options) {*/
-    /*process_t *p;*/
+/*process_t *p;*/
 
 /*repeat:*/
-    /*for (p = _ready_queue; p != NULL; p = p->next) {*/
-        /*if (!p || p == _current_process)*/
-            /*continue;*/
+/*for (p = _ready_queue; p != NULL; p = p->next) {*/
+/*if (!p || p == _current_process)*/
+/*continue;*/
 
-        /*if (p->father != _current_process->id)*/
-            /*continue;*/
-    /*}*/
+/*if (p->father != _current_process->id)*/
+/*continue;*/
+/*}*/
 
-    /*return -ECHILD;*/
+/*return -ECHILD;*/
 /*}*/

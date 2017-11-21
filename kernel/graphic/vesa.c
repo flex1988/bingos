@@ -17,6 +17,9 @@ extern color_t BLACK;
 extern color_t SOLARIZED_BASE03;
 extern color_t SOLARIZED_BASE0;
 
+extern uint8_t *frame_buffer;
+static int frame_pitch;
+
 static int console_height;
 static int console_width;
 
@@ -39,6 +42,8 @@ void vesa_init(console_t *console, multiboot_info_t *boot_info) {
     ASSERT(boot_info->flags & (1 << 12));
 
     vbe_mode_info_structure_t *mode_info = (vbe_mode_info_structure_t *)boot_info->vbe_mode_info;
+
+    frame_pitch = mode_info->pitch;
 
     ASSERT(boot_info->framebuffer_type == 1);
 
@@ -97,13 +102,29 @@ static void vesa_println(char *s) {
     vesa_printc('\n');
 }
 
-static void vesa_scroll_screen() {}
+static void vesa_scroll_screen() {
+    if (cursor_y >= console_height) {
+        int i;
+
+        for (i = 0; i < console_height - 1; i++) {
+            memcpy(frame_buffer + i * frame_pitch * char_height, frame_buffer + (i + 1) * frame_pitch * char_height,
+                   frame_pitch * char_height);
+        }
+
+        for (i = 0; i < console_width; i++) {
+            draw_char(' ', i * char_width, (console_height - 1) * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
+        }
+
+        cursor_y = console_height - 1;
+    }
+}
+
 static void vesa_move_cursor() {}
 
 static void vesa_clear_screen() {
     int i, j;
     for (i = 0; i < console_width; i++) {
-        for (j = 0; j < console_height; j++) {
+        for (j = 0; j <= console_height; j++) {
             draw_char(' ', i * char_width, j * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
         }
     }

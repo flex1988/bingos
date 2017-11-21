@@ -14,4 +14,7 @@ extern void panic(const char *file, uint32_t line, const char *msg);
 #define true 1
 #define false 0
 
+#define IRQ_ON asm volatile("sti")
+#define IRQ_OFF asm volatile("cli")
+
 #endif

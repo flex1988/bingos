@@ -2,21 +2,21 @@
 #include "kernel/process.h"
 #include "lib/list.h"
 
-volatile process_t *_current_process = NULL;
-volatile process_t *_prev_process = NULL;
-volatile process_t *_next_process = NULL;
-volatile process_t *_ready_queue = NULL;
-
 volatile list_t *_process_queue;
+volatile list_t *_finished_queue;
 
-void sched_init() { _process_queue = list_create(); }
+void sched_init() {
+    _process_queue = list_create();
+    _finished_queue = list_create();
+}
 
-void sched_enqueue(process_t *p) {
-    /*process_t *t = (process_t *)_ready_queue;*/
-    /*while (t->next) t = t->next;*/
-    /*t->next = new;*/
+void sched_enqueue(process_t *p, int priority) {
+    ASSERT(p);
 
-    list_push_back(_process_queue, (void *)p);
+    if (priority)
+        list_push_front(_process_queue, (void *)p);
+    else
+        list_push_back(_process_queue, (void *)p);
 }
 
 process_t *sched_dequeue() {
@@ -26,10 +26,28 @@ process_t *sched_dequeue() {
         return NULL;
 
     process_t *p = (process_t *)n->value;
-
     kfree(n);
-
+    ASSERT(p);
     return p;
 }
 
-int sched_available() { return _process_queue->head != 0; }
+void sched_enqueue_finished(process_t *p) { list_push_back(_finished_queue, (void *)p); }
+
+process_t *sched_lookup_finished(int pid) {
+    /*printk("lookup %d", pid);*/
+    ASSERT(_finished_queue);
+    list_node_t *n = _finished_queue->head;
+    for (; n != NULL; n = n->next) {
+        process_t *p = (process_t *)n->value;
+        ASSERT(p);
+        if (p->id == pid)
+            return p;
+    }
+
+    return NULL;
+}
+
+int sched_available() {
+    /*printk("head %d", _process_queue->head);*/
+    return _process_queue->head != 0;
+}

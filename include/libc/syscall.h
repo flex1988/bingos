@@ -14,20 +14,21 @@ void syscalls_init();
 int syscall_##fn() \
 { \
   int a; \
-  asm volatile("int $0x80" : "=a" (a) : "0" (num)); \
+  __asm__ __volatile__("int $0x80" : "=a" (a) : "0" (num)); \
   return a; \
 }
 
 #define DEFN_SYSCALL1(fn,num,P1)   \
 int syscall_##fn(P1 p1)  { \
-int a;  \
-asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1));  \
-return a; } 
+    int a;  \
+    __asm__ __volatile__("int $0x80" : "=a" (a) : "0"(num),"b"((int)p1));  \
+    return a;   \
+} 
 
 #define DEFN_SYSCALL3(fn,num,P1,P2,P3)   \
 int syscall_##fn(P1 p1,P2 p2,P3 p3)  { \
 int a;  \
-asm volatile("int $0x80":"=a"(a):"0"(num),"b"((int)p1),"c"((int)p2),"d"((int)p3));  \
+__asm__ __volatile__("int $0x80":"=a"(a):"0"(num),"b"((int)p1),"c"((int)p2),"d"((int)p3));  \
 return a; } 
 
 
@@ -36,11 +37,13 @@ DECL_SYSCALL1(println,const char *);
 DECL_SYSCALL3(execve,const char *,char **,char **);
 DECL_SYSCALL0(fork);
 DECL_SYSCALL0(getpid);
+DECL_SYSCALL1(waitpid, int);
 
 #define SYSCALL_EXIT 0
 #define SYSCALL_PRINTLN 1
 #define SYSCALL_EXECVE 7
 #define SYSCALL_FORK 8
 #define SYSCALL_GETPID 9
+#define SYSCALL_WAITPID 10
 
 #endif

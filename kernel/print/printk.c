@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <types.h>
 
+#include "kernel.h"
 #include "kernel/console.h"
 
 static char buf[1024];

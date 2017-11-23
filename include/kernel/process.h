@@ -42,6 +42,9 @@ typedef struct process_s {
     uint32_t ustack;
     size_t size;
 
+    uint32_t img_entry;
+    uint32_t img_size;
+
     process_t *next;
     page_dir_t *pd;
     registers_t *syscall_regs;

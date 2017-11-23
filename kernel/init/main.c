@@ -49,7 +49,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     init_descriptor_tables();
 
-    asm volatile("sti");
+    IRQ_ON;
 
     timer_init(50);
 
@@ -77,14 +77,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     message();
 
-    int i;
-    for(i=0;i<30;i++) printk("hello world!");
-
-    if (sys_fork() == 0) {
-        sys_exec("/init", 0, NULL);
-    } else {
-        context_switch();
-    }
+    sys_exec("/init", 0, NULL);
 
     while (1)
         ;

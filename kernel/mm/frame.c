@@ -15,11 +15,11 @@ static uint32_t *_frame_map = 0;
 extern void *kernel_end;
 ptr_t _placement_addr = (ptr_t)&kernel_end;
 
-inline void bitmap_set(int bit) { _frame_map[bit / 32] |= (1 << (bit % 32)); }
+void bitmap_set(int bit) { _frame_map[bit / 32] |= (1 << (bit % 32)); }
 
-inline void bitmap_unset(int bit) { _frame_map[bit / 32] &= ~(1 << (bit % 32)); }
+void bitmap_unset(int bit) { _frame_map[bit / 32] &= ~(1 << (bit % 32)); }
 
-inline int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)); }
+int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)); }
 
 static inline uint32_t get_frame_count() { return _max_frames; }
 

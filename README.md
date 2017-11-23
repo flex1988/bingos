@@ -29,6 +29,7 @@ gettimeofday|6|get/set date and time
 execve|7|transforms the calling process into a new process
 fork|8|copy calling process
 getpid|9|get parent or calling process identification
+waitpid|10|
 sbrk|10|change data segment size
 lseek|11|reposition read/write file offset
 lstat|12|get file status

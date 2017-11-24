@@ -21,17 +21,17 @@ extern uint8_t* frame_buffer;
 
 static inline void page_dir_switch(page_dir_t* dir) {
     _current_pd = dir;
-    asm volatile("mov %0, %%cr3" ::"r"(dir->physical));
+    __asm__ volatile("mov %0, %%cr3" ::"r"(dir->physical));
 }
 
 static inline void enable_paging() {
     uint32_t r;
-    asm volatile("mov %%cr0, %0" : "=r"(r));
+    __asm__ volatile("mov %%cr0, %0" : "=r"(r));
     r |= 0x80000000;
-    asm volatile("mov %0, %%cr0" ::"r"(r));
+    __asm__ volatile("mov %0, %%cr0" ::"r"(r));
 }
 
-static inline void setup_pages() { asm volatile("mov %0, %%cr3" ::"r"((uint32_t)_kernel_pd)); }
+static inline void setup_pages() { __asm__ volatile("mov %0, %%cr3" ::"r"((uint32_t)_kernel_pd)); }
 
 ptr_t get_physaddr(ptr_t virtualaddr) {
     int pdidx = virtualaddr >> 22;
@@ -48,7 +48,7 @@ void page_fault(registers_t* regs) {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
     uint32_t faulting_address;
-    asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
+    __asm__ volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
     // The error code gives us details of what happened.
     int present = !(regs->err_code & 0x1);  // Page not present

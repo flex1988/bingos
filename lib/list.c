@@ -68,6 +68,24 @@ void list_push_back(list_t *l, void *value) {
     l->length++;
 }
 
+void list_push_front(list_t *l, void *value) {
+    list_node_t *n = kmalloc(sizeof(list_node_t));
+
+    n->value = value;
+    n->next = 0;
+    n->prev = 0;
+
+    if (!l->head) {
+        l->tail = n;
+    } else {
+        l->head->prev = n;
+        n->next = l->head;
+    }
+
+    l->head = n;
+    l->length++;
+}
+
 list_node_t *list_pop_front(list_t *l) {
     if (!l->head)
         return NULL;

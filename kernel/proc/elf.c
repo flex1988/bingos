@@ -1,8 +1,10 @@
 #include "kernel/elf.h"
 #include "kernel.h"
 #include "kernel/mmu.h"
+#include "kernel/process.h"
 
 extern page_dir_t *_current_pd;
+extern process_t *_current_process;
 
 bool_t elf_ehdr_check(elf32_ehdr *ehdr) {
     if (*(uint32_t *)ehdr->e_ident != ELF_MAGIC) {
@@ -26,10 +28,20 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
     elf32_shdr *shdr;
     page_t *page;
 
+    IRQ_OFF;
+
     for (virt = 0; virt < (ehdr->e_shentsize * ehdr->e_shnum); virt += ehdr->e_shentsize) {
         shdr = (elf32_shdr *)((uint8_t *)ehdr + (ehdr->e_shoff + virt));
 
         if (shdr->sh_addr) {
+            if (shdr->sh_addr < _current_process->img_entry) {
+                _current_process->img_entry = shdr->sh_addr;
+            }
+
+            if (shdr->sh_addr + shdr->sh_size - _current_process->img_entry > _current_process->img_size) {
+                _current_process->img_size = shdr->sh_addr + shdr->sh_size - _current_process->img_entry;
+            }
+
             for (virt = 0; virt < (shdr->sh_size + 0x2000); virt += PAGE_SIZE) {
                 page = get_page(shdr->sh_addr + virt, 1, _current_pd);
                 ASSERT(page);
@@ -37,18 +49,14 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
             }
         }
 
-        switch (shdr->sh_type) {
-            case SHT_NOBITS:
-                memset((void *)shdr->sh_addr, 0, shdr->sh_size);
-                break;
-
-            case SHT_PROGBITS:
-            case SHT_STRTAB:
-            case SHT_SYMTAB:
-                memcpy((void *)shdr->sh_addr, (uint8_t *)ehdr + shdr->sh_offset, shdr->sh_size);
-                break;
+        if (shdr->sh_type == SHT_NOBITS) {
+            memset((void *)shdr->sh_addr, 0, shdr->sh_size);
+        } else {
+            memcpy((void *)shdr->sh_addr, (uint8_t *)ehdr + shdr->sh_offset, shdr->sh_size);
         }
     }
+
+    IRQ_ON;
 
     return true;
 }

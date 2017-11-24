@@ -1,11 +1,10 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-    printf("Simple Shell.");
+    int i = 0;
+    /*while (i++ < 1000);*/
 
-    //while (1) {
-      //  execve("/sh", 0, 0);
-    //}
+    printf("Simple Shell.");
 
     return 0;
 }

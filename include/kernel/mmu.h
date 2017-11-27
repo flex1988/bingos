@@ -4,6 +4,8 @@
 #include "hal/isr.h"
 
 #define PAGE_SIZE (4096)
+#define PAGE_MASK (~(PAGE_SIZE-1))
+#define PAGE_ALIGN(addr) (((addr)+PAGE_SIZE-1)&PAGE_MASK)
 
 #define PAGE_TABLE_INDEX(x) ((x) >> 12) & 0x03ff
 #define PAGE_DIRECTORY_INDEX(x) (((x) >> 22) & 0x3ff)

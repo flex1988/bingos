@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
 
     if ((pid = fork()) == 0) {
         printf("shell xxxxxxxxxxxxxx %d", pid);
+        brk();
         execve("/sh", 0, 0);
         exit(0);
     } else {

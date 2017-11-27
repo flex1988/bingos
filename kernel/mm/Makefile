@@ -2,7 +2,7 @@ obj_dir := ../../build/objs
 
 include ../Makefile.config
 
-target := $(obj_dir)/mmu.o $(obj_dir)/frame.o $(obj_dir)/kheap.o
+target := $(obj_dir)/mmu.o $(obj_dir)/frame.o $(obj_dir)/kheap.o $(obj_dir)/mmap.o
 
 all: $(target)
 

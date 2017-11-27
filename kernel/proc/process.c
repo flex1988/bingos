@@ -40,6 +40,26 @@ void travse_dir(page_dir_t *dir) {
     printk("");
 }
 
+int dup_mmap(process_t *p, process_t *parent) {
+    vm_area_t *i, **ptr, *tmp;
+
+    p->mmap = NULL;
+    ptr = &p->mmap;
+    for (i = parent->mmap; i != NULL; i = i->next) {
+        tmp = (vm_area_t *)kmalloc(sizeof(vm_area_t));
+        if (!tmp)
+            return -ENOMEM;
+
+        *tmp = *i;
+        tmp->next = NULL;
+
+        *ptr = tmp;
+        ptr = &tmp->next;
+    }
+
+    return 0;
+}
+
 // !!! p->kstack point to stack bottom (really important)
 process_t *process_create(process_t *parent) {
     process_t *p = (process_t *)kmalloc_i(sizeof(process_t), 0, 0);
@@ -60,8 +80,11 @@ process_t *process_create(process_t *parent) {
         memset((void *)p->kstack - KSTACK_SIZE, 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
+
+        dup_mmap(p, parent);
     } else {
         p->ustack = 0;
+        p->mmap = 0;
     }
 
     p->status = 0;
@@ -143,13 +166,13 @@ void move_stack(uint32_t new_stack_start, uint32_t size) {
 
     // flush the TLB by reading and writing the page directory address again
     uint32_t pd_addr;
-    __asm__ volatile("mov %%cr3, %0" : "=r"(pd_addr));
-    __asm__ volatile("mov %0, %%cr3" ::"r"(pd_addr));
+    __asm__ __volatile__("mov %%cr3, %0" : "=r"(pd_addr));
+    __asm__ __volatile__("mov %0, %%cr3" ::"r"(pd_addr));
 
     uint32_t old_stack_pointer;
-    __asm__ volatile("mov %%esp, %0" : "=r"(old_stack_pointer));
+    __asm__ __volatile__("mov %%esp, %0" : "=r"(old_stack_pointer));
     uint32_t old_base_pointer;
-    __asm__ volatile("mov %%ebp, %0" : "=r"(old_base_pointer));
+    __asm__ __volatile__("mov %%ebp, %0" : "=r"(old_base_pointer));
 
     uint32_t offset = (uint32_t)new_stack_start - _initial_esp;
 
@@ -305,12 +328,8 @@ int sys_exec(char *path, int argc, char **argv) {
     ptr_t entry;
     page_t *page;
 
-    for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
-        page = get_page(virt, 1, _current_process->pd);
-        ASSERT(page);
-
-        page_map(page, 0, 1);
-    }
+    ret = do_mmap(USTACK_BOTTOM, n->length);
+    ASSERT(!ret);
 
     ehdr = (elf32_ehdr *)0x30000000;
 
@@ -329,24 +348,15 @@ int sys_exec(char *path, int argc, char **argv) {
 
     entry = ehdr->e_entry;
 
-    // free user mode stack and file
-    for (virt = 0x30000000; virt < (0x30000000 + n->length); virt += PAGE_SIZE) {
-        page = get_page(virt, 0, _current_process->pd);
-        ASSERT(page);
+    ret = do_munmap(USTACK_BOTTOM, n->length);
+    ASSERT(!ret);
 
-        page_unmap(page);
-    }
-
-    for (virt = USTACK_BOTTOM; virt <= (USTACK_BOTTOM + USTACK_SIZE); virt += PAGE_SIZE) {
-        page = get_page(virt, 1, _current_process->pd);
-        ASSERT(page);
-
-        page_map(page, 0, 1);
-    }
+    ret = do_mmap(USTACK_BOTTOM, USTACK_SIZE);
+    ASSERT(!ret);
 
     _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
-    switch_to_user_mode(entry, USTACK_BOTTOM + USTACK_SIZE);
+    switch_to_user_mode(entry, _current_process->ustack);
 
     ASSERT(0);
 

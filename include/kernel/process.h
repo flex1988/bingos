@@ -2,6 +2,7 @@
 #define __PROCESS_H__
 
 #include <types.h>
+#include "kernel/mm.h"
 #include "kernel/mmu.h"
 
 #define KSTACK_SIZE 0x2000
@@ -44,6 +45,8 @@ typedef struct process_s {
 
     uint32_t img_entry;
     uint32_t img_size;
+
+    vm_area_t *mmap;
 
     process_t *next;
     page_dir_t *pd;

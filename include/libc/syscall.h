@@ -45,5 +45,6 @@ DECL_SYSCALL1(waitpid, int);
 #define SYSCALL_FORK 8
 #define SYSCALL_GETPID 9
 #define SYSCALL_WAITPID 10
+#define SYSCALL_BRK 11
 
 #endif

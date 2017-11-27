@@ -35,4 +35,6 @@ void tty_init(multiboot_info_t *boot_info) {
     } else {
         vesa_init(&console, boot_info);
     }
+
+    console.clear();
 }

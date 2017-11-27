@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "kernel/elf.h"
 #include "kernel/kheap.h"
+#include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
 
@@ -204,14 +205,14 @@ void process_init() {
     IRQ_OFF;
 
     // relocate the stack to 0xe0000000
-    move_stack(0xe0000000, 0x2000);
+    move_stack(KINIT_STACK_BOTTOM, KINIT_STACK_SIZE);
 
     sched_init();
 
     process_t *init = process_create(0);
 
     init->pd = _current_pd;
-    init->kstack = 0xe0000000;
+    init->kstack = KINIT_STACK_BOTTOM;
     init->state = PROCESS_RUNING;
 
     _current_process = _init_process = init;
@@ -336,7 +337,7 @@ int sys_exec(char *path, int argc, char **argv) {
     ret = do_mmap(USTACK_BOTTOM, n->length);
     ASSERT(!ret);
 
-    ehdr = (elf32_ehdr *)0x30000000;
+    ehdr = (elf32_ehdr *)USTACK_BOTTOM;
 
     ret = vfs_read(n, 0, n->length, (uint8_t *)ehdr);
     ASSERT(ret >= sizeof(elf32_ehdr));

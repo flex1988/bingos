@@ -5,6 +5,7 @@
 #include "kernel.h"
 #include "kernel/frame.h"
 #include "kernel/kheap.h"
+#include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "multiboot.h"
 

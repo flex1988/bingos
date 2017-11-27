@@ -38,6 +38,7 @@ DECL_SYSCALL3(execve,const char *,char **,char **);
 DECL_SYSCALL0(fork);
 DECL_SYSCALL0(getpid);
 DECL_SYSCALL1(waitpid, int);
+DECL_SYSCALL1(brk, const void *);
 
 #define SYSCALL_EXIT 0
 #define SYSCALL_PRINTLN 1

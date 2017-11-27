@@ -6,7 +6,7 @@ DEFN_SYSCALL3(execve, SYSCALL_EXECVE, const char *, char **, char **);
 DEFN_SYSCALL0(fork, SYSCALL_FORK);
 DEFN_SYSCALL0(getpid, SYSCALL_GETPID);
 DEFN_SYSCALL1(waitpid, SYSCALL_WAITPID, int);
-DEFN_SYSCALL0(brk, SYSCALL_BRK);
+DEFN_SYSCALL1(brk, SYSCALL_BRK,const void *);
 
 int exit(int val) { return syscall_exit(val); }
 

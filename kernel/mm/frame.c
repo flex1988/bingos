@@ -123,6 +123,8 @@ void free_frame(uint32_t frame) {
     _used_frames--;
 }
 
+uint32_t free_pages() { return _max_frames - _used_frames; }
+
 uint32_t alloc_frames(size_t size) {
     if (get_frame_count() <= 0) {
         PANIC("no more frames");

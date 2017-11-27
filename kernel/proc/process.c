@@ -81,8 +81,13 @@ process_t *process_create(process_t *parent) {
 
         p->ustack = parent->ustack;
 
+        p->brk = parent->brk;
+        p->img_entry = parent->img_entry;
+        p->img_size = parent->img_size;
+
         dup_mmap(p, parent);
     } else {
+        p->brk = 0;
         p->ustack = 0;
         p->mmap = 0;
     }

@@ -46,6 +46,8 @@ typedef struct process_s {
     uint32_t img_entry;
     uint32_t img_size;
 
+    uint32_t brk;
+
     vm_area_t *mmap;
 
     process_t *next;

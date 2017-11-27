@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "kernel/frame.h"
 #include "kernel/kheap.h"
 #include "kernel/mm.h"
 #include "kernel/mmu.h"
@@ -8,7 +9,38 @@
 
 extern process_t *_current_process;
 
-void *sys_brk(void *brk) { return 0; }
+void *sys_brk(void *brk) {
+    int end_code = _current_process->img_entry + _current_process->img_size;
+
+    int free;
+    uint32_t newbrk, oldbrk;
+printk("0x%x 0x%x",brk,end_code);
+    if (brk < end_code)
+        return _current_process->brk;
+    newbrk = PAGE_ALIGN((uint32_t)brk);
+    oldbrk = PAGE_ALIGN((uint32_t)_current_process->brk);
+    if (oldbrk == newbrk) {
+        _current_process->brk = brk;
+        return brk;
+    }
+
+    if (brk <= _current_process->brk) {
+        _current_process->brk = brk;
+        do_munmap(newbrk, oldbrk - newbrk);
+        return brk;
+    }
+
+    free = free_pages();
+    if (free < 0) {
+        return _current_process->brk;
+    }
+
+    _current_process->brk = brk;
+
+    do_mmap(oldbrk, newbrk - oldbrk);
+
+    return brk;
+}
 
 // Insert vm structure into process list
 // This makes sure the list is sorted by start address, and
@@ -77,7 +109,7 @@ int do_munmap(uint32_t addr, uint32_t len) {
 
 int do_mmap(uint32_t addr, uint32_t len) {
     if ((len = PAGE_ALIGN(len)) == 0) {
-        printk("page align %d",len);
+        printk("page align %d", len);
         return addr;
     }
 

@@ -11,6 +11,6 @@ int sys_gettimeofday();
 int sys_execve();
 extern int sys_fork();
 extern int sys_getpid();
-int sys_sbrk();
+extern void *sys_brk();
 extern int sys_waitpid(int pid);
 #endif

@@ -26,7 +26,7 @@ static void* syscalls[] = {
     sys_fork,          // 8
     sys_getpid,        // 9
     sys_waitpid,       // 10
-    sys_fork,          // 11
+    sys_brk,           // 11
     sys_exit           // 12
 };
 
@@ -60,7 +60,7 @@ void syscall_handler(registers_t* regs) {
         : "=a"(ret)
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
-     regs->eax = ret;
+    regs->eax = ret;
 }
 
 // must not return ,switch process instead
@@ -91,5 +91,3 @@ int sys_execve(const char* filename, char* const argv[], char* const envp[]) {
 
     return sys_exec(filename, argc, argv);
 }
-
-int sys_sbrk() { return 0; }

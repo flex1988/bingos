@@ -27,6 +27,7 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
     uint32_t virt;
     elf32_shdr *shdr;
     page_t *page;
+    int ret;
 
     IRQ_OFF;
 
@@ -42,11 +43,8 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
                 _current_process->img_size = shdr->sh_addr + shdr->sh_size - _current_process->img_entry;
             }
 
-            for (virt = 0; virt < (shdr->sh_size + 0x2000); virt += PAGE_SIZE) {
-                page = get_page(shdr->sh_addr + virt, 1, _current_pd);
-                ASSERT(page);
-                page_map(page, 0, 1);
-            }
+            ret = do_mmap(shdr->sh_addr, shdr->sh_size + 0x2000);
+            ASSERT(!ret);
         }
 
         if (shdr->sh_type == SHT_NOBITS) {
@@ -55,6 +53,8 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
             memcpy((void *)shdr->sh_addr, (uint8_t *)ehdr + shdr->sh_offset, shdr->sh_size);
         }
     }
+
+    _current_process->brk = USTACK_BOTTOM + USTACK_SIZE;
 
     IRQ_ON;
 

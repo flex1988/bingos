@@ -90,6 +90,7 @@ page_t* get_page(uint32_t virt, int make, page_dir_t* pd) {
 }
 
 void page_map(page_t* page, int kernel, int rw) {
+    ASSERT(page);
     if (page->addr != 0) {
         /*printk("map page already exist frame page->addr 0x%x", page->addr);*/
         /*PANIC("page frame exists");*/
@@ -104,6 +105,7 @@ void page_map(page_t* page, int kernel, int rw) {
 }
 
 void page_unmap(page_t* page) {
+    ASSERT(page);
     free_frame(page->addr);
     page->addr = 0;
 }

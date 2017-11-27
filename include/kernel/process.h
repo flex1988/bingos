@@ -5,11 +5,6 @@
 #include "kernel/mm.h"
 #include "kernel/mmu.h"
 
-#define KSTACK_SIZE 0x2000
-#define USTACK_SIZE 0x10000
-
-#define USTACK_BOTTOM 0x30000000
-
 #define PROCESS_STATE_SLEEP 0
 #define PROCESS_STATE_ACTIVE 1
 

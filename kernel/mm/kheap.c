@@ -1,5 +1,6 @@
 #include "kernel/kheap.h"
 #include "kernel.h"
+#include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "lib/ordered_array.h"
 

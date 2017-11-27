@@ -1,5 +1,6 @@
 #include "kernel/elf.h"
 #include "kernel.h"
+#include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "kernel/process.h"
 

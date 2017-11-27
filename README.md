@@ -15,6 +15,28 @@
     - b kmain
     - target remote :1234
 
+### Memory Layout
+
+```
+    /* Memory layout definition
+     * +------------+
+     * | 0x00100000 | Kernel multiboot header
+     * +------------+
+     * | 0x00x00000 | some kernel stucts before mmu_init
+     * +------------+
+     * | 0x20000000 | User mode image loaded address
+     * +------------+
+     * | 0x30000000 | User stack bottom
+     * +------------+
+     * | 0x30010000 | User stack heap bottom
+     * +------------+
+     * | 0xc0000000 | Kernel heap bottom
+     * +------------+
+     * | 0xdfffe000 | Init process kernel stack
+     * +------------+
+     */
+```
+
 ### Syscall Table
 
 syscall|interrupt number|comment|args

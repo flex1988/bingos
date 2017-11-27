@@ -44,9 +44,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
 
     tty_init(boot_info);
-
-    console.clear();
-
+    
     init_descriptor_tables();
 
     IRQ_ON;

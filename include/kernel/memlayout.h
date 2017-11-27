@@ -9,13 +9,15 @@
  * +------------+
  * | 0x20000000 | User mode image loaded address
  * +------------+
- * | 0x30000000 | User stack bottom
+ * | 0x30000000 | User stack: 0x30000000~0x30010000
  * +------------+
  * | 0x30010000 | User stack heap bottom
  * +------------+
  * | 0xc0000000 | Kernel heap bottom
  * +------------+
- * | 0xdfffe000 | Init process kernel stack
+ * | 0xdfffe000 | Init process kernel stack: 0xdfffe000~0xe0000000
+ * +------------+
+ * | 0xe0000000 | 
  * +------------+
  */
 

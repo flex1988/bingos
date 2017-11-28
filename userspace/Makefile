@@ -6,6 +6,8 @@ obj_dir := ../build/libc/objs
 
 libc := ../build/libc.a
 
+lib := ../build/lib.a
+
 target := $(bin_dir)/init $(bin_dir)/sh
 
 all: $(target)
@@ -15,7 +17,7 @@ CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -I ../include/libc
 LDFLAGS := -melf_i386 -T link.ld
 
 $(bin_dir)/init: $(obj_dir)/init.o
-	$(LD) $(LDFLAGS) -o $(bin_dir)/init $(obj_dir)/init.o $(libc)
+	$(LD) $(LDFLAGS) -o $(bin_dir)/init $(obj_dir)/init.o $(libc) $(lib)
 
 $(bin_dir)/sh: $(obj_dir)/sh.o
 	$(LD) $(LDFLAGS) -o $(bin_dir)/sh $(obj_dir)/sh.o $(libc)

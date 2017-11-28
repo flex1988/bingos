@@ -4,16 +4,16 @@ CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfil
 
 obj_dir := ../build/libc/objs
 
-objs := $(obj_dir)/string.o $(obj_dir)/stdio.o $(obj_dir)/crt0.o $(obj_dir)/syscall.o $(obj_dir)/vsprintf.o $(obj_dir)/errno.o
+objs := $(obj_dir)/string.o $(obj_dir)/stdio.o $(obj_dir)/crt0.o $(obj_dir)/syscall.o $(obj_dir)/vsprintf.o $(obj_dir)/errno.o $(obj_dir)/heap.o $(obj_dir)/stdlib.o
 
 all: libc
 
 libc: $(objs)
-	ar -crv ../build/libc.a $(objs)
+	ar -crv ../build/libc.a $(objs) ../build/lib.a
 
 $(obj_dir)/%.o: %.c
 	test -d ../build/libc/objs || mkdir -p ../build/libc/objs
-	$(CC) $(CFLAGS) -I../include/libc -c -o $@ $< 
+	$(CC) $(CFLAGS) -I../include/libc -I../include -c -o $@ $< 
 
 $(obj_dir)/crt0.o:
 	nasm -felf32 -o $(obj_dir)/crt0.o crt0.asm

@@ -6,7 +6,10 @@ kernel := build/kernel-$(arch).bin
 
 libc := build/libc.a
 
-modules := kernel/init \
+lib := build/lib.a
+
+modules := lib	\
+	kernel/init \
 	kernel/print \
 	kernel/mm \
 	kernel/graphic \
@@ -14,7 +17,6 @@ modules := kernel/init \
 	kernel/sys	\
 	libc \
 	hal \
-	lib	\
 	fs	\
 	drivers \
 	userspace	\
@@ -42,7 +44,7 @@ $(modules): Makefile
 	cd $@ && $(MAKE) $(MFLAGS)
 
 $(kernel): $(obj_files) $(linker_script) 
-	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc)
+	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc) $(lib)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub

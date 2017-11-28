@@ -360,6 +360,10 @@ int sys_exec(char *path, int argc, char **argv) {
     ret = do_mmap(USTACK_BOTTOM, USTACK_SIZE);
     ASSERT(!ret);
 
+    ret = do_mmap(UHEAP_START, UHEAP_INITIAL_SIZE);
+    ASSERT(!ret);
+
+    _current_process->brk = UHEAP_START;
     _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
     switch_to_user_mode(entry, _current_process->ustack);

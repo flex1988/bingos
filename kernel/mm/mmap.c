@@ -10,15 +10,17 @@
 extern process_t *_current_process;
 
 void *sys_brk(void *brk) {
-    int end_code = _current_process->img_entry + _current_process->img_size;
+    int end_code = _current_process->brk;
 
     int free;
     uint32_t newbrk, oldbrk;
-printk("0x%x 0x%x",brk,end_code);
+
     if (brk < end_code)
         return _current_process->brk;
+
     newbrk = PAGE_ALIGN((uint32_t)brk);
     oldbrk = PAGE_ALIGN((uint32_t)_current_process->brk);
+
     if (oldbrk == newbrk) {
         _current_process->brk = brk;
         return brk;
@@ -32,6 +34,7 @@ printk("0x%x 0x%x",brk,end_code);
 
     free = free_pages();
     if (free < 0) {
+        printk("free pages is not enough");
         return _current_process->brk;
     }
 
@@ -108,6 +111,7 @@ int do_munmap(uint32_t addr, uint32_t len) {
 }
 
 int do_mmap(uint32_t addr, uint32_t len) {
+    
     if ((len = PAGE_ALIGN(len)) == 0) {
         printk("page align %d", len);
         return addr;

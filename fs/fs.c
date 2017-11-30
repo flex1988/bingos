@@ -1,7 +1,9 @@
 #include "fs/fs.h"
 #include "kernel.h"
+#include "lib/tree.h"
 
 vfs_node_t* vfs_root = 0;
+tree_t* fs_tree = 0;
 
 static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path) {
     char* dir = NULL;
@@ -89,3 +91,5 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
 
     return n;
 }
+
+void vfs_init() { fs_tree = create_tree(); }

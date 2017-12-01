@@ -12,6 +12,7 @@
 #include "kernel/process.h"
 #include "kernel/vesa.h"
 #include "kernel/vga.h"
+#include "lib/tree.h"
 #include "multiboot.h"
 
 extern ptr_t _placement_addr;
@@ -26,6 +27,8 @@ static void init(void) {}
 extern process_t *_current_process;
 
 extern console_t console;
+
+extern tree_node_t *fs_tree;
 
 static void message() {
     printk(
@@ -55,12 +58,16 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     frame_init(boot_info);
     mmu_init();
     process_init();
-    vfs_root = initrd_init(initrd);
+
+    vfs_init();
+    vfs_node_t *ramdisk = initrd_init(initrd);
+    vfs_mount("/bin", ramdisk);
+
     syscalls_init();
     kbd_init();
-
     message();
-    sys_exec("/init", 0, NULL);
+
+    sys_exec("/bin/init", 0, NULL);
 
     while (1)
         ;

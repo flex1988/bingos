@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
         memcpy(p, "hello world!", sizeof("hello world!"));
         printf(p);
         free(p);
-        execve("/sh", 0, 0);
+        execve("/bin/sh", 0, 0);
         exit(0);
     } else {
         printf("parent xxxxxxxxxx %d", pid);

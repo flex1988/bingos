@@ -13,6 +13,7 @@
 #include "kernel/vesa.h"
 #include "kernel/vga.h"
 #include "lib/tree.h"
+#include "module.h"
 #include "multiboot.h"
 
 extern ptr_t _placement_addr;
@@ -52,8 +53,9 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     timer_init(50);
 
     uint32_t initrd = *((uint32_t *)boot_info->mods_addr);
-    uint32_t initrd_end = *(uint32_t *)(boot_info->mods_addr + 4);
-    _placement_addr = initrd_end;
+    _placement_addr = *(uint32_t *)(boot_info->mods_addr + 4);
+
+    modules_init();
 
     frame_init(boot_info);
     mmu_init();

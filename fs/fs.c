@@ -1,34 +1,30 @@
 #include "fs/fs.h"
 #include "kernel.h"
+#include "lib/tree.h"
+
+#include <string.h>
 
 vfs_node_t* vfs_root = 0;
+tree_t* fs_tree = 0;
 
-static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path) {
+static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path, int depth) {
     char* dir = NULL;
-    int ret;
+    vfs_node_t* ret;
 
-    while (path[0] == '/') path++;
+    /*while (path[0] == '/') path++;*/
 
     if (!path[0])
         return n;
 
-    while (1) {
+    while (depth--) {
         dir = path;
 
-        if (path) {
-            path = strchr(path, '/');
-            if (path) {
-                path[0] = '\0';
-                path++;
-            }
-        }
+        path = path + strlen(path) + 1;
 
-        if (!dir) {
-            return n;
-        }
-
-        n = vfs_finddir(n, dir);
+        ret = vfs_finddir(n, dir);
     }
+
+    return ret;
 }
 
 uint32_t vfs_read(vfs_node_t* node, uint32_t offset, uint32_t size, uint8_t* buffer) {
@@ -68,24 +64,202 @@ vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
         return 0;
 }
 
+// find file mount point
+vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, uint32_t* mount_depth) {
+    size_t d;
+
+    for (d = 0; d < depth; d++) {
+        path += strlen(path) + 1;
+    }
+
+    vfs_node_t* last = vfs_root;
+    tree_node_t* node = fs_tree->root;
+
+    char* p = *mount_path;
+    *mount_depth = 1;
+
+    while (1) {
+        if (p >= path) {
+            break;
+        }
+
+        int found = 0;
+        for (int i = 0; i < node->length; i++) {
+            tree_node_t* child = node->children[i];
+
+            vfs_entry_t* entry = (vfs_entry_t*)child->data;
+
+            if (!strcmp(entry->name, p)) {
+                found = 1;
+                node = child;
+                p = p + strlen(p) + 1;
+
+                if (entry->file) {
+                    last = entry->file;
+                    *mount_path = p;
+                }
+
+                break;
+            }
+        }
+
+        if (!found)
+            break;
+
+        *mount_depth++;
+    }
+
+    return last;
+}
+
 vfs_node_t* vfs_lookup(const char* path, int type) {
     char* dup = NULL;
-    vfs_node_t* n = NULL;
+    vfs_node_t* ret = NULL;
     vfs_node_t* c = NULL;
 
     // support absolute path only
     ASSERT(path[0] == '/');
 
-    c = vfs_root;
-    // ref
-
     dup = kmalloc(strlen(path) + 1);
-
     strcpy(dup, path);
 
-    n = vfs_lookup_internal(c, dup);
+    size_t path_size = strlen(path);
+
+    if (path_size == 1) {
+        kfree(dup);
+        return vfs_root;
+    }
+
+    char* p = path;
+    uint32_t pdepth = 0;
+
+    // split path
+    while (p < path + path_size) {
+        if (*p == '/') {
+            *p = '\0';
+            pdepth++;
+        }
+        p++;
+    }
+    p[path_size] = '\0';
+    p = path + 1;
+
+    char* mount_path = p;
+    uint32_t mount_depth = 0;
+
+    vfs_node_t* node = vfs_get_mount_point(p, pdepth, &mount_path, &mount_depth);
+
+    ret = vfs_lookup_internal(node, mount_path, pdepth - mount_depth);
 
     kfree(dup);
 
-    return n;
+    return ret;
+}
+
+void* vfs_mount(char* path, vfs_node_t* lroot) {
+    if (!fs_tree) {
+        printk("vfs mount tree has not been initialized");
+        return NULL;
+    }
+
+    if (!path || path[0] != '/') {
+        printk("mount path must be absolute path");
+        return NULL;
+    }
+
+    // may be need spin lock
+    tree_node_t* ret = NULL;
+
+    int path_size = strlen(path);
+    char* buf = kmalloc(path_size + 1);
+    memcpy(buf, path, path_size + 1);
+
+    char* i = buf;
+    while (i < buf + path_size) {
+        if (*i == '/') {
+            *i = '\0';
+        }
+        i++;
+    }
+
+    buf[path_size] = '\0';
+    i = buf + 1;
+
+    tree_node_t* root_node = fs_tree->root;
+
+    if (*i == '\0') {
+        // mount root
+        vfs_entry_t* root = (vfs_entry_t*)root_node->data;
+        if (root->file) {
+            printk("Path %s already mounted", path);
+        }
+        root->file = lroot;
+        vfs_root = lroot;
+        ret = root_node;
+    } else {
+        tree_node_t* node = root_node;
+        char* p = i;
+
+        while (1) {
+            if (p >= buf + path_size)
+                break;
+
+            int found = 0;
+
+            for (int j = 0; j < node->length; j++) {
+                tree_node_t* child = node->children[j];
+
+                if (!strcmp(child->name, p)) {
+                    found = 1;
+                    node = child;
+                    ret = child;
+                    break;
+                }
+            }
+
+            if (!found) {
+                vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
+                memcpy(entry->name, p, strlen(p) + 1);
+
+                entry->file = NULL;
+                entry->device = NULL;
+                entry->type = NULL;
+
+                node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+            }
+
+            p = p + strlen(p) + 1;
+        }
+
+        vfs_entry_t* entry = (vfs_entry_t*)node->data;
+        if (entry->file) {
+            printk("Path %s already mounted", path);
+        }
+        entry->file = lroot;
+        ret = node;
+    }
+
+    free(buf);
+
+    return ret;
+}
+
+void vfs_init() {
+    fs_tree = create_tree();
+    vfs_entry_t* root = kmalloc(sizeof(vfs_entry_t));
+
+    memcpy(root->name, "/", strlen("/") + 1);
+
+    root->file = NULL;
+    root->type = NULL;
+    root->device = NULL;
+
+    tree_node_t* n = kmalloc(sizeof(tree_node_t));
+    n->data = (void*)root;
+    n->length = 0;
+
+    memcpy(n->name, root->name, strlen(root->name) + 1);
+    memset(n->children, 0, MAX_TREE_CHILDREN * sizeof(tree_node_t*));
+
+    set_tree_root(fs_tree, n);
 }

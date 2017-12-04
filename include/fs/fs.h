@@ -44,6 +44,13 @@ typedef struct vfs_node_s {
     vfs_node_t *ptr;
 } vfs_node_t;
 
+typedef struct vfs_entry_s {
+    char name[64];
+    vfs_node_t *file;
+    char *device;
+    char *type;
+} vfs_entry_t;
+
 extern vfs_node_t *vfs_root;
 
 uint32_t vfs_read(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
@@ -53,4 +60,5 @@ void vfs_close(vfs_node_t *node);
 dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
 vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
 vfs_node_t *vfs_lookup(const char *path, int type);
+void vfs_init();
 #endif

@@ -86,3 +86,4 @@ readlink|33|read value of a symbolic link
 - [Multiboot](https://www.gnu.org/software/grub/manual/multiboot/multiboot.html)
 - [Drawing_In_Protected](http://wiki.osdev.org/Drawing_In_Protected_Mode#Drawing_Text)
 - [Getting_to_Ring_3](http://wiki.osdev.org/Getting_to_Ring_3)
+- [ELF32](http://wiki.osdev.org/ELF)

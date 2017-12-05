@@ -2,12 +2,14 @@ CC := /root/opt/cross/bin/i686-elf-gcc
 
 CFLAGS := -m32 -std=c99 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs
 
-obj_dir := ../build/modules/objs
+LDFLAGS := -melf_i386 -T link.ld
 
-target := $(obj_dir)/ext2.o
+obj_dir := ../build/modules
+
+target := $(obj_dir)/ext2.ko
 
 all: $(target)
 
-$(obj_dir)/%.o: %.c
+$(obj_dir)/%.ko: %.c
 	test -d $(obj_dir) || mkdir -p $(obj_dir)
-	$(CC) $(CFLAGS) -I../include -I../include/libc -c -o $@ $< 
+	$(CC) $(CFLAGS) -T link.ld -I../include -I../include/libc -c -o $@ $< 

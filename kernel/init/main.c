@@ -52,10 +52,10 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     IRQ_ON;
     timer_init(50);
 
-    uint32_t initrd = *((uint32_t *)boot_info->mods_addr);
+    uint32_t initrd = *(uint32_t *)(boot_info->mods_addr);
     _placement_addr = *(uint32_t *)(boot_info->mods_addr + 4);
 
-    modules_init();
+    modules_init(boot_info);
 
     frame_init(boot_info);
     mmu_init();

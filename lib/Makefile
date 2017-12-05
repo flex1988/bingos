@@ -8,7 +8,7 @@ target := lib
 
 all: $(target)
 
-objs := $(obj_dir)/list.o $(obj_dir)/ordered_array.o $(obj_dir)/tree.o
+objs := $(obj_dir)/list.o $(obj_dir)/ordered_array.o $(obj_dir)/tree.o $(obj_dir)/hashmap.o
 
 lib: $(objs)
 	ar -crv ../build/lib.a $(objs)

@@ -85,6 +85,25 @@ void* hashmap_get(hashmap_t* map, void* key) {
     }
 }
 
+void* hashmap_beigin_with(hashmap_t* map, void* prefix) {
+    for (int i = 0; i < map->size; i++) {
+        hashmap_entry_t* x = map->entries[i];
+        while (x) {
+            if (strlen(x->key) < strlen(prefix)) {
+                x = x->next;
+                continue;
+            }
+
+            if (memcmp(x->key, prefix, strlen(prefix))) {
+                x = x->next;
+                continue;
+            }
+
+            return x->value;
+        }
+    }
+}
+
 void* hashmap_delete(hashmap_t* map, void* key) {
     uint32_t hash = map->hash(key) % map->size;
 
@@ -133,4 +152,12 @@ void hashmap_free(hashmap_t* map) {
     }
 
     free(map->entries);
+}
+
+int hashmap_string_compare(void* a, void* b) { return !strcmp(a, b) ? 1 : 0; }
+
+void* hashmap_string_dup(void* key) {
+    char* ret = malloc(strlen(key) + 1);
+    memcpy(ret, key, strlen(key) + 1);
+    return ret;
 }

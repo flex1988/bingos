@@ -1,7 +1,12 @@
 #include "kernel.h"
 #include "module.h"
 
-int ext2_init(void) { return 0; }
+int ext2_init(void) {
+    int i = 10000;
+    while (i--)
+        ;
+    return 0;
+}
 
 int ext2_deinit(void) { return 0; }
 

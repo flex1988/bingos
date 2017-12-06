@@ -13,6 +13,7 @@
 #include "kernel/vesa.h"
 #include "kernel/vga.h"
 #include "lib/tree.h"
+#include "module.h"
 #include "multiboot.h"
 
 extern ptr_t _placement_addr;
@@ -21,14 +22,6 @@ extern vfs_node_t *vfs_root;
 extern uint32_t _ip;
 
 uint32_t _initial_esp;
-
-static void init(void) {}
-
-extern process_t *_current_process;
-
-extern console_t console;
-
-extern tree_node_t *fs_tree;
 
 static void message() {
     printk(
@@ -51,9 +44,10 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     IRQ_ON;
     timer_init(50);
 
-    uint32_t initrd = *((uint32_t *)boot_info->mods_addr);
-    uint32_t initrd_end = *(uint32_t *)(boot_info->mods_addr + 4);
-    _placement_addr = initrd_end;
+    uint32_t initrd = *(uint32_t *)(boot_info->mods_addr);
+    _placement_addr = boot_info->mods_addr + 0x20000;
+
+    modules_init(boot_info);
 
     frame_init(boot_info);
     mmu_init();

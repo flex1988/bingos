@@ -90,13 +90,18 @@ typedef struct {
 } elf32_phdr;
 // table index 0 is reserved
 typedef struct {
-    uint16_t st_name;
+    uint32_t st_name;
     uint32_t st_value;
-    uint16_t st_size;
+    uint32_t st_size;
     uint8_t st_info;
     uint8_t st_other;
     uint16_t st_shndx;
 } elf32_sym;
+
+typedef struct {
+    uint32_t r_offset;
+    uint16_t r_info;
+} elf32_rel;
 #define STB_LOCAL 0
 #define STB_GLOBAL 1
 #define STT_NOTYPE 0
@@ -114,6 +119,11 @@ typedef struct {
 
 #define ELF_CLASS32 1
 #define ELF_CLASS64 2
+
+#define ELF32_ST_BIND(i) ((i) >> 4)
+#define ELF32_R_SYM(i) ((i) >> 8)
+#define ELF32_ST_TYPE(i) ((i) & 0xf)
+#define ELF32_R_TYPE(i) ((uint8_t)(i))
 
 bool_t elf_ehdr_check(elf32_ehdr *ehdr);
 bool_t elf_load_sections(elf32_ehdr *ehdr);

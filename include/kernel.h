@@ -3,6 +3,8 @@
 
 #include <types.h>
 
+#define __KERNEL__ 1
+
 #define PANIC(msg) panic(__FILE__, __LINE__, msg)
 
 #define ASSERT(b) ((b) ? (void)0 : panic(__FILE__, __LINE__, #b))

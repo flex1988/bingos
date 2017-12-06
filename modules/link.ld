@@ -15,4 +15,9 @@ SECTIONS
     {
         *(.bss*)
     }
+
+    .moddeps :
+    {
+        *(.moddeps)
+    }
 }

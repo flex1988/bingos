@@ -3,11 +3,21 @@
 #include "kernel/elf.h"
 #include "lib/hashmap.h"
 
-#define SYMBOLTABLE_HASHMAP_SIZE 10
+#define SYMBOLTABLE_HASHMAP_SIZE 200
 #define MODULE_HASHMAP_SIZE 10
 
 static hashmap_t *symboltable = NULL;
 static hashmap_t *modules = NULL;
+
+extern char kernel_symbols_start[];
+extern char kernel_symbols_end[];
+
+typedef struct {
+    uint32_t addr;
+    char name[];
+} kernel_symbol_t;
+
+extern int printk(const char *fmt, ...);
 
 void *module_load(void *blob, size_t length) {
     elf32_ehdr *ehdr = (elf32_ehdr *)blob;
@@ -207,6 +217,16 @@ void *module_load(void *blob, size_t length) {
 void modules_init(multiboot_info_t *mbi) {
     symboltable = hashmap_create(SYMBOLTABLE_HASHMAP_SIZE, HASHMAP_STRING);
     modules = hashmap_create(MODULE_HASHMAP_SIZE, HASHMAP_STRING);
+
+    kernel_symbol_t *k = (kernel_symbol_t *)kernel_symbols_start;
+
+    while ((uint32_t)k < (uint32_t)kernel_symbols_end) {
+        hashmap_set(symboltable, k->name, (void *)k->addr);
+        k = (kernel_symbol_t *)((uint32_t)k + sizeof(kernel_symbol_t) + strlen(k->name) + 1);
+    }
+
+    hashmap_set(symboltable, "kernel_symbols_start", kernel_symbols_start);
+    hashmap_set(symboltable, "kernel_symbols_end", kernel_symbols_end);
 
     multiboot_module_t *mod;
     int i;

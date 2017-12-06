@@ -29,6 +29,10 @@ CFLAGS_global := -Wall -g -nostdlib -nostdinc -fno-builtin -fno-stack-protector 
 
 CC = /root/opt/cross/bin/i686-elf-gcc
 
+NM = /root/opt/cross/bin/i686-elf-nm
+
+AS = /root/opt/cross/bin/i686-elf-as
+
 .PHONY: all $(modules) run iso
 
 linker_script := boot/linker.ld
@@ -39,15 +43,23 @@ initrd := tools/initrd.img
 
 ext2_module := build/modules/ext2.ko
 
-all: $(modules) $(kernel) $(iso)
+symbols := build/symbols.o
+
+all: $(modules) $(kernel) $(iso) 
 
 $(modules): Makefile
 	test -d build/objs || mkdir -p build/objs
 	test -d build/bin || mkdir -p build/bin
 	cd $@ && $(MAKE) $(MFLAGS)
 
-$(kernel): $(obj_files) $(linker_script) 
-	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc) $(lib)
+symbols:
+	$(NM) build/kernel-x86_64.bin -g|util/generate_symbols.py > kernel/symbols.asm
+
+$(kernel): $(obj_files) $(linker_script)
+	cp kernel/symbols.asm build/symbols.asm
+	$(AS) --32 build/symbols.asm -o build/symbols.o
+	mv build/symbols.o build/objs/symbols.o
+	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) build/objs/symbols.o $(libc) $(lib)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub

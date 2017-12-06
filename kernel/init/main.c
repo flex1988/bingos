@@ -23,14 +23,6 @@ extern uint32_t _ip;
 
 uint32_t _initial_esp;
 
-static void init(void) {}
-
-extern process_t *_current_process;
-
-extern console_t console;
-
-extern tree_node_t *fs_tree;
-
 static void message() {
     printk(
         "       _                _\n"
@@ -53,7 +45,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     timer_init(50);
 
     uint32_t initrd = *(uint32_t *)(boot_info->mods_addr);
-    _placement_addr = *(uint32_t *)(boot_info->mods_addr + 4);
+    _placement_addr = boot_info->mods_addr + 0x20000;
 
     modules_init(boot_info);
 

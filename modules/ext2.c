@@ -1,10 +1,19 @@
+#include "fs/ext2.h"
+#include "fs/fs.h"
 #include "kernel.h"
 #include "module.h"
 
+vfs_node_t *ext2_mount(char *device, char *mount_path) {
+    char *arg = kmalloc(strlen(device) + 1);
+    memcpy(arg, device, strlen(device) + 1);
+
+    char *argv[10];
+    ;
+}
+
 int ext2_init(void) {
-    int i = 10000;
-    while (i--)
-        ;
+    printk("Loading ext2 module...");
+
     return 0;
 }
 

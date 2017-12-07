@@ -1,6 +1,6 @@
 CC := gcc
 
-target := initrd font
+target := initrd
 
 bin_dir := ../build/bin
 

@@ -3,17 +3,16 @@
 #include "kernel.h"
 #include "module.h"
 
-vfs_node_t *ext2_mount(char *device, char *mount_path) {
-    char *arg = kmalloc(strlen(device) + 1);
-    memcpy(arg, device, strlen(device) + 1);
+static vfs_node_t *ext2_mount(char *device, char *mount_path) {
+    vfs_node_t *dev = vfs_lookup(device, 0);
 
-    char *argv[10];
-    ;
+    printk("ext2 mount 0x%x", dev);
+    return NULL;
 }
 
 int ext2_init(void) {
     printk("Loading ext2 module...");
-
+    vfs_register("ext2", ext2_mount);
     return 0;
 }
 

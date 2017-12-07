@@ -14,6 +14,8 @@
 typedef struct vfs_node_s vfs_node_t;
 typedef struct dirent dirent_t;
 
+typedef vfs_node_t *(*vfs_mount_callback)(char *arg, char *mount_point);
+
 typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef uint32_t (*write_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef void (*open_type_t)(vfs_node_t *);
@@ -61,4 +63,6 @@ dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
 vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
 vfs_node_t *vfs_lookup(const char *path, int type);
 void vfs_init();
+int vfs_register(char *name, vfs_mount_callback callback);
+int vfs_mount_type(char *type, char *arg, char *mount_point);
 #endif

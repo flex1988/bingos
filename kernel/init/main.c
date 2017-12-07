@@ -16,10 +16,7 @@
 #include "module.h"
 #include "multiboot.h"
 
-extern ptr_t _placement_addr;
 extern vfs_node_t *vfs_root;
-
-extern uint32_t _ip;
 
 uint32_t _initial_esp;
 
@@ -38,24 +35,22 @@ static void message() {
 
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
+
     tty_init(boot_info);
     init_descriptor_tables();
 
     IRQ_ON;
     timer_init(50);
 
-    uint32_t initrd = *(uint32_t *)(boot_info->mods_addr);
-    _placement_addr = boot_info->mods_addr + 0x20000;
-
     modules_init(boot_info);
-
     frame_init(boot_info);
     mmu_init();
     process_init();
-
+    
     vfs_init();
-    vfs_node_t *ramdisk = initrd_init(initrd);
+    vfs_node_t *ramdisk = initrd_init(*(uint32_t *)(boot_info->mods_addr));
     vfs_mount("/bin", ramdisk);
+    vfs_mount_type("ext2", "/", "/");
 
     syscalls_init();
     kbd_init();

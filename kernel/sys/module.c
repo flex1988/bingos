@@ -8,6 +8,7 @@
 
 static hashmap_t *symboltable = NULL;
 static hashmap_t *modules = NULL;
+extern hashmap_t *vfs_type_mounts;
 
 extern char kernel_symbols_start[];
 extern char kernel_symbols_end[];
@@ -17,7 +18,7 @@ typedef struct {
     char name[];
 } kernel_symbol_t;
 
-extern int printk(const char *fmt, ...);
+extern ptr_t _placement_addr;
 
 void *module_load(void *blob, size_t length) {
     elf32_ehdr *ehdr = (elf32_ehdr *)blob;
@@ -215,8 +216,12 @@ void *module_load(void *blob, size_t length) {
 }
 
 void modules_init(multiboot_info_t *mbi) {
+    // placement_addr muse be point to modules end,in ease here just incremnt by 0x10000
+    _placement_addr = *((uint32_t *)(mbi->mods_addr + 4)) + 0x10000;
+
     symboltable = hashmap_create(SYMBOLTABLE_HASHMAP_SIZE, HASHMAP_STRING);
     modules = hashmap_create(MODULE_HASHMAP_SIZE, HASHMAP_STRING);
+    vfs_type_mounts = hashmap_create(10, HASHMAP_STRING);
 
     kernel_symbol_t *k = (kernel_symbol_t *)kernel_symbols_start;
 
@@ -239,6 +244,7 @@ void modules_init(multiboot_info_t *mbi) {
 
         uint32_t mstart = mod->mod_start;
         uint32_t msize = mod->mod_end - mod->mod_start;
+
         module_load((void *)mstart, msize);
     }
 }

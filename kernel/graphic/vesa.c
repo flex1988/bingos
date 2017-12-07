@@ -9,8 +9,8 @@
 static uint8_t cursor_x;
 static uint8_t cursor_y;
 
-static uint8_t char_height;
-static uint8_t char_width;
+uint8_t char_height;
+uint8_t char_width;
 
 extern color_t RED;
 extern color_t BLACK;
@@ -49,7 +49,7 @@ void vesa_init(console_t *console, multiboot_info_t *boot_info) {
 
     graphic_init(mode_info);
 
-    char_height = 16;
+    char_height = 11;
     char_width = 8;
 
     console_height = mode_info->height / char_height - 1;
@@ -71,7 +71,7 @@ static void vesa_printc(char c) {
     }
 
     else if (c == 0x09) {
-        cursor_x = (cursor_x + 8) & ~(8 - 1);
+        cursor_x = (cursor_x + char_width) & ~(char_width - 1);
     }
 
     else if (c == '\r') {

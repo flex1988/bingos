@@ -52,7 +52,8 @@ $(modules): Makefile
 	test -d build/bin || mkdir -p build/bin
 	cd $@ && $(MAKE) $(MFLAGS)
 
-symbols:
+symbols: $(obj_files)
+	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc) $(lib)
 	$(NM) build/kernel-x86_64.bin -g|util/generate_symbols.py > kernel/symbols.asm
 
 $(kernel): $(obj_files) $(linker_script)

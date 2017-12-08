@@ -115,6 +115,60 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
     return last;
 }
 
+vfs_node_t* vfs_create_device(char* path) {
+    size_t plen = strlen(path);
+    char* pdup = kmalloc(plen + 1);
+    memcpy(pdup, path, plen + 1);
+
+    char* p = pdup;
+    while (p < pdup + plen) {
+        if (*p == '/')
+            *p = '\0';
+        p++;
+    }
+    pdup[plen] = '\0';
+
+    tree_node_t* node = vfs_tree->root;
+
+    p = pdup;
+    while (1) {
+        if (p > pdup) {
+            break;
+        }
+
+        int found = 0;
+        for (int i = 0; i < node->length; i++) {
+            tree_node_t* child = node->children[i];
+
+            vfs_entry_t* entry = (vfs_entry_t*)child->data;
+
+            if (!strcmp(entry->name, p)) {
+                node = child;
+                found = 1;
+                break;
+            }
+        }
+
+        // create vfs_node if node not exits
+        if (!found) {
+            vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
+            memcpy(entry->name, p, strlen(p) + 1);
+
+            entry->file = NULL;
+            entry->device = NULL;
+            entry->type = NULL;
+
+            node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+        }
+
+        p += strlen(p) + 1;
+    }
+
+    kfree(pdup);
+
+    return node;
+}
+
 vfs_node_t* vfs_lookup(const char* path, int type) {
     char* dup = NULL;
     vfs_node_t* ret = NULL;
@@ -242,7 +296,7 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
         ret = node;
     }
 
-    free(buf);
+    kfree(buf);
 
     return ret;
 }

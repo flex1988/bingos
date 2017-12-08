@@ -41,8 +41,6 @@ grub_cfg := boot/grub.cfg
 
 initrd := tools/initrd.img
 
-ext2_module := build/modules/ext2.ko
-
 symbols := build/symbols.o
 
 all: $(modules) $(kernel) $(iso) 
@@ -65,7 +63,7 @@ $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub
 	cp $(kernel) build/isofiles/boot/kernel.bin
 	cp $(grub_cfg) build/isofiles/boot/grub
-	cp $(ext2_module) build/isofiles/boot/ext2.ko
+	cp build/modules/* build/isofiles/boot
 	cp $(initrd) build/isofiles/boot/initrd.img
 	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles

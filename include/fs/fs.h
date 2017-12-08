@@ -30,6 +30,7 @@ struct dirent {
 
 typedef struct vfs_node_s {
     char name[128];
+    void *device;
     uint32_t mask;
     uint32_t uid;
     uint32_t gid;
@@ -44,6 +45,7 @@ typedef struct vfs_node_s {
     readdir_type_t readdir;
     finddir_type_t finddir;
     vfs_node_t *ptr;
+    void *ioctl;
 } vfs_node_t;
 
 typedef struct vfs_entry_s {

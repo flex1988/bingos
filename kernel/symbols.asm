@@ -228,11 +228,20 @@
 .extern initrd_root
 .type initrd_root, @function
 
+.extern inl
+.type inl, @function
+
+.extern ins
+.type ins, @function
+
 .extern insert_ordered_array
 .type insert_ordered_array, @function
 
 .extern insert_vm
 .type insert_vm, @function
+
+.extern insm
+.type insm, @function
 
 .extern _interrupt_handlers
 .type _interrupt_handlers, @function
@@ -284,6 +293,9 @@
 
 .extern irq9
 .type irq9, @function
+
+.extern irq_ack
+.type irq_ack, @function
 
 .extern irq_handler
 .type irq_handler, @function
@@ -501,6 +513,15 @@
 .extern outb
 .type outb, @function
 
+.extern outl
+.type outl, @function
+
+.extern outs
+.type outs, @function
+
+.extern outsm
+.type outsm, @function
+
 .extern page_dir_clone
 .type page_dir_clone, @function
 
@@ -518,6 +539,54 @@
 
 .extern panic
 .type panic, @function
+
+.extern PciClassCodeTable
+.type PciClassCodeTable, @function
+
+.extern PciCommandFlags
+.type PciCommandFlags, @function
+
+.extern pci_device_lookup
+.type pci_device_lookup, @function
+
+.extern PciDevSelFlags
+.type PciDevSelFlags, @function
+
+.extern PciDevTable
+.type PciDevTable, @function
+
+.extern pci_find_type
+.type pci_find_type, @function
+
+.extern pci_read_field
+.type pci_read_field, @function
+
+.extern pci_scan
+.type pci_scan, @function
+
+.extern pci_scan_bus
+.type pci_scan_bus, @function
+
+.extern pci_scan_func
+.type pci_scan_func, @function
+
+.extern pci_scan_hit
+.type pci_scan_hit, @function
+
+.extern pci_scan_slot
+.type pci_scan_slot, @function
+
+.extern PciStatusFlags
+.type PciStatusFlags, @function
+
+.extern pci_vendor_lookup
+.type pci_vendor_lookup, @function
+
+.extern PciVenTable
+.type PciVenTable, @function
+
+.extern pci_write_field
+.type pci_write_field, @function
 
 .extern _pdbr
 .type _pdbr, @function
@@ -593,6 +662,9 @@
 
 .extern SOLARIZED_BASE03
 .type SOLARIZED_BASE03, @function
+
+.extern sprintf
+.type sprintf, @function
 
 .extern _start
 .type _start, @function
@@ -707,6 +779,9 @@
 
 .extern vfs_close
 .type vfs_close, @function
+
+.extern vfs_create_device
+.type vfs_create_device, @function
 
 .extern vfs_finddir
 .type vfs_finddir, @function
@@ -987,11 +1062,20 @@ kernel_symbols_start:
 .long initrd_root
 .asciz "initrd_root"
 
+.long inl
+.asciz "inl"
+
+.long ins
+.asciz "ins"
+
 .long insert_ordered_array
 .asciz "insert_ordered_array"
 
 .long insert_vm
 .asciz "insert_vm"
+
+.long insm
+.asciz "insm"
 
 .long _interrupt_handlers
 .asciz "_interrupt_handlers"
@@ -1043,6 +1127,9 @@ kernel_symbols_start:
 
 .long irq9
 .asciz "irq9"
+
+.long irq_ack
+.asciz "irq_ack"
 
 .long irq_handler
 .asciz "irq_handler"
@@ -1260,6 +1347,15 @@ kernel_symbols_start:
 .long outb
 .asciz "outb"
 
+.long outl
+.asciz "outl"
+
+.long outs
+.asciz "outs"
+
+.long outsm
+.asciz "outsm"
+
 .long page_dir_clone
 .asciz "page_dir_clone"
 
@@ -1277,6 +1373,54 @@ kernel_symbols_start:
 
 .long panic
 .asciz "panic"
+
+.long PciClassCodeTable
+.asciz "PciClassCodeTable"
+
+.long PciCommandFlags
+.asciz "PciCommandFlags"
+
+.long pci_device_lookup
+.asciz "pci_device_lookup"
+
+.long PciDevSelFlags
+.asciz "PciDevSelFlags"
+
+.long PciDevTable
+.asciz "PciDevTable"
+
+.long pci_find_type
+.asciz "pci_find_type"
+
+.long pci_read_field
+.asciz "pci_read_field"
+
+.long pci_scan
+.asciz "pci_scan"
+
+.long pci_scan_bus
+.asciz "pci_scan_bus"
+
+.long pci_scan_func
+.asciz "pci_scan_func"
+
+.long pci_scan_hit
+.asciz "pci_scan_hit"
+
+.long pci_scan_slot
+.asciz "pci_scan_slot"
+
+.long PciStatusFlags
+.asciz "PciStatusFlags"
+
+.long pci_vendor_lookup
+.asciz "pci_vendor_lookup"
+
+.long PciVenTable
+.asciz "PciVenTable"
+
+.long pci_write_field
+.asciz "pci_write_field"
 
 .long _pdbr
 .asciz "_pdbr"
@@ -1352,6 +1496,9 @@ kernel_symbols_start:
 
 .long SOLARIZED_BASE03
 .asciz "SOLARIZED_BASE03"
+
+.long sprintf
+.asciz "sprintf"
 
 .long _start
 .asciz "_start"
@@ -1466,6 +1613,9 @@ kernel_symbols_start:
 
 .long vfs_close
 .asciz "vfs_close"
+
+.long vfs_create_device
+.asciz "vfs_create_device"
 
 .long vfs_finddir
 .asciz "vfs_finddir"

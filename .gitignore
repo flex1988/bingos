@@ -3,3 +3,4 @@ build
 *.o
 bochsout.txt
 serial.txt
+disk.img

@@ -35,6 +35,8 @@ hashmap_t* hashmap_create(int size, int mode) {
 }
 
 void* hashmap_set(hashmap_t* map, void* key, void* value) {
+    if(!strcmp(key,"module_info_ata"))
+    printk("%s 0x%x",key,value);
     uint32_t hash = map->hash(key) % map->size;
 
     hashmap_entry_t* x = map->entries[hash];

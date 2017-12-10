@@ -229,3 +229,17 @@ int vsprintf(char *buf, const char *fmt, va_list args) {
     *str = '\0';
     return str - buf;
 }
+
+int sprintf(char *buf, const char *fmt, ...) {
+    int ret;
+    va_list args;
+
+    if (!fmt)
+        return 0;
+
+    va_start(args, fmt);
+    ret = vsprintf(buf, fmt, args);
+    va_end(args);
+
+    return ret;
+}

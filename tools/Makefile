@@ -10,3 +10,6 @@ initrd:
 	$(CC) initrd.c -o initrd 
 	./initrd $(bin_dir)/init init $(bin_dir)/sh sh
 	rm initrd
+
+font:
+	$(CC)  generate_font.c -o font

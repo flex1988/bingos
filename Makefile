@@ -33,15 +33,13 @@ NM = /root/opt/cross/bin/i686-elf-nm
 
 AS = /root/opt/cross/bin/i686-elf-as
 
-.PHONY: all $(modules) run iso
+.PHONY: all $(modules) run iso $(kernel)
 
 linker_script := boot/linker.ld
 
 grub_cfg := boot/grub.cfg
 
 initrd := tools/initrd.img
-
-ext2_module := build/modules/ext2.ko
 
 symbols := build/symbols.o
 
@@ -53,20 +51,19 @@ $(modules): Makefile
 	cd $@ && $(MAKE) $(MFLAGS)
 
 symbols: $(obj_files)
+	test -d build/objs || mkdir -p build/objs
 	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) $(libc) $(lib)
-	$(NM) build/kernel-x86_64.bin -g|util/generate_symbols.py > kernel/symbols.asm
+	$(NM) build/kernel-x86_64.bin -g|tools/generate_symbols.py > kernel/symbols.asm
+	$(AS) --32 kernel/symbols.asm -o build/objs/symbols.o
 
 $(kernel): $(obj_files) $(linker_script)
-	cp kernel/symbols.asm build/symbols.asm
-	$(AS) --32 build/symbols.asm -o build/symbols.o
-	mv build/symbols.o build/objs/symbols.o
-	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o) build/objs/symbols.o $(libc) $(lib)
+	$(CC) -g -O0 -fstack-protector-all -nostdlib -n -T $(linker_script) -o $(kernel) $(wildcard build/objs/*.o)  $(libc) $(lib)
 
 $(iso): $(kernel) $(grub_cfg) $(modules)
 	mkdir -p build/isofiles/boot/grub
 	cp $(kernel) build/isofiles/boot/kernel.bin
 	cp $(grub_cfg) build/isofiles/boot/grub
-	cp $(ext2_module) build/isofiles/boot/ext2.ko
+	cp build/modules/* build/isofiles/boot
 	cp $(initrd) build/isofiles/boot/initrd.img
 	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles

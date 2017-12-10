@@ -154,7 +154,6 @@ void frame_init(struct multiboot_info *mbi) {
         return;
     }
 
-    _placement_addr = *((uint32_t *)(mbi->mods_addr + 4));
     printk("mem_lower = %uKB, mem_upper = %uKB\n", (unsigned)mbi->mem_lower, (unsigned)mbi->mem_upper);
 
     if (!CHECK_FLAG(mbi->flags, 6)) {

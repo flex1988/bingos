@@ -20,7 +20,7 @@ typedef struct {
     char *deps;
 } module_info_t;
 
-extern void *module_load(void *blob,size_t length);
+extern void *module_load(void *blob, size_t length, char *mod_name);
 extern void module_unload(char *name);
 
 #define MODULE_DEFINE(n,i,d) \

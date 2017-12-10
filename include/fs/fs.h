@@ -14,6 +14,8 @@
 typedef struct vfs_node_s vfs_node_t;
 typedef struct dirent dirent_t;
 
+typedef vfs_node_t *(*vfs_mount_callback)(char *arg, char *mount_point);
+
 typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef uint32_t (*write_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef void (*open_type_t)(vfs_node_t *);
@@ -28,6 +30,7 @@ struct dirent {
 
 typedef struct vfs_node_s {
     char name[128];
+    void *device;
     uint32_t mask;
     uint32_t uid;
     uint32_t gid;
@@ -42,6 +45,7 @@ typedef struct vfs_node_s {
     readdir_type_t readdir;
     finddir_type_t finddir;
     vfs_node_t *ptr;
+    void *ioctl;
 } vfs_node_t;
 
 typedef struct vfs_entry_s {
@@ -61,4 +65,6 @@ dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
 vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
 vfs_node_t *vfs_lookup(const char *path, int type);
 void vfs_init();
+int vfs_register(char *name, vfs_mount_callback callback);
+int vfs_mount_type(char *type, char *arg, char *mount_point);
 #endif

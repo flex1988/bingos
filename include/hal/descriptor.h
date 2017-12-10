@@ -62,6 +62,8 @@ typedef struct tss_entry_s {
 
 void init_descriptor_tables();
 
+void irq_ack(uint32_t irq_no);
+
 extern void isr0();
 extern void isr1();
 extern void isr2();

@@ -2,6 +2,18 @@
 #include "hal/common.h"
 #include "hal/isr.h"
 
+#define IRQ_CHAIN_SIZE 16
+
+#define PIC1 0x20
+#define PIC1_COMMAND PIC1
+#define PIC1_OFFSET 0x20
+#define PIC1_DATA (PIC1 + 1)
+
+#define PIC2 0xa0
+#define PIC2_COMMAND PIC2
+
+#define PCI_EOI 0x20
+
 static gdt_t _gdt[6];
 static gdtr_t _gdtr;
 
@@ -151,4 +163,12 @@ void init_descriptor_tables() {
     gdt_init();
     idt_init();
     memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
+}
+
+void irq_ack(uint32_t irq_no) {
+    if (irq_no > 8) {
+        outb(PIC2_COMMAND, PCI_EOI);
+    }
+
+    outb(PIC1_COMMAND, PCI_EOI);
 }

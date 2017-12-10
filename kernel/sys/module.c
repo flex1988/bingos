@@ -6,8 +6,13 @@
 #define SYMBOLTABLE_HASHMAP_SIZE 200
 #define MODULE_HASHMAP_SIZE 10
 
+#define MODULE_RAMDISK_INDEX 0
+#define MODULE_ATA_INDEX 1
+#define MODULE_EXT2_INDEX 2
+
 static hashmap_t *symboltable = NULL;
 static hashmap_t *modules = NULL;
+extern hashmap_t *vfs_type_mounts;
 
 extern char kernel_symbols_start[];
 extern char kernel_symbols_end[];
@@ -17,9 +22,9 @@ typedef struct {
     char name[];
 } kernel_symbol_t;
 
-extern int printk(const char *fmt, ...);
+extern ptr_t _placement_addr;
 
-void *module_load(void *blob, size_t length) {
+void *module_load(void *blob, size_t length, char *mod_name) {
     elf32_ehdr *ehdr = (elf32_ehdr *)blob;
     char *head = (char *)blob;
 
@@ -198,7 +203,9 @@ void *module_load(void *blob, size_t length) {
     }
 
     module_t *mod = NULL;
-    mod = hashmap_beigin_with(local_symbols, "module_info");
+    char name[32];
+    sprintf(name, "module_info_%s", mod_name);
+    mod = hashmap_get(local_symbols, name);
     mod->init();
 
     module_info_t *mod_info = kmalloc(sizeof(module_info_t));
@@ -215,8 +222,11 @@ void *module_load(void *blob, size_t length) {
 }
 
 void modules_init(multiboot_info_t *mbi) {
+    _placement_addr = ((multiboot_module_t *)(mbi->mods_addr) + mbi->mods_count - 1)->mod_end + 0x1000;
+
     symboltable = hashmap_create(SYMBOLTABLE_HASHMAP_SIZE, HASHMAP_STRING);
     modules = hashmap_create(MODULE_HASHMAP_SIZE, HASHMAP_STRING);
+    vfs_type_mounts = hashmap_create(10, HASHMAP_STRING);
 
     kernel_symbol_t *k = (kernel_symbol_t *)kernel_symbols_start;
 
@@ -232,13 +242,14 @@ void modules_init(multiboot_info_t *mbi) {
     int i;
 
     for (i = 0, mod = (multiboot_module_t *)mbi->mods_addr; i < mbi->mods_count; i++, mod++) {
-        if (i == 0) {
+        if (i == MODULE_RAMDISK_INDEX) {
             printk("ignore ram disk");
             continue;
         }
 
         uint32_t mstart = mod->mod_start;
         uint32_t msize = mod->mod_end - mod->mod_start;
-        module_load((void *)mstart, msize);
+
+        module_load((void *)mstart, msize, mod->cmdline);
     }
 }

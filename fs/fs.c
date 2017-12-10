@@ -1,11 +1,14 @@
 #include "fs/fs.h"
 #include "kernel.h"
+#include "lib/hashmap.h"
 #include "lib/tree.h"
 
+#include <errno.h>
 #include <string.h>
 
-vfs_node_t* vfs_root = 0;
-tree_t* fs_tree = 0;
+vfs_node_t* vfs_root = NULL;
+tree_t* vfs_tree = NULL;
+hashmap_t* vfs_type_mounts = NULL;
 
 static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path, int depth) {
     char* dir = NULL;
@@ -73,7 +76,7 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
     }
 
     vfs_node_t* last = vfs_root;
-    tree_node_t* node = fs_tree->root;
+    tree_node_t* node = vfs_tree->root;
 
     char* p = *mount_path;
     *mount_depth = 1;
@@ -110,6 +113,60 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
     }
 
     return last;
+}
+
+vfs_node_t* vfs_create_device(char* path) {
+    size_t plen = strlen(path);
+    char* pdup = kmalloc(plen + 1);
+    memcpy(pdup, path, plen + 1);
+
+    char* p = pdup;
+    while (p < pdup + plen) {
+        if (*p == '/')
+            *p = '\0';
+        p++;
+    }
+    pdup[plen] = '\0';
+
+    tree_node_t* node = vfs_tree->root;
+
+    p = pdup;
+    while (1) {
+        if (p > pdup) {
+            break;
+        }
+
+        int found = 0;
+        for (int i = 0; i < node->length; i++) {
+            tree_node_t* child = node->children[i];
+
+            vfs_entry_t* entry = (vfs_entry_t*)child->data;
+
+            if (!strcmp(entry->name, p)) {
+                node = child;
+                found = 1;
+                break;
+            }
+        }
+
+        // create vfs_node if node not exits
+        if (!found) {
+            vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
+            memcpy(entry->name, p, strlen(p) + 1);
+
+            entry->file = NULL;
+            entry->device = NULL;
+            entry->type = NULL;
+
+            node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+        }
+
+        p += strlen(p) + 1;
+    }
+
+    kfree(pdup);
+
+    return node;
 }
 
 vfs_node_t* vfs_lookup(const char* path, int type) {
@@ -157,7 +214,7 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
 }
 
 void* vfs_mount(char* path, vfs_node_t* lroot) {
-    if (!fs_tree) {
+    if (!vfs_tree) {
         printk("vfs mount tree has not been initialized");
         return NULL;
     }
@@ -185,7 +242,7 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
     buf[path_size] = '\0';
     i = buf + 1;
 
-    tree_node_t* root_node = fs_tree->root;
+    tree_node_t* root_node = vfs_tree->root;
 
     if (*i == '\0') {
         // mount root
@@ -239,13 +296,34 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
         ret = node;
     }
 
-    free(buf);
+    kfree(buf);
 
     return ret;
 }
 
+int vfs_register(char* name, vfs_mount_callback callback) {
+    /*callback();*/
+    printk("register 0x%x", callback);
+    if (hashmap_get(vfs_type_mounts, name))
+        return 1;
+    hashmap_set(vfs_type_mounts, name, (void*)callback);
+    return 0;
+}
+
+int vfs_mount_type(char* type, char* arg, char* mount_point) {
+    vfs_mount_callback mount = (vfs_mount_callback)(uint32_t)hashmap_get(vfs_type_mounts, type);
+    if (!mount) {
+        printk("unknown filesystem : %s", type);
+        return -ENODEV;
+    }
+
+    vfs_node_t* n = mount(arg, mount_point);
+    if (!n)
+        return -EINVAL;
+}
+
 void vfs_init() {
-    fs_tree = create_tree();
+    vfs_tree = create_tree();
     vfs_entry_t* root = kmalloc(sizeof(vfs_entry_t));
 
     memcpy(root->name, "/", strlen("/") + 1);
@@ -261,5 +339,5 @@ void vfs_init() {
     memcpy(n->name, root->name, strlen(root->name) + 1);
     memset(n->children, 0, MAX_TREE_CHILDREN * sizeof(tree_node_t*));
 
-    set_tree_root(fs_tree, n);
+    set_tree_root(vfs_tree, n);
 }

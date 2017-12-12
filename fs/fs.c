@@ -315,6 +315,7 @@ int vfs_mount_type(char* type, char* arg, char* mount_point) {
     }
 
     vfs_node_t* n = mount(arg, mount_point);
+    printk("ext2 0x%x",n);
     if (!n)
         return -EINVAL;
 

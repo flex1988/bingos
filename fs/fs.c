@@ -119,6 +119,7 @@ vfs_node_t* vfs_create_device(char* path) {
     size_t plen = strlen(path);
     char* pdup = kmalloc(plen + 1);
     memcpy(pdup, path, plen + 1);
+    int found;
 
     char* p = pdup;
     while (p < pdup + plen) {
@@ -131,15 +132,15 @@ vfs_node_t* vfs_create_device(char* path) {
     tree_node_t* node = vfs_tree->root;
 
     p = pdup;
+    p++;
     while (1) {
-        if (p > pdup) {
+        if (p > pdup + plen) {
             break;
         }
 
-        int found = 0;
+        found = 0;
         for (int i = 0; i < node->length; i++) {
             tree_node_t* child = node->children[i];
-
             vfs_entry_t* entry = (vfs_entry_t*)child->data;
 
             if (!strcmp(entry->name, p)) {
@@ -151,14 +152,7 @@ vfs_node_t* vfs_create_device(char* path) {
 
         // create vfs_node if node not exits
         if (!found) {
-            vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
-            memcpy(entry->name, p, strlen(p) + 1);
-
-            entry->file = NULL;
-            entry->device = NULL;
-            entry->type = NULL;
-
-            node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+            break;
         }
 
         p += strlen(p) + 1;
@@ -166,7 +160,11 @@ vfs_node_t* vfs_create_device(char* path) {
 
     kfree(pdup);
 
-    return node;
+    if (!found)
+        return NULL;
+
+    vfs_entry_t* entry = (vfs_entry_t*)node->data;
+    return entry->file;
 }
 
 vfs_node_t* vfs_lookup(const char* path, int type) {
@@ -283,6 +281,7 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
                 entry->type = NULL;
 
                 node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+                memcpy(node->name, entry->name, strlen(entry->name) + 1);
             }
 
             p = p + strlen(p) + 1;
@@ -302,8 +301,6 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
 }
 
 int vfs_register(char* name, vfs_mount_callback callback) {
-    /*callback();*/
-    printk("register 0x%x", callback);
     if (hashmap_get(vfs_type_mounts, name))
         return 1;
     hashmap_set(vfs_type_mounts, name, (void*)callback);
@@ -320,6 +317,15 @@ int vfs_mount_type(char* type, char* arg, char* mount_point) {
     vfs_node_t* n = mount(arg, mount_point);
     if (!n)
         return -EINVAL;
+
+    tree_node_t* node = vfs_mount(mount_point, n);
+    if (node && node->data) {
+        vfs_entry_t* entry = (vfs_entry_t*)node->data;
+        /*entry->type = strdup(type);*/
+        /*entry->device = strdup(arg);*/
+    }
+
+    return 0;
 }
 
 void vfs_init() {

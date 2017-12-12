@@ -148,6 +148,8 @@ uint32_t alloc_frames(size_t size) {
 void frame_init(struct multiboot_info *mbi) {
     unsigned long long int i;
 
+    _placement_addr = ((multiboot_module_t *)(mbi->mods_addr) + mbi->mods_count - 1)->mod_end + 0x1000;
+
     printk("_placement_addr 0x%x", _placement_addr);
 
     if (!CHECK_FLAG(mbi->flags, 0)) {

@@ -29,6 +29,8 @@ void insm(uint16_t port, uint8_t *data, uint32_t size) { __asm__ __volatile__("r
 
 void outsm(uint16_t port, uint8_t *data, uint32_t size) { __asm__ __volatile__("rep outsw" : "+S"(data), "+c"(size) : "d"(port)); }
 
+void insl(uint16_t port, uint8_t *buf, uint32_t size) { __asm__ __volatile__("cld;rep;insl\n\t" ::"d"(port), "D"(buf), "c"(size)); }
+
 int local_irq_enable() {
     unsigned long flags;
 

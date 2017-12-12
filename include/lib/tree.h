@@ -25,4 +25,5 @@ tree_node_t *tree_node_insert(tree_node_t *p, char *name, int len, void *data);
 tree_node_t *tree_search(tree_t *t, char *name);
 tree_node_t *tree_node_search(tree_node_t *n, void *data);
 void set_tree_root(tree_t *t, tree_node_t *n);
+void traverse_tree(tree_t* t);
 #endif

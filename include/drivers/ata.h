@@ -82,12 +82,14 @@
 #define ATA_READ 0x00
 #define ATA_WRITE 0x01
 
+#define ATA_SECTOR_SIZE 512
+
 typedef struct {
-    uint16_t base;
-    uint16_t ctrl;
-    uint16_t bmide;
-    uint16_t nien;
-} ide_channel_regs_t;
+    uint16_t base; // I/O Base
+    uint16_t ctrl; // Control Base
+    uint16_t bmide;// Bus Master IDE
+    uint8_t nien;  // nIEN (No Interrupt)
+} ide_channel_t;
 
 typedef struct {
     uint8_t reserved;
@@ -95,7 +97,7 @@ typedef struct {
     uint8_t drive;
     uint16_t type;
     uint16_t signature;
-    uint32_t capabilities;
+    uint16_t capabilities;
     uint32_t commands_sets;
     uint32_t size;
     uint8_t model[41];
@@ -135,5 +137,7 @@ typedef struct {
     partition_t partitions[4];
     uint8_t signature[2];
 } __attribute__((packed)) mbr_t;
+
+void ide_initialize(uint32_t BAR0, uint32_t BAR1, uint32_t BAR2, uint32_t BAR3, uint32_t BAR4);
 
 #endif

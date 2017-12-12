@@ -38,6 +38,10 @@ typedef struct vfs_node_s {
     uint32_t inode;
     uint32_t length;
     uint32_t impl;
+    uint32_t atime;
+    uint32_t ctime;
+    uint32_t mtime;
+    uint32_t nlink;
     read_type_t read;
     write_type_t write;
     open_type_t open;

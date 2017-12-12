@@ -83,7 +83,6 @@ void *module_load(void *blob, size_t length, char *mod_name) {
     }
 
     {
-        printk("Loading sections");
         for (uint32_t x = 0; x < ehdr->e_shentsize * ehdr->e_shnum; x += ehdr->e_shentsize) {
             elf32_shdr *shdr = (elf32_shdr *)((uint32_t)ehdr + ehdr->e_shoff + x);
             if (shdr->sh_type == SHT_NOBITS) {
@@ -222,8 +221,6 @@ void *module_load(void *blob, size_t length, char *mod_name) {
 }
 
 void modules_init(multiboot_info_t *mbi) {
-    _placement_addr = ((multiboot_module_t *)(mbi->mods_addr) + mbi->mods_count - 1)->mod_end + 0x1000;
-
     symboltable = hashmap_create(SYMBOLTABLE_HASHMAP_SIZE, HASHMAP_STRING);
     modules = hashmap_create(MODULE_HASHMAP_SIZE, HASHMAP_STRING);
     vfs_type_mounts = hashmap_create(10, HASHMAP_STRING);
@@ -243,7 +240,6 @@ void modules_init(multiboot_info_t *mbi) {
 
     for (i = 0, mod = (multiboot_module_t *)mbi->mods_addr; i < mbi->mods_count; i++, mod++) {
         if (i == MODULE_RAMDISK_INDEX) {
-            printk("ignore ram disk");
             continue;
         }
 

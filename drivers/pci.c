@@ -91,17 +91,17 @@ void pci_scan_bus(pci_func_t f, int type, int bus, void * extra) {
 
 void pci_scan(pci_func_t f, int type, void * extra) {
 
-	if ((pci_read_field(0, PCI_HEADER_TYPE, 1) & 0x80) == 0) {
-		pci_scan_bus(f,type,0,extra);
-		return;
-	}
+	/*if ((pci_read_field(0, PCI_HEADER_TYPE, 1) & 0x80) == 0) {*/
+		/*pci_scan_bus(f,type,0,extra);*/
+		/*return;*/
+	/*}*/
 
-	for (int func = 0; func < 8; ++func) {
-		uint32_t dev = pci_box_device(0, 0, func);
-		if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE) {
-			pci_scan_bus(f, type, func, extra);
-		} else {
-			break;
-		}
-	}
+	/*for (int func = 0; func < 8; ++func) {*/
+		/*uint32_t dev = pci_box_device(0, 0, func);*/
+		/*if (pci_read_field(dev, PCI_VENDOR_ID, 2) != PCI_NONE) {*/
+			/*pci_scan_bus(f, type, func, extra);*/
+		/*} else {*/
+			/*break;*/
+		/*}*/
+	/*}*/
 }

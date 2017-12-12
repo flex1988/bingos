@@ -9,6 +9,9 @@
 .extern alloc_frames
 .type alloc_frames, @function
 
+.extern atapi_packet
+.type atapi_packet, @function
+
 .extern bitmap_set
 .type bitmap_set, @function
 
@@ -201,6 +204,42 @@
 .extern hashmap_string_hash
 .type hashmap_string_hash, @function
 
+.extern ide_buf
+.type ide_buf, @function
+
+.extern ide_channels
+.type ide_channels, @function
+
+.extern ide_devices
+.type ide_devices, @function
+
+.extern ide_initialize
+.type ide_initialize, @function
+
+.extern ide_irq_invoked
+.type ide_irq_invoked, @function
+
+.extern ide_polling
+.type ide_polling, @function
+
+.extern ide_print_error
+.type ide_print_error, @function
+
+.extern ide_read
+.type ide_read, @function
+
+.extern ide_read_buffer
+.type ide_read_buffer, @function
+
+.extern ide_read_sector
+.type ide_read_sector, @function
+
+.extern ide_write
+.type ide_write, @function
+
+.extern ide_write_sector
+.type ide_write_sector, @function
+
 .extern idt_flush
 .type idt_flush, @function
 
@@ -239,6 +278,9 @@
 
 .extern insert_vm
 .type insert_vm, @function
+
+.extern insl
+.type insl, @function
 
 .extern insm
 .type insm, @function
@@ -843,6 +885,9 @@ kernel_symbols_start:
 .long alloc_frames
 .asciz "alloc_frames"
 
+.long atapi_packet
+.asciz "atapi_packet"
+
 .long bitmap_set
 .asciz "bitmap_set"
 
@@ -1035,6 +1080,42 @@ kernel_symbols_start:
 .long hashmap_string_hash
 .asciz "hashmap_string_hash"
 
+.long ide_buf
+.asciz "ide_buf"
+
+.long ide_channels
+.asciz "ide_channels"
+
+.long ide_devices
+.asciz "ide_devices"
+
+.long ide_initialize
+.asciz "ide_initialize"
+
+.long ide_irq_invoked
+.asciz "ide_irq_invoked"
+
+.long ide_polling
+.asciz "ide_polling"
+
+.long ide_print_error
+.asciz "ide_print_error"
+
+.long ide_read
+.asciz "ide_read"
+
+.long ide_read_buffer
+.asciz "ide_read_buffer"
+
+.long ide_read_sector
+.asciz "ide_read_sector"
+
+.long ide_write
+.asciz "ide_write"
+
+.long ide_write_sector
+.asciz "ide_write_sector"
+
 .long idt_flush
 .asciz "idt_flush"
 
@@ -1073,6 +1154,9 @@ kernel_symbols_start:
 
 .long insert_vm
 .asciz "insert_vm"
+
+.long insl
+.asciz "insl"
 
 .long insm
 .asciz "insm"

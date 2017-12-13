@@ -16,9 +16,6 @@
 #include "module.h"
 #include "multiboot.h"
 
-extern vfs_node_t *vfs_root;
-extern tree_t *vfs_tree;
-
 uint32_t _initial_esp;
 
 static void message() {

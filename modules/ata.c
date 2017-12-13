@@ -327,21 +327,31 @@ static int ata_device_detect(ata_device_t *dev) {
     uint8_t cl = inb(dev->io_base + ATA_REG_LBA1); /* CYL_LO */
     uint8_t ch = inb(dev->io_base + ATA_REG_LBA2); /* CYL_HI */
 
-    printk("Device detected: 0x%2x 0x%2x", cl, ch);
     if (cl == 0xFF && ch == 0xFF) {
         /* Nothing here */
         return 0;
     }
     if ((cl == 0x00 && ch == 0x00) || (cl == 0x3C && ch == 0xC3)) {
         /* Parallel ATA device, or emulated SATA */
-
         char devname[64];
         sprintf((char *)&devname, "/dev/hd%c", ata_drive_char);
+
+        printk("detect device %s", devname);
+
         vfs_node_t *node = ata_device_create(dev);
         vfs_mount(devname, node);
         ata_drive_char++;
 
         return 1;
+    } else if ((cl == 0x14 && ch == 0xeb) || (cl == 0x69 && ch == 0x96)) {
+        char devname[64];
+        sprintf((char *)devname, "/dev/cdrom%d", cdrom_number);
+
+        printk("detect device %s", devname);
+
+        vfs_node_t *node = atapi_device_create(dev);
+        vfs_mount(devname, node);
+        cdrom_number++;
     }
 
     /* TODO: ATAPI, SATA, SATAPI */
@@ -547,6 +557,8 @@ int ata_init(void) {
 
     ata_device_detect(&ata_primary_master);
     ata_device_detect(&ata_primary_slave);
+    ata_device_detect(&ata_secondary_master);
+    ata_device_detect(&ata_secondary_slave);
 
     return 0;
 }

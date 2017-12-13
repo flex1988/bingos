@@ -12,12 +12,15 @@ hashmap_t* vfs_type_mounts = NULL;
 
 static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path, int depth) {
     char* dir = NULL;
-    vfs_node_t* ret;
+    vfs_node_t* ret = NULL;
 
     /*while (path[0] == '/') path++;*/
 
     if (!path[0])
         return n;
+
+    if (depth == 0)
+        return vfs_finddir(n, path);
 
     while (depth--) {
         dir = path;
@@ -61,6 +64,7 @@ dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
 }
 
 vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
+    printk("find dir %s %s",node->name,name);
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir)
         return node->finddir(node, name);
     else
@@ -106,16 +110,17 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
             }
         }
 
-        if (!found)
+        if (!found) {
             break;
+        }
 
-        *mount_depth++;
+        (*mount_depth)++;
     }
 
     return last;
 }
 
-vfs_node_t* vfs_create_device(char* path) {
+vfs_node_t* vfs_fetch_device(char* path) {
     size_t plen = strlen(path);
     char* pdup = kmalloc(plen + 1);
     memcpy(pdup, path, plen + 1);
@@ -315,7 +320,7 @@ int vfs_mount_type(char* type, char* arg, char* mount_point) {
     }
 
     vfs_node_t* n = mount(arg, mount_point);
-    printk("ext2 0x%x",n);
+    printk("ext2 0x%x", n);
     if (!n)
         return -EINVAL;
 

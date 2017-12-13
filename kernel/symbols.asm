@@ -93,6 +93,9 @@
 .extern do_munmap
 .type do_munmap, @function
 
+.extern do_open
+.type do_open, @function
+
 .extern draw_char
 .type draw_char, @function
 
@@ -822,8 +825,8 @@
 .extern vfs_close
 .type vfs_close, @function
 
-.extern vfs_create_device
-.type vfs_create_device, @function
+.extern vfs_fetch_device
+.type vfs_fetch_device, @function
 
 .extern vfs_finddir
 .type vfs_finddir, @function
@@ -968,6 +971,9 @@ kernel_symbols_start:
 
 .long do_munmap
 .asciz "do_munmap"
+
+.long do_open
+.asciz "do_open"
 
 .long draw_char
 .asciz "draw_char"
@@ -1698,8 +1704,8 @@ kernel_symbols_start:
 .long vfs_close
 .asciz "vfs_close"
 
-.long vfs_create_device
-.asciz "vfs_create_device"
+.long vfs_fetch_device
+.asciz "vfs_fetch_device"
 
 .long vfs_finddir
 .asciz "vfs_finddir"

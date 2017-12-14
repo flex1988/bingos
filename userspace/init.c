@@ -8,10 +8,6 @@ int main(int argc, char **argv) {
     int pid;
 
     if ((pid = fork()) == 0) {
-        void *p = malloc(1000);
-        memcpy(p, "hello world!", sizeof("hello world!"));
-        printf(p);
-        free(p);
         execve("/bin/sh", 0, 0);
         exit(0);
     } else {

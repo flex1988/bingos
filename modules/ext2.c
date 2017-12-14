@@ -114,6 +114,25 @@ static int ext2_read_block(ext2_fs_t *this, uint32_t block_no, uint8_t *buf) {
     return E_SUCCESS;
 }
 
+static uint32_t ext2_create_node(ext2_fs_t *this, ext2_inode_t *inode, ext2_dir_entry_t *dentry, vfs_node_t *fnode) {
+    if (!fnode) {
+        return 0;
+    }
+
+    fnode->device = (void *)this;
+    fnode->inode = dentry->inode;
+    memcpy(&fnode->name, &dentry->name, dentry->name_len);
+    fnode->name[dentry->name_len] = '\0';
+
+    fnode->uid = inode->i_uid;
+    fnode->gid = inode->i_gid;
+    fnode->length = inode->i_size;
+    fnode->mask = inode->i_mode & 0xfff;
+    fnode->nlink = inode->i_links_count;
+
+    return 1;
+}
+
 static uint32_t ext2_get_block_number(ext2_fs_t *this, ext2_inode_t *inode, uint32_t index) {
     uint32_t pointers = this->pointers_per_block;
     uint8_t *buf;
@@ -218,7 +237,7 @@ vfs_node_t *ext2_finddir(vfs_node_t *node, char *name) {
     uint32_t total_offset = 0;
 
     while (total_offset < inode->i_size) {
-        if (dir_offset > this->block_size) {
+        if (dir_offset >= this->block_size) {
             block_nr++;
             dir_offset -= this->block_size;
             ext2_inode_read_block(this, inode, block_nr, block);
@@ -232,9 +251,43 @@ vfs_node_t *ext2_finddir(vfs_node_t *node, char *name) {
 
             continue;
         }
+
+        char *dname = kmalloc(dentry->name_len + 1);
+        memcpy(dname, dentry->name, dentry->name_len);
+        dname[dentry->name_len] = '\0';
+
+        if (!strcmp(dname, name)) {
+            kfree(dname);
+
+            dir = kmalloc(dentry->rec_len);
+            memcpy(dir, dentry, dentry->rec_len);
+            break;
+        }
+
+        kfree(dname);
+
+        dir_offset += dentry->rec_len;
+        total_offset += dentry->rec_len;
     }
 
-    return NULL;
+    kfree(inode);
+    if (!dir) {
+        kfree(block);
+        return NULL;
+    }
+
+    vfs_node_t *target = kmalloc(sizeof(vfs_node_t));
+    memset(target, 0x0, sizeof(vfs_node_t));
+
+    inode = ext2_read_inode(this, dir->inode);
+
+    ext2_create_node(this, inode, dir, target);
+
+    kfree(dir);
+    kfree(inode);
+    kfree(block);
+
+    return target;
 }
 
 static void ext2_print_disk_info(ext2_fs_t *this) {

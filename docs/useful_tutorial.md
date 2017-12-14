@@ -8,8 +8,9 @@
 - [ELF32](http://wiki.osdev.org/ELF)
 - [ATA](http://wiki.osdev.org/ATA_read/write_sectors)
 - [IDE Tutorial](http://forum.osdev.org/viewtopic.php?f=1&p=167798#p167798)
+- [Ext2](http://wiki.osdev.org/Ext2)
 
-### Projects
+### Projects help a lot
 
 - https://github.com/klange/toaruos
 - https://github.com/maxdev1/ghost

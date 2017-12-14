@@ -64,11 +64,21 @@ dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
 }
 
 vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
-    printk("find dir %s %s",node->name,name);
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir)
         return node->finddir(node, name);
     else
         return 0;
+}
+
+vfs_node_t* vfs_clone(vfs_node_t* source) {
+    if (!source)
+        return NULL;
+
+    if (source->refs >= 0) {
+        source->refs++;
+    }
+
+    return source;
 }
 
 // find file mount point

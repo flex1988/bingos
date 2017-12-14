@@ -52,7 +52,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     vfs_mount_type("ext2", "/dev/hda", "/");
 
     syscalls_init();
-    kbd_init();
+
     message();
 
     sys_exec("/bin/init", 0, NULL);

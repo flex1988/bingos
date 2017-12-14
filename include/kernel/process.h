@@ -4,6 +4,7 @@
 #include <types.h>
 #include "kernel/mm.h"
 #include "kernel/mmu.h"
+#include "fs/fs.h"
 
 #define PROCESS_STATE_SLEEP 0
 #define PROCESS_STATE_ACTIVE 1
@@ -15,6 +16,13 @@
 #define PROCESS_FINISHED 2
 
 typedef struct process_s process_t;
+
+typedef struct {
+    vfs_node_t **entries;
+    size_t length;
+    size_t capacity;
+    size_t refs;
+} fd_set_t;
 
 typedef struct process_s {
     int ref;
@@ -40,6 +48,8 @@ typedef struct process_s {
 
     uint32_t img_entry;
     uint32_t img_size;
+
+    fd_set_t *fds;
 
     uint32_t brk;
 

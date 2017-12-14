@@ -63,6 +63,9 @@
 .extern create_heap
 .type create_heap, @function
 
+.extern create_pipe
+.type create_pipe, @function
+
 .extern create_tree
 .type create_tree, @function
 
@@ -92,6 +95,9 @@
 
 .extern do_munmap
 .type do_munmap, @function
+
+.extern do_open
+.type do_open, @function
 
 .extern draw_char
 .type draw_char, @function
@@ -444,11 +450,17 @@
 .extern isr_handler
 .type isr_handler, @function
 
-.extern kbd_enc_read_buf
-.type kbd_enc_read_buf, @function
+.extern kbd_key
+.type kbd_key, @function
 
-.extern kbd_init
-.type kbd_init, @function
+.extern kbd_scancode
+.type kbd_scancode, @function
+
+.extern kbd_us
+.type kbd_us, @function
+
+.extern kbd_us_l2
+.type kbd_us_l2, @function
 
 .extern kernel_end
 .type kernel_end, @function
@@ -462,17 +474,14 @@
 .extern kernel_symbols_start
 .type kernel_symbols_start, @function
 
+.extern key_method
+.type key_method, @function
+
 .extern kfree
 .type kfree, @function
 
 .extern kheap
 .type kheap, @function
-
-.extern kkybrd_key_to_ascii
-.type kkybrd_key_to_ascii, @function
-
-.extern kkybrd_set_leds
-.type kkybrd_set_leds, @function
 
 .extern kmain
 .type kmain, @function
@@ -482,12 +491,6 @@
 
 .extern kmalloc_i
 .type kmalloc_i, @function
-
-.extern kybrd_ctrl_read_status
-.type kybrd_ctrl_read_status, @function
-
-.extern kybrd_enc_send_cmd
-.type kybrd_enc_send_cmd, @function
 
 .extern list_create
 .type list_create, @function
@@ -819,11 +822,14 @@
 .extern vesa_init
 .type vesa_init, @function
 
+.extern vfs_clone
+.type vfs_clone, @function
+
 .extern vfs_close
 .type vfs_close, @function
 
-.extern vfs_create_device
-.type vfs_create_device, @function
+.extern vfs_fetch_device
+.type vfs_fetch_device, @function
 
 .extern vfs_finddir
 .type vfs_finddir, @function
@@ -939,6 +945,9 @@ kernel_symbols_start:
 .long create_heap
 .asciz "create_heap"
 
+.long create_pipe
+.asciz "create_pipe"
+
 .long create_tree
 .asciz "create_tree"
 
@@ -968,6 +977,9 @@ kernel_symbols_start:
 
 .long do_munmap
 .asciz "do_munmap"
+
+.long do_open
+.asciz "do_open"
 
 .long draw_char
 .asciz "draw_char"
@@ -1320,11 +1332,17 @@ kernel_symbols_start:
 .long isr_handler
 .asciz "isr_handler"
 
-.long kbd_enc_read_buf
-.asciz "kbd_enc_read_buf"
+.long kbd_key
+.asciz "kbd_key"
 
-.long kbd_init
-.asciz "kbd_init"
+.long kbd_scancode
+.asciz "kbd_scancode"
+
+.long kbd_us
+.asciz "kbd_us"
+
+.long kbd_us_l2
+.asciz "kbd_us_l2"
 
 .long kernel_end
 .asciz "kernel_end"
@@ -1338,17 +1356,14 @@ kernel_symbols_start:
 .long kernel_symbols_start
 .asciz "kernel_symbols_start"
 
+.long key_method
+.asciz "key_method"
+
 .long kfree
 .asciz "kfree"
 
 .long kheap
 .asciz "kheap"
-
-.long kkybrd_key_to_ascii
-.asciz "kkybrd_key_to_ascii"
-
-.long kkybrd_set_leds
-.asciz "kkybrd_set_leds"
 
 .long kmain
 .asciz "kmain"
@@ -1358,12 +1373,6 @@ kernel_symbols_start:
 
 .long kmalloc_i
 .asciz "kmalloc_i"
-
-.long kybrd_ctrl_read_status
-.asciz "kybrd_ctrl_read_status"
-
-.long kybrd_enc_send_cmd
-.asciz "kybrd_enc_send_cmd"
 
 .long list_create
 .asciz "list_create"
@@ -1695,11 +1704,14 @@ kernel_symbols_start:
 .long vesa_init
 .asciz "vesa_init"
 
+.long vfs_clone
+.asciz "vfs_clone"
+
 .long vfs_close
 .asciz "vfs_close"
 
-.long vfs_create_device
-.asciz "vfs_create_device"
+.long vfs_fetch_device
+.asciz "vfs_fetch_device"
 
 .long vfs_finddir
 .asciz "vfs_finddir"

@@ -16,9 +16,6 @@
 #include "module.h"
 #include "multiboot.h"
 
-extern vfs_node_t *vfs_root;
-extern tree_t *vfs_tree;
-
 uint32_t _initial_esp;
 
 static void message() {
@@ -55,7 +52,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     vfs_mount_type("ext2", "/dev/hda", "/");
 
     syscalls_init();
-    kbd_init();
+
     message();
 
     sys_exec("/bin/init", 0, NULL);

@@ -6,132 +6,70 @@
 #define EXT2_SUPER_MAGIC 0xEF53
 
 /* File Types */
-#define EXT2_S_IFSOCK	0xC000
-#define EXT2_S_IFLNK	0xA000
-#define EXT2_S_IFREG	0x8000
-#define EXT2_S_IFBLK	0x6000
-#define EXT2_S_IFDIR	0x4000
-#define EXT2_S_IFCHR	0x2000
-#define EXT2_S_IFIFO	0x1000
+#define EXT2_S_IFSOCK 0xC000
+#define EXT2_S_IFLNK 0xA000
+#define EXT2_S_IFREG 0x8000
+#define EXT2_S_IFBLK 0x6000
+#define EXT2_S_IFDIR 0x4000
+#define EXT2_S_IFCHR 0x2000
+#define EXT2_S_IFIFO 0x1000
 
 /* setuid, etc. */
-#define EXT2_S_ISUID	0x0800
-#define EXT2_S_ISGID	0x0400
-#define EXT2_S_ISVTX	0x0200
+#define EXT2_S_ISUID 0x0800
+#define EXT2_S_ISGID 0x0400
+#define EXT2_S_ISVTX 0x0200
 
 /* rights */
-#define EXT2_S_IRUSR	0x0100
-#define EXT2_S_IWUSR	0x0080
-#define EXT2_S_IXUSR	0x0040
-#define EXT2_S_IRGRP	0x0020
-#define EXT2_S_IWGRP	0x0010
-#define EXT2_S_IXGRP	0x0008
-#define EXT2_S_IROTH	0x0004
-#define EXT2_S_IWOTH	0x0002
-#define EXT2_S_IXOTH	0x0001
-
- //typedef struct {
- //uint32_t s_inodes_count;       // inodes count
- //uint32_t s_blocks_count;       // blocks count
- //uint32_t s_r_blocks_count;     // reserved blocks count
- //uint32_t s_free_blocks_count;  // free blocks count
- //uint32_t s_free_inodes_count;  // free inodes count
- //uint32_t s_first_data_block;   // first data block
- //uint32_t s_log_block_size;     // block size
- //uint32_t s_log_frag_size;      // fragment size
- //uint32_t s_blocks_per_group;   // blocks per group
- //uint32_t s_frags_per_group;    // fragments per group
- //uint32_t s_inodes_per_group;   // inodes per group
- //uint32_t s_mtime;              // mount time
- //uint32_t s_wtime;              // write time
-
- //uint16_t s_mnt_count;  // mount count
- //uint16_t s_max_mnt_count;
- //uint16_t s_magic;      // magic signature
- //uint16_t s_state;      // file system state
- //uint16_t s_errors;     // behaviour when detecting errors
- //uint16_t s_pad;
- //uint32_t s_lastcheck;      // time of last check
- //uint32_t s_checkinterval;  // max time between checks
- //uint32_t s_reserved[238];
-//} __attribute__((packed)) ext2_superblock_t;
+#define EXT2_S_IRUSR 0x0100
+#define EXT2_S_IWUSR 0x0080
+#define EXT2_S_IXUSR 0x0040
+#define EXT2_S_IRGRP 0x0020
+#define EXT2_S_IWGRP 0x0010
+#define EXT2_S_IXGRP 0x0008
+#define EXT2_S_IROTH 0x0004
+#define EXT2_S_IWOTH 0x0002
+#define EXT2_S_IXOTH 0x0001
 
 typedef struct {
-    uint32_t inodes_count;
-    uint32_t blocks_count;
-    uint32_t r_blocks_count;
-    uint32_t free_blocks_count;
-    uint32_t free_inodes_count;
-    uint32_t first_data_block;
-    uint32_t log_block_size;
-    uint32_t log_frag_size;
-    uint32_t blocks_per_group;
-    uint32_t frags_per_group;
-    uint32_t inodes_per_group;
-    uint32_t mtime;
-    uint32_t wtime;
+    uint32_t s_inodes_count;       // total inodes count
+    uint32_t s_blocks_count;       // total blocks count
+    uint32_t s_r_blocks_count;     // root reserved blocks
+    uint32_t s_free_blocks_count;  // free blocks count
+    uint32_t s_free_inodes_count;  // free inodes count
+    uint32_t s_first_data_block;   // Block number of the block containing the superblock
+    uint32_t s_log_block_size;
+    uint32_t s_log_frag_size;
+    uint32_t s_blocks_per_group;
+    uint32_t s_frags_per_group;
+    uint32_t s_inodes_per_group;
+    uint32_t s_mtime;  // Last mount time
+    uint32_t s_wtime;  // Last written time
 
-    uint16_t mnt_count;
-    uint16_t max_mnt_count;
-    uint16_t magic;
-    uint16_t state;
-    uint16_t errors;
-    uint16_t minor_rev_level;
+    uint16_t s_mnt_count;        // Number of times the volume has been mounted since its last consistency check
+    uint16_t s_max_mnt_count;    // Number of mounts allowed before a consistency check must be done
+    uint16_t s_magic;            // Ext2 signature (0xef53)
+    uint16_t s_state;            // File system state
+    uint16_t s_errors;           // What to do when an error is detected
+    uint16_t s_minor_rev_level;  // Minor portion of version
 
-    uint32_t lastcheck;
-    uint32_t checkinterval;
-    uint32_t creator_os;
-    uint32_t rev_level;
+    uint32_t s_lastcheck;      // POSIX time of last consistency check
+    uint32_t s_checkinterval;  // Interval (in POSIX time) between forced consistency checks
+    uint32_t s_creator_os;     // Operating system ID from which the filesystem on this volume was created
+    uint32_t s_rev_level;      // Major portion of version
 
-    uint16_t def_resuid;
-    uint16_t def_resgid;
+    uint16_t s_def_resuid;  // User ID that can use reserved blocks
+    uint16_t s_def_resgid;  // Group ID that can use reserved blocks
 
-    /* EXT2_DYNAMIC_REV */
-    uint32_t first_ino;
-    uint16_t inode_size;
-    uint16_t block_group_nr;
-    uint32_t feature_compat;
-    uint32_t feature_incompat;
-    uint32_t feature_ro_compat;
-
-    uint8_t uuid[16];
-    uint8_t volume_name[16];
-
-    uint8_t last_mounted[64];
-
-    uint32_t algo_bitmap;
-
-    /* Performance Hints */
-    uint8_t prealloc_blocks;
-    uint8_t prealloc_dir_blocks;
-    uint16_t _padding;
-
-    /* Journaling Support */
-    uint8_t journal_uuid[16];
-    uint32_t journal_inum;
-    uint32_t jounral_dev;
-    uint32_t last_orphan;
-
-    /* Directory Indexing Support */
-    uint32_t hash_seed[4];
-    uint8_t def_hash_version;
-    uint16_t _padding_a;
-    uint8_t _padding_b;
-
-    /* Other Options */
-    uint32_t default_mount_options;
-    uint32_t first_meta_bg;
-    uint8_t _unused[760];
-
+    uint32_t s_reserved[235];
 } __attribute__((packed)) ext2_superblock_t;
 
 typedef struct {
-    uint32_t block_bitmap;
-    uint32_t inode_bitmap;
-    uint32_t inode_table;
-    uint16_t free_blocks_count;
-    uint16_t free_inodes_count;
-    uint16_t used_dirs_count;
+    uint32_t block_bitmap;       // Block address of block usage bitmap
+    uint32_t inode_bitmap;       // Block address of inode usage bitmap
+    uint32_t inode_table;        // Starting block address of inode table
+    uint16_t free_blocks_count;  // Number of unallocated blocks in group
+    uint16_t free_inodes_count;  // Number of unallocated inodes in group
+    uint16_t used_dirs_count;    // Number of directories in group
     uint16_t pad;
     uint8_t reserved[12];
 } __attribute__((packed)) ext2_group_desc_t;
@@ -146,7 +84,7 @@ typedef struct {
     uint32_t i_dtime;        // deletion time
     uint32_t i_gid;          // group id
     uint32_t i_links_count;  // links count
-    uint32_t i_blocks;       // blocks count
+    uint32_t i_sectors;       // blocks count
     uint32_t i_flags;        // file flags
     uint32_t i_reserved1;
     uint32_t i_block[15];  // pointers to blocks
@@ -163,7 +101,7 @@ typedef struct {
 #define EXT2_NAME_LEN 255
 typedef struct {
     uint32_t inode;
-    uint16_t rec_len;
+    uint16_t rec_len; //Total size of this entry (Including all subfields)
     uint16_t name_len;
     char name[EXT2_NAME_LEN];
 } __attribute__((packed)) ext2_dir_entry_t;

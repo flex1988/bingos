@@ -87,10 +87,26 @@ process_t *process_create(process_t *parent) {
         p->img_size = parent->img_size;
 
         dup_mmap(p, parent);
+
+        p->fds = kmalloc(sizeof(fd_set_t));
+        p->fds->refs = 1;
+        p->fds->length = parent->fds->length;
+        p->fds->capacity = parent->fds->capacity;
+        p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
+
+        for (uint32_t i = 0; i < parent->fds->length; i++) {
+            p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);  // clone ?
+        }
     } else {
         p->brk = 0;
         p->ustack = 0;
         p->mmap = 0;
+
+        p->fds = kmalloc(sizeof(fd_set_t));
+        p->fds->refs = 1;
+        p->fds->length = 0;
+        p->fds->capacity = 4;
+        p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
     }
 
     p->status = 0;

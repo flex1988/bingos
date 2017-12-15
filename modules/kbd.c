@@ -1,6 +1,7 @@
 #include "fs/fs.h"
 #include "hal/isr.h"
 #include "kernel/process.h"
+#include "drivers/kbd.h"
 #include "module.h"
 
 #define KEY_DEVICE 0x60
@@ -13,9 +14,14 @@ static vfs_node_t *kbd_pipe;
 
 static void keyboard_handler() {
     uint8_t scancode;
+    key_event_t event;
+    key_event_state_t state;
     if (inb(KEY_PENDING) & 0x01) {
         scancode = inb(KEY_DEVICE);
-        vfs_write(kbd_pipe, 0, 1, (uint8_t[]){scancode});
+
+        kbd_scancode(&state, scancode , &event);
+
+        vfs_write(kbd_pipe, 0, 1, &event.key);
     }
 
     irq_ack(KEY_IRQ);
@@ -24,8 +30,9 @@ static void keyboard_handler() {
 int kbd_init(void) {
     printk("Initializing keyboard driver");
 
-    kbd_pipe = create_pipe(128);
+    kbd_pipe = create_pipe(256);
     _current_process->fds->entries[0] = kbd_pipe;
+    _current_process->fds->length++;
 
     kbd_pipe->flags = VFS_CHARDEVICE;
 

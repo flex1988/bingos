@@ -2,9 +2,10 @@
 #define __PROCESS_H__
 
 #include <types.h>
+#include "fs/fs.h"
 #include "kernel/mm.h"
 #include "kernel/mmu.h"
-#include "fs/fs.h"
+#include "lib/list.h"
 
 #define PROCESS_STATE_SLEEP 0
 #define PROCESS_STATE_ACTIVE 1
@@ -67,7 +68,7 @@ extern volatile process_t *_curr_process;
 
 void process_init();
 
-void context_switch();
+void context_switch(int reschedule);
 
 int sys_fork();
 
@@ -78,4 +79,6 @@ void switch_to_user_mode(uint32_t location, uint32_t ustack);
 int sys_exec(char *path, int argc, char **argv);
 
 int sys_getpid();
+
+int sleep_on(list_t *queue);
 #endif

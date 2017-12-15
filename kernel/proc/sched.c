@@ -10,17 +10,13 @@ void sched_init() {
     _finished_queue = list_create();
 }
 
-void sched_enqueue(process_t *p, int priority) {
+void sched_enqueue(process_t *p) {
     ASSERT(p);
-
-    if (priority)
-        list_push_front(_process_queue, (void *)p);
-    else
-        list_push_back(_process_queue, (void *)p);
+    list_push_front(_process_queue, (void *)p);
 }
 
 process_t *sched_dequeue() {
-    list_node_t *n = list_pop_front(_process_queue);
+    list_node_t *n = list_pop_back(_process_queue);
 
     if (!n)
         return NULL;
@@ -28,14 +24,15 @@ process_t *sched_dequeue() {
     process_t *p = (process_t *)n->value;
     kfree(n);
     ASSERT(p);
+
     return p;
 }
 
 void sched_enqueue_finished(process_t *p) { list_push_back(_finished_queue, (void *)p); }
 
 process_t *sched_lookup_finished(int pid) {
-    /*printk("lookup %d", pid);*/
     ASSERT(_finished_queue);
+
     list_node_t *n = _finished_queue->head;
     for (; n != NULL; n = n->next) {
         process_t *p = (process_t *)n->value;
@@ -48,6 +45,5 @@ process_t *sched_lookup_finished(int pid) {
 }
 
 int sched_available() {
-    /*printk("head %d", _process_queue->head);*/
     return _process_queue->head != 0;
 }

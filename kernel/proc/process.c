@@ -6,6 +6,7 @@
 #include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "kernel/sched.h"
+#include "lib/list.h"
 
 #include <errno.h>
 
@@ -266,7 +267,7 @@ int sys_fork() {
 
         new->eip = eip;
 
-        sched_enqueue(new, 0);
+        sched_enqueue(new);
 
         IRQ_ON;
 
@@ -277,7 +278,7 @@ int sys_fork() {
     }
 }
 
-void context_switch() {
+void context_switch(int reschedule) {
     if (!_current_process) {
         return;
     }
@@ -303,7 +304,9 @@ void context_switch() {
     _current_process->esp = esp;
     _current_process->ebp = ebp;
 
-    sched_enqueue(_current_process, 0);
+    if (reschedule) {
+        sched_enqueue(_current_process);
+    }
 
     switch_to_next();
 }
@@ -419,4 +422,27 @@ repeat:
 
     IRQ_OFF;
     return -ECHILD;
+}
+
+int sleep_on(list_t *queue) {
+    list_push_front(queue, _current_process);
+
+    context_switch(0);
+
+    return 0;
+}
+
+int wakeup_from(list_t *queue) {
+    list_node_t *n = list_pop_back(queue);
+
+    if (!n)
+        return 0;
+
+    process_t *p = (process_t *)n->value;
+    kfree(n);
+    ASSERT(p);
+
+    sched_enqueue(p);
+
+    return 0;
 }

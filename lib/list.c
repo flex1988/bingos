@@ -95,3 +95,13 @@ list_node_t *list_pop_front(list_t *l) {
 
     return n;
 }
+
+list_node_t *list_pop_back(list_t *l) {
+    if (!l->tail)
+        return NULL;
+
+    list_node_t *n = l->tail;
+    list_delete(l, l->tail);
+
+    return n;
+}

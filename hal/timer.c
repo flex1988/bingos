@@ -11,7 +11,7 @@ static uint32_t tick = 0;
 
 static void timer_callback(registers_t *regs) {
     tick++;
-    context_switch();
+    context_switch(1);
 }
 
 void timer_init(uint32_t frequency) {

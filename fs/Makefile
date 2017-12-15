@@ -4,7 +4,7 @@ CFLAGS := -m32 -std=c99 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -n
 
 obj_dir := ../build/objs
 
-target := $(obj_dir)/fs.o $(obj_dir)/initrd.o $(obj_dir)/open.o $(obj_dir)/pipe.o
+target := $(obj_dir)/fs.o $(obj_dir)/initrd.o $(obj_dir)/open.o $(obj_dir)/pipe.o $(obj_dir)/read_write.o
  
 all: $(target)
 

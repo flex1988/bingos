@@ -1,6 +1,8 @@
 #ifndef __SYSCALL_H__
 #define __SYSCALL_H__
 
+#include <types.h>
+
 void syscalls_init();
 
 #define DECL_SYSCALL0(fn) int syscall_##fn();
@@ -40,10 +42,12 @@ DECL_SYSCALL0(getpid);
 DECL_SYSCALL1(waitpid, int);
 DECL_SYSCALL1(brk, const void *);
 DECL_SYSCALL3(open,const char*,int,int);
+DECL_SYSCALL3(read,int,void *,size_t);
 
 #define SYSCALL_EXIT 0
 #define SYSCALL_PRINTLN 1
 #define SYSCALL_OPEN 2
+#define SYSCALL_READ 3
 #define SYSCALL_EXECVE 7
 #define SYSCALL_FORK 8
 #define SYSCALL_GETPID 9

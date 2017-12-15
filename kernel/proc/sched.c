@@ -45,6 +45,5 @@ process_t *sched_lookup_finished(int pid) {
 }
 
 int sched_available() {
-    /*printk("head %d", _process_queue->head);*/
     return _process_queue->head != 0;
 }

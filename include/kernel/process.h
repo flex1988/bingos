@@ -68,7 +68,7 @@ extern volatile process_t *_curr_process;
 
 void process_init();
 
-void context_switch();
+void context_switch(int reschedule);
 
 int sys_fork();
 

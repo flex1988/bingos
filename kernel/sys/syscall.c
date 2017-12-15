@@ -77,7 +77,6 @@ int sys_println(const char* msg) {
     return 0;
 }
 
-int sys_read(int fd, void* buf, size_t nbytes) { return 0; }
 int sys_write(int fd, const void* buf, size_t nbytes) { return 0; }
 int sys_close(int fd) { return 0; }
 int sys_gettimeofday() { return 0; }

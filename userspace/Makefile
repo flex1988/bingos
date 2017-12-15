@@ -20,7 +20,7 @@ $(bin_dir)/init: $(obj_dir)/init.o
 	$(LD) $(LDFLAGS) -o $(bin_dir)/init $(obj_dir)/init.o $(libc) $(lib)
 
 $(bin_dir)/sh: $(obj_dir)/sh.o
-	$(LD) $(LDFLAGS) -o $(bin_dir)/sh $(obj_dir)/sh.o $(libc)
+	$(LD) $(LDFLAGS) -o $(bin_dir)/sh $(obj_dir)/sh.o $(libc) $(lib)
 
 $(obj_dir)/%.o: %.c
 	$(CC) $(CFLAGS) -m32 -g -I../include/libc -c -o $@ $<

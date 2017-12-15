@@ -39,6 +39,9 @@
 .extern char_width
 .type char_width, @function
 
+.extern close_pipe
+.type close_pipe, @function
+
 .extern cmp_page_dir
 .type cmp_page_dir, @function
 
@@ -501,6 +504,9 @@
 .extern list_destroy
 .type list_destroy, @function
 
+.extern list_pop_back
+.type list_pop_back, @function
+
 .extern list_pop_front
 .type list_pop_front, @function
 
@@ -554,6 +560,9 @@
 
 .extern nsyscalls
 .type nsyscalls, @function
+
+.extern open_pipe
+.type open_pipe, @function
 
 .extern outb
 .type outb, @function
@@ -663,6 +672,9 @@
 .extern read_eip
 .type read_eip, @function
 
+.extern read_pipe
+.type read_pipe, @function
+
 .extern RED
 .type RED, @function
 
@@ -701,6 +713,9 @@
 
 .extern set_tree_root
 .type set_tree_root, @function
+
+.extern sleep_on
+.type sleep_on, @function
 
 .extern SOLARIZED_BASE0
 .type SOLARIZED_BASE0, @function
@@ -879,6 +894,12 @@
 .extern vsprintf
 .type vsprintf, @function
 
+.extern wakeup_from
+.type wakeup_from, @function
+
+.extern write_pipe
+.type write_pipe, @function
+
 .global kernel_symbols_start
 kernel_symbols_start:
 
@@ -920,6 +941,9 @@ kernel_symbols_start:
 
 .long char_width
 .asciz "char_width"
+
+.long close_pipe
+.asciz "close_pipe"
 
 .long cmp_page_dir
 .asciz "cmp_page_dir"
@@ -1383,6 +1407,9 @@ kernel_symbols_start:
 .long list_destroy
 .asciz "list_destroy"
 
+.long list_pop_back
+.asciz "list_pop_back"
+
 .long list_pop_front
 .asciz "list_pop_front"
 
@@ -1436,6 +1463,9 @@ kernel_symbols_start:
 
 .long nsyscalls
 .asciz "nsyscalls"
+
+.long open_pipe
+.asciz "open_pipe"
 
 .long outb
 .asciz "outb"
@@ -1545,6 +1575,9 @@ kernel_symbols_start:
 .long read_eip
 .asciz "read_eip"
 
+.long read_pipe
+.asciz "read_pipe"
+
 .long RED
 .asciz "RED"
 
@@ -1583,6 +1616,9 @@ kernel_symbols_start:
 
 .long set_tree_root
 .asciz "set_tree_root"
+
+.long sleep_on
+.asciz "sleep_on"
 
 .long SOLARIZED_BASE0
 .asciz "SOLARIZED_BASE0"
@@ -1760,6 +1796,12 @@ kernel_symbols_start:
 
 .long vsprintf
 .asciz "vsprintf"
+
+.long wakeup_from
+.asciz "wakeup_from"
+
+.long write_pipe
+.asciz "write_pipe"
 
 .global kernel_symbols_end
 kernel_symbols_end:

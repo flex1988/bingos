@@ -15,5 +15,7 @@ extern char *strchr(const char *str, int ch);
 extern void *memset(void *dst, char val, size_t count);
 extern void *memcpy(void *dst, const void *src, size_t count);
 extern int memcmp(const void *s1, const void *s2, size_t count);
+char *strtok_r(char *str, const char *delim, char **saveptr);
+size_t strspn(const char *str, const char *accept);
 
-#endif	/* __STRING_H__ */
+#endif /* __STRING_H__ */

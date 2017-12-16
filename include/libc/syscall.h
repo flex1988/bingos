@@ -36,6 +36,8 @@ return a; }
 
 DECL_SYSCALL1(exit,int);
 DECL_SYSCALL1(println,const char *);
+DECL_SYSCALL1(printc,char);
+DECL_SYSCALL1(printf,const char *);
 DECL_SYSCALL3(execve,const char *,char **,char **);
 DECL_SYSCALL0(fork);
 DECL_SYSCALL0(getpid);
@@ -48,6 +50,9 @@ DECL_SYSCALL3(read,int,void *,size_t);
 #define SYSCALL_PRINTLN 1
 #define SYSCALL_OPEN 2
 #define SYSCALL_READ 3
+#define SYSCALL_WRITE 4 
+#define SYSCALL_CLOSE 5
+#define SYSCALL_PRINTC 6
 #define SYSCALL_EXECVE 7
 #define SYSCALL_FORK 8
 #define SYSCALL_GETPID 9

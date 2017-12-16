@@ -177,9 +177,6 @@
 .extern get_physaddr
 .type get_physaddr, @function
 
-.extern getpid
-.type getpid, @function
-
 .extern graphic_init
 .type graphic_init, @function
 
@@ -639,6 +636,9 @@
 .extern pre_alloc
 .type pre_alloc, @function
 
+.extern printc
+.type printc, @function
+
 .extern printk
 .type printk, @function
 
@@ -776,6 +776,9 @@
 
 .extern sys_open
 .type sys_open, @function
+
+.extern sys_printc
+.type sys_printc, @function
 
 .extern sys_println
 .type sys_println, @function
@@ -1064,9 +1067,6 @@ kernel_symbols_start:
 
 .long get_physaddr
 .asciz "get_physaddr"
-
-.long getpid
-.asciz "getpid"
 
 .long graphic_init
 .asciz "graphic_init"
@@ -1527,6 +1527,9 @@ kernel_symbols_start:
 .long pre_alloc
 .asciz "pre_alloc"
 
+.long printc
+.asciz "printc"
+
 .long printk
 .asciz "printk"
 
@@ -1664,6 +1667,9 @@ kernel_symbols_start:
 
 .long sys_open
 .asciz "sys_open"
+
+.long sys_printc
+.asciz "sys_printc"
 
 .long sys_println
 .asciz "sys_println"

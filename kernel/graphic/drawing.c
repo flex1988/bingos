@@ -589,8 +589,6 @@ void graphic_init(vbe_mode_info_structure_t *mode_info) {
     frame_width = mode_info->width;
     frame_bpp = mode_info->bpp;
     frame_pitch = mode_info->pitch;
-
-    // setupfonts();
 }
 
 void draw_pixel(int x, int y, color_t *color) {

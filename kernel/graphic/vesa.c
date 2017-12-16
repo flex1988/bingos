@@ -68,6 +68,7 @@ static void vesa_printc(char c) {
 
     if (c == 0x08 && cursor_x) {
         cursor_x--;
+        draw_char(' ', cursor_x * char_width, cursor_y * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
     }
 
     else if (c == 0x09) {

@@ -15,26 +15,25 @@ static void syscall_handler(registers_t* regs);
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
 
 static void* syscalls[] = {
-    sys_exit,          // 0
-    sys_println,       // 1
-    sys_open,          // 2
-    sys_read,          // 3
-    sys_write,         // 4
-    sys_close,         // 5
-    sys_gettimeofday,  // 6
-    sys_execve,        // 7
-    sys_fork,          // 8
-    sys_getpid,        // 9
-    sys_waitpid,       // 10
-    sys_brk,           // 11
-    sys_exit           // 12
+    sys_exit,     // 0
+    sys_println,  // 1
+    sys_open,     // 2
+    sys_read,     // 3
+    sys_write,    // 4
+    sys_close,    // 5
+    sys_printc,   // 6
+    sys_execve,   // 7
+    sys_fork,     // 8
+    sys_getpid,   // 9
+    sys_waitpid,  // 10
+    sys_brk,      // 11
+    sys_exit      // 12
 };
 
 void syscall_handler(registers_t* regs) {
     if (regs->eax >= nsyscalls)
         return;
 
-    uint32_t call = regs->eax;
     uint32_t location = syscalls[regs->eax];
 
     if (!location)
@@ -74,6 +73,11 @@ int sys_exit(int ret) {
 
 int sys_println(const char* msg) {
     printk(msg);
+    return 0;
+}
+
+int sys_printc(char c) {
+    printc(c);
     return 0;
 }
 

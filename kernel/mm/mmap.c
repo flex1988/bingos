@@ -49,6 +49,7 @@ void *sys_brk(void *brk) {
 // This makes sure the list is sorted by start address, and
 // some simple overlap checking
 void insert_vm(process_t *p, vm_area_t *area) {
+    /*printk("insert_vm %d 0x%x 0x%x",p->id,area->vm_start,area->vm_end);*/
     vm_area_t **prev, *i;
     prev = &p->mmap;
 

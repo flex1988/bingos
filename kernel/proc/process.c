@@ -45,8 +45,8 @@ void travse_dir(page_dir_t *dir) {
 int dup_mmap(process_t *p, process_t *parent) {
     vm_area_t *i, **ptr, *tmp;
 
-    p->mmap = NULL;
     ptr = &p->mmap;
+
     for (i = parent->mmap; i != NULL; i = i->next) {
         tmp = (vm_area_t *)kmalloc(sizeof(vm_area_t));
         if (!tmp)
@@ -64,12 +64,12 @@ int dup_mmap(process_t *p, process_t *parent) {
 
 // !!! p->kstack point to stack bottom (really important)
 process_t *process_create(process_t *parent) {
-    process_t *p = (process_t *)kmalloc_i(sizeof(process_t), 0, 0);
+    process_t *p = (process_t *)kmalloc(sizeof(process_t));
     p->id = _next_pid++;
     p->uid = 500;
     p->gid = 500;
     p->next = 0;
-    memcpy(p->name, "[default]", sizeof("[default]"));
+    memcpy(p->name, "[default]", 10);
 
     p->esp = 0;
     p->ebp = 0;
@@ -78,7 +78,7 @@ process_t *process_create(process_t *parent) {
     p->state = PROCESS_READY;
 
     if (parent) {
-        p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0) + KSTACK_SIZE;
+        p->kstack = kmalloc(KSTACK_SIZE) + KSTACK_SIZE;
         memset((void *)p->kstack - KSTACK_SIZE, 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
@@ -87,7 +87,15 @@ process_t *process_create(process_t *parent) {
         p->img_entry = parent->img_entry;
         p->img_size = parent->img_size;
 
+        p->mmap = NULL;
+
+        /*printk("parent id %d", parent->id);*/
+        /*dump_vm_area(parent->mmap);*/
+
         dup_mmap(p, parent);
+
+        /*printk("child id %d", p->id);*/
+        /*dump_vm_area(p->mmap);*/
 
         p->fds = kmalloc(sizeof(fd_set_t));
         p->fds->refs = 1;
@@ -96,7 +104,7 @@ process_t *process_create(process_t *parent) {
         p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
 
         for (uint32_t i = 0; i < parent->fds->length; i++) {
-            p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);  // clone ?
+            p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);
         }
     } else {
         p->brk = 0;
@@ -111,6 +119,8 @@ process_t *process_create(process_t *parent) {
     }
 
     p->status = 0;
+
+    return p;
 }
 
 void process_exit(int ret) {
@@ -251,8 +261,8 @@ int sys_fork() {
     if (_current_process == parent) {
         // parent
         uint32_t esp;
-        __asm__ __volatile__("mov %%esp, %0" : "=r"(esp));
         uint32_t ebp;
+        __asm__ __volatile__("mov %%esp, %0" : "=r"(esp));
         __asm__ __volatile__("mov %%ebp, %0" : "=r"(ebp));
 
         if (parent->kstack > new->kstack) {
@@ -260,7 +270,7 @@ int sys_fork() {
             new->ebp = ebp - (parent->kstack - new->kstack);
         } else {
             new->esp = esp + (new->kstack - parent->kstack);
-            new->ebp = ebp + (new->kstack - parent->kstack);
+            new->ebp = ebp - (parent->kstack - new->kstack);
         }
 
         memcpy((void *)new->kstack - KSTACK_SIZE, (void *)parent->kstack - KSTACK_SIZE, KSTACK_SIZE);
@@ -337,8 +347,6 @@ void switch_to_next() {
         "r"(esp), "r"(ebp), "r"(_current_pd->physical)
         : "%ecx", "%esp", "%eax");
 }
-
-int getpid() { return _current_process->id; }
 
 int sys_exec(char *path, int argc, char **argv) {
     int ret = -1;

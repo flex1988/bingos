@@ -453,18 +453,6 @@
 .extern isr_handler
 .type isr_handler, @function
 
-.extern kbd_key
-.type kbd_key, @function
-
-.extern kbd_scancode
-.type kbd_scancode, @function
-
-.extern kbd_us
-.type kbd_us, @function
-
-.extern kbd_us_l2
-.type kbd_us_l2, @function
-
 .extern kernel_end
 .type kernel_end, @function
 
@@ -476,9 +464,6 @@
 
 .extern kernel_symbols_start
 .type kernel_symbols_start, @function
-
-.extern key_method
-.type key_method, @function
 
 .extern kfree
 .type kfree, @function
@@ -1356,18 +1341,6 @@ kernel_symbols_start:
 .long isr_handler
 .asciz "isr_handler"
 
-.long kbd_key
-.asciz "kbd_key"
-
-.long kbd_scancode
-.asciz "kbd_scancode"
-
-.long kbd_us
-.asciz "kbd_us"
-
-.long kbd_us_l2
-.asciz "kbd_us_l2"
-
 .long kernel_end
 .asciz "kernel_end"
 
@@ -1379,9 +1352,6 @@ kernel_symbols_start:
 
 .long kernel_symbols_start
 .asciz "kernel_symbols_start"
-
-.long key_method
-.asciz "key_method"
 
 .long kfree
 .asciz "kfree"

@@ -6,7 +6,6 @@ extern process_t *_current_process;
 
 static int validate_fd(uint32_t fd) {
     if (fd >= _current_process->fds->length) {
-        printk("xx %d", _current_process->fds->length);
         return 0;
     }
 

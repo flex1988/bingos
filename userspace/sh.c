@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     char *buf = malloc(1024);
     while (1) {
         int n = read(0, buf, 1);
-        printf("read: %d", buf[0]);
+        printf("read: %s", buf);
     }
     return 0;
 }

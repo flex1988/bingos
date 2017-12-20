@@ -8,6 +8,9 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
 
+static char buffer[LSH_RL_BUFSIZE];
+static char *tokens[LSH_TOK_BUFSIZE];
+
 void sh_loop();
 char *sh_read_line(char *buffer);
 int sh_split_line(char *line, char **tokens, int *tlen);
@@ -17,8 +20,7 @@ void sh_loop() {
     char *line;
     char *args;
     int status = 0;
-    char buffer[LSH_RL_BUFSIZE];
-    char *tokens[LSH_TOK_BUFSIZE];
+    
     int tlen;
 
     do {
@@ -26,18 +28,19 @@ void sh_loop() {
         line = sh_read_line(buffer);
         sh_split_line(line, tokens, &tlen);
         status = sh_execute(tlen, tokens);
+        println("stats %d", status);
     } while (status);
 }
 
 int sh_execute(int argc, char **argv) {
-    if (fork() == 0) {
-        ;//execve(argv[0], 0, 0);
-        exit(0);
+    int pid;
+    if ((pid = fork()) == 0) {
+        println("child %d", getpid());
+        return 1;
     } else {
-        println("parent");
+        int s = waitpid(pid);
+        return s;
     }
-
-    return 0;
 }
 
 char *sh_read_line(char *buffer) {

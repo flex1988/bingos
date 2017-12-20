@@ -41,6 +41,7 @@ static size_t pipe_unread(pipe_device_t *pipe) {
 
 uint32_t read_pipe(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer) {
     pipe_device_t *pipe = (pipe_device_t *)node->device;
+    ASSERT(pipe);
 
     if (pipe->dead) {
         return 0;
@@ -66,6 +67,7 @@ uint32_t read_pipe(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *bu
 
 uint32_t write_pipe(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer) {
     pipe_device_t *pipe = (pipe_device_t *)node->device;
+    ASSERT(pipe);
 
     if (pipe->dead) {
         return 0;
@@ -90,6 +92,7 @@ uint32_t write_pipe(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *b
 
 void open_pipe(vfs_node_t *node, uint32_t flags) {
     pipe_device_t *pipe = (pipe_device_t *)node->device;
+    ASSERT(pipe);
     pipe->refs++;
 
     return;
@@ -97,6 +100,7 @@ void open_pipe(vfs_node_t *node, uint32_t flags) {
 
 void close_pipe(vfs_node_t *node) {
     pipe_device_t *pipe = (pipe_device_t *)node->device;
+    ASSERT(pipe);
 
     pipe->refs--;
 

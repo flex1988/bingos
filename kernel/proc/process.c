@@ -79,7 +79,7 @@ process_t *process_create(process_t *parent) {
 
     if (parent) {
         p->kstack = kmalloc(KSTACK_SIZE) + KSTACK_SIZE;
-        memset((void *)p->kstack - KSTACK_SIZE, 0, KSTACK_SIZE);
+        memset((void *)(p->kstack - KSTACK_SIZE), 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
 
@@ -125,6 +125,7 @@ process_t *process_create(process_t *parent) {
 
 void process_exit(int ret) {
     IRQ_OFF;
+    printk("process_exit %d",_current_process->id);
 
     ASSERT(_current_process);
 
@@ -249,6 +250,9 @@ void process_init() {
 
 int sys_fork() {
     IRQ_OFF;
+
+    uint32_t magic = 0xEEEEEEEE;
+    uint32_t esp, ebp, eip;
     process_t *parent = (process_t *)_current_process;
     page_dir_t *ppd = page_dir_clone(parent->pd);
 
@@ -256,12 +260,11 @@ int sys_fork() {
 
     new->pd = ppd;
 
-    uint32_t eip = read_eip();
+    eip = read_eip();
 
     if (_current_process == parent) {
+        ASSERT(magic == 0xEEEEEEEE);
         // parent
-        uint32_t esp;
-        uint32_t ebp;
         __asm__ __volatile__("mov %%esp, %0" : "=r"(esp));
         __asm__ __volatile__("mov %%ebp, %0" : "=r"(ebp));
 
@@ -273,7 +276,7 @@ int sys_fork() {
             new->ebp = ebp - (parent->kstack - new->kstack);
         }
 
-        memcpy((void *)new->kstack - KSTACK_SIZE, (void *)parent->kstack - KSTACK_SIZE, KSTACK_SIZE);
+        memcpy((void *)(new->kstack - KSTACK_SIZE), (void *)(parent->kstack - KSTACK_SIZE), KSTACK_SIZE);
 
         new->eip = eip;
 
@@ -283,6 +286,7 @@ int sys_fork() {
 
         return new->id;
     } else {
+        ASSERT(magic == 0xEEEEEEEE);
         // child
         return 0;
     }
@@ -327,6 +331,7 @@ void switch_to_next() {
     _current_process = sched_dequeue();
 
     ASSERT(_current_process);
+    printk("switch to %d",_current_process->id);
 
     eip = _current_process->eip;
     esp = _current_process->esp;
@@ -407,16 +412,15 @@ int sys_getpid() {
 }
 
 int sys_waitpid(int pid) {
-    process_t *p;
+    process_t *p = NULL;
 
     if (pid < 0)
         return -ECHILD;
 
 repeat:
-    IRQ_ON;
+    printk("repeat");
     while ((p = sched_lookup_finished(pid)) != NULL) {
         if (p->state == PROCESS_FINISHED) {
-            IRQ_OFF;
             // free process
             return p->status;
         } else {
@@ -425,10 +429,10 @@ repeat:
     }
 
     if (p == NULL) {
+        context_switch(1);
         goto repeat;
     }
 
-    IRQ_OFF;
     return -ECHILD;
 }
 

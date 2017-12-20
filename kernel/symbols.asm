@@ -477,6 +477,9 @@
 .extern kmalloc_i
 .type kmalloc_i, @function
 
+.extern lfind
+.type lfind, @function
+
 .extern list_create
 .type list_create, @function
 
@@ -672,6 +675,9 @@
 .extern remove_ordered_array
 .type remove_ordered_array, @function
 
+.extern rfind
+.type rfind, @function
+
 .extern root_nodes
 .type root_nodes, @function
 
@@ -740,6 +746,15 @@
 
 .extern strnlen
 .type strnlen, @function
+
+.extern strpbrk
+.type strpbrk, @function
+
+.extern strspn
+.type strspn, @function
+
+.extern strtok_r
+.type strtok_r, @function
 
 .extern switch_to_next
 .type switch_to_next, @function
@@ -1368,6 +1383,9 @@ kernel_symbols_start:
 .long kmalloc_i
 .asciz "kmalloc_i"
 
+.long lfind
+.asciz "lfind"
+
 .long list_create
 .asciz "list_create"
 
@@ -1563,6 +1581,9 @@ kernel_symbols_start:
 .long remove_ordered_array
 .asciz "remove_ordered_array"
 
+.long rfind
+.asciz "rfind"
+
 .long root_nodes
 .asciz "root_nodes"
 
@@ -1631,6 +1652,15 @@ kernel_symbols_start:
 
 .long strnlen
 .asciz "strnlen"
+
+.long strpbrk
+.asciz "strpbrk"
+
+.long strspn
+.asciz "strspn"
+
+.long strtok_r
+.asciz "strtok_r"
 
 .long switch_to_next
 .asciz "switch_to_next"

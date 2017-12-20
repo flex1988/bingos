@@ -2,6 +2,7 @@
 
 #include "hal/isr.h"
 #include "kernel.h"
+#include "kernel/memlayout.h"
 #include "kernel/process.h"
 #include "kernel/syscall.h"
 #include "kernel/vga.h"
@@ -40,8 +41,9 @@ void syscall_handler(registers_t* regs) {
         return;
 
     _current_process->syscall_regs = regs;
+    volatile uint32_t stack = _current_process->kstack - KSTACK_SIZE;
 
-    int ret;
+    uint32_t ret;
 
     __asm__ __volatile__(
         "   push %1;    \
@@ -55,9 +57,16 @@ void syscall_handler(registers_t* regs) {
             pop %%ebx;  \
             pop %%ebx;  \
             pop %%ebx;  \
-        "
+            "
         : "=a"(ret)
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
+
+    volatile uint32_t nstack = _current_process->kstack - KSTACK_SIZE;
+    /*if (nstack != stack) {*/
+        /*uint32_t temp = ((uint32_t)regs - stack);*/
+        /*regs = (registers_t*)(nstack + temp);*/
+    /*}*/
+
 
     regs->eax = ret;
 }

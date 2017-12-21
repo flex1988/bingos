@@ -678,6 +678,9 @@
 .extern remove_ordered_array
 .type remove_ordered_array, @function
 
+.extern return_to_userspace
+.type return_to_userspace, @function
+
 .extern rfind
 .type rfind, @function
 
@@ -1586,6 +1589,9 @@ kernel_symbols_start:
 
 .long remove_ordered_array
 .asciz "remove_ordered_array"
+
+.long return_to_userspace
+.asciz "return_to_userspace"
 
 .long rfind
 .asciz "rfind"

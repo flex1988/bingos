@@ -248,8 +248,13 @@ void process_init() {
     IRQ_ON;
 }
 
+#define PUSH(stack,type,item) stack -= sizeof(type); \
+                                       *((type*)stack) = item
+
 int sys_fork() {
     IRQ_OFF;
+
+    _current_process->syscall_regs->eax = 0;
 
     uint32_t magic = 0xEEEEEEEE;
     uint32_t esp, ebp, eip;
@@ -260,37 +265,24 @@ int sys_fork() {
 
     new->pd = ppd;
 
-    eip = read_eip();
 
-    if (_current_process == parent) {
-        ASSERT(magic == 0xEEEEEEEE);
-        // parent
-        __asm__ __volatile__("mov %%esp, %0" : "=r"(esp));
-        __asm__ __volatile__("mov %%ebp, %0" : "=r"(ebp));
+    registers_t regs;
+    memcpy(&regs,_current_process->syscall_regs,sizeof(registers_t));
+    new->syscall_regs = &regs;
 
-        if (parent->kstack > new->kstack) {
-            new->esp = esp - (parent->kstack - new->kstack);
-            new->ebp = ebp - (parent->kstack - new->kstack);
-        } else {
-            new->esp = esp + (new->kstack - parent->kstack);
-            new->ebp = ebp - (parent->kstack - new->kstack);
-        }
+    esp = new->kstack;
+    ebp = esp;
+    new->syscall_regs->eax = 0;
+    PUSH(esp,registers_t,regs);
 
-        memcpy((void *)(new->kstack - KSTACK_SIZE), (void *)(parent->kstack - KSTACK_SIZE), KSTACK_SIZE);
+    new->esp = esp;
+    new->ebp = ebp;
+    new->eip = (uint32_t)&return_to_userspace;
 
-        new->eip = eip;
-
-        sched_enqueue(new);
-
-        IRQ_ON;
-
-        return new->id;
-    } else {
-        ASSERT(magic == 0xEEEEEEEE);
-        printk("child id %d",new->id);
-        // child
-        return 0;
-    }
+    sched_enqueue(new);
+   
+    IRQ_ON;
+    return new->id;
 }
 
 void context_switch(int reschedule) {
@@ -332,9 +324,6 @@ void switch_to_next() {
     _current_process = sched_dequeue();
 
     ASSERT(_current_process);
-    if(_current_process->id == 3) {
-    printk("switch to %d eip 0x%x 0x%x 0x%x 0x%x",_current_process->id,_current_process->eip,_current_process->ebp,_current_process->esp,_current_process->kstack);
-    }
 
     eip = _current_process->eip;
     esp = _current_process->esp;
@@ -421,7 +410,6 @@ int sys_waitpid(int pid) {
         return -ECHILD;
 
 repeat:
-    printk("repeat");
     while ((p = sched_lookup_finished(pid)) != NULL) {
         if (p->state == PROCESS_FINISHED) {
             // free process

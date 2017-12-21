@@ -81,4 +81,6 @@ int sys_exec(char *path, int argc, char **argv);
 int sys_getpid();
 
 int sleep_on(list_t *queue);
+
+extern void return_to_userspace(void);
 #endif

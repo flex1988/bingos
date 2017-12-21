@@ -171,6 +171,9 @@
 .extern get_first_frames
 .type get_first_frames, @function
 
+.extern get_frame
+.type get_frame, @function
+
 .extern get_page
 .type get_page, @function
 
@@ -1076,6 +1079,9 @@ kernel_symbols_start:
 
 .long get_first_frames
 .asciz "get_first_frames"
+
+.long get_frame
+.asciz "get_frame"
 
 .long get_page
 .asciz "get_page"

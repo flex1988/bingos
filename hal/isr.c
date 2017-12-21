@@ -30,6 +30,7 @@ void irq_handler(registers_t *regs) {
 
     if (_interrupt_handlers[regs->int_no]) {
         isr_t handler = _interrupt_handlers[regs->int_no];
+
         handler(regs);
     }
 }

@@ -62,10 +62,14 @@ void syscall_handler(registers_t* regs) {
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
     volatile uint32_t nstack = _current_process->kstack - KSTACK_SIZE;
+
+    /*printk("xx 0x%x 0x%x 0x%x",regs,stack,nstack);*/
     /*if (nstack != stack) {*/
         /*uint32_t temp = ((uint32_t)regs - stack);*/
         /*regs = (registers_t*)(nstack + temp);*/
     /*}*/
+
+    /*printk("0x%x 0x%x",regs,_current_process->syscall_regs);*/
 
 
     regs->eax = ret;

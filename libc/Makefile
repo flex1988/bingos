@@ -1,5 +1,7 @@
 CC := /root/opt/cross/bin/i686-elf-gcc
 
+AS := yasm
+
 CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs
 
 obj_dir := ../build/libc/objs
@@ -16,4 +18,4 @@ $(obj_dir)/%.o: %.c
 	$(CC) $(CFLAGS) -I../include/libc -I../include -c -o $@ $< 
 
 $(obj_dir)/crt0.o:
-	nasm -felf32 -o $(obj_dir)/crt0.o crt0.asm
+	$(AS) -felf32 -o $(obj_dir)/crt0.o crt0.asm

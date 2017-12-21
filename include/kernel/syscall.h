@@ -2,6 +2,7 @@
 #define __SYSCALL_H__
 int sys_exit(int ret);
 int sys_println(const char *);
+int sys_printc(char c);
 extern int sys_exec(char *path, int argc, char **argv);
 extern int sys_open(const char *filename, int flags, int mode);
 extern int sys_read(int fd, void *buf, size_t nbytes);

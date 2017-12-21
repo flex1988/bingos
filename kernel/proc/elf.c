@@ -51,11 +51,9 @@ bool_t elf_load_sections(elf32_ehdr *ehdr) {
         if (shdr->sh_type == SHT_NOBITS) {
             memset((void *)shdr->sh_addr, 0, shdr->sh_size);
         } else {
-            memcpy((void *)shdr->sh_addr, (uint8_t *)ehdr + shdr->sh_offset, shdr->sh_size);
+            memcpy((void *)(shdr->sh_addr), (void *)((uint32_t)ehdr + shdr->sh_offset), shdr->sh_size);
         }
     }
-
-    _current_process->brk = USTACK_BOTTOM + USTACK_SIZE;
 
     IRQ_ON;
 

@@ -117,6 +117,11 @@ uint32_t alloc_frame() {
     return frame;
 }
 
+void get_frame(uint32_t frame) {
+    bitmap_set(frame);
+    _used_frames++;
+}
+
 void free_frame(uint32_t frame) {
     bitmap_unset(frame);
 

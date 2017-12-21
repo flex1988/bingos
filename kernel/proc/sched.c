@@ -28,7 +28,10 @@ process_t *sched_dequeue() {
     return p;
 }
 
-void sched_enqueue_finished(process_t *p) { list_push_back(_finished_queue, (void *)p); }
+void sched_enqueue_finished(process_t *p) {
+    ASSERT(p);
+    list_push_back(_finished_queue, (void *)p);
+}
 
 process_t *sched_lookup_finished(int pid) {
     ASSERT(_finished_queue);
@@ -44,6 +47,4 @@ process_t *sched_lookup_finished(int pid) {
     return NULL;
 }
 
-int sched_available() {
-    return _process_queue->head != 0;
-}
+int sched_available() { return _process_queue->head != 0; }

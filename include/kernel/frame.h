@@ -11,6 +11,7 @@ uint32_t alloc_frames(size_t size);
 void free_frame(uint32_t frame);
 uint32_t free_pages();
 uint32_t get_first_frame();
+void get_frame(uint32_t frame);
 void memory_region_init(ptr_t base, uint64_t size);
 void memory_region_deinit(ptr_t base, uint64_t size);
 #endif

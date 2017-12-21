@@ -69,3 +69,13 @@ enter_userspace:
 	iret
 	pop ebp
 	ret
+
+[GLOBAL return_to_userspace]
+return_to_userspace:
+	pop gs
+	pop fs
+	pop es
+	pop ds
+	popa
+	add esp,8
+	iret

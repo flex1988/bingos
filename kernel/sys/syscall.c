@@ -2,6 +2,7 @@
 
 #include "hal/isr.h"
 #include "kernel.h"
+#include "kernel/memlayout.h"
 #include "kernel/process.h"
 #include "kernel/syscall.h"
 #include "kernel/vga.h"
@@ -15,34 +16,34 @@ static void syscall_handler(registers_t* regs);
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
 
 static void* syscalls[] = {
-    sys_exit,          // 0
-    sys_println,       // 1
-    sys_open,          // 2
-    sys_read,          // 3
-    sys_write,         // 4
-    sys_close,         // 5
-    sys_gettimeofday,  // 6
-    sys_execve,        // 7
-    sys_fork,          // 8
-    sys_getpid,        // 9
-    sys_waitpid,       // 10
-    sys_brk,           // 11
-    sys_exit           // 12
+    sys_exit,     // 0
+    sys_println,  // 1
+    sys_open,     // 2
+    sys_read,     // 3
+    sys_write,    // 4
+    sys_close,    // 5
+    sys_printc,   // 6
+    sys_execve,   // 7
+    sys_fork,     // 8
+    sys_getpid,   // 9
+    sys_waitpid,  // 10
+    sys_brk,      // 11
+    sys_exit      // 12
 };
 
 void syscall_handler(registers_t* regs) {
     if (regs->eax >= nsyscalls)
         return;
 
-    uint32_t call = regs->eax;
     uint32_t location = syscalls[regs->eax];
 
     if (!location)
         return;
 
     _current_process->syscall_regs = regs;
+    volatile uint32_t stack = _current_process->kstack - KSTACK_SIZE;
 
-    int ret;
+    uint32_t ret;
 
     __asm__ __volatile__(
         "   push %1;    \
@@ -56,11 +57,14 @@ void syscall_handler(registers_t* regs) {
             pop %%ebx;  \
             pop %%ebx;  \
             pop %%ebx;  \
-        "
+            "
         : "=a"(ret)
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
-    regs->eax = ret;
+    volatile uint32_t nstack = _current_process->kstack - KSTACK_SIZE;
+    if (_current_process->syscall_regs == regs || (location != (uint32_t)sys_fork)) {
+        regs->eax = ret;
+    }
 }
 
 // must not return ,switch process instead
@@ -74,6 +78,11 @@ int sys_exit(int ret) {
 
 int sys_println(const char* msg) {
     printk(msg);
+    return 0;
+}
+
+int sys_printc(char c) {
+    printc(c);
     return 0;
 }
 

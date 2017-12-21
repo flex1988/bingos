@@ -45,8 +45,8 @@ void travse_dir(page_dir_t *dir) {
 int dup_mmap(process_t *p, process_t *parent) {
     vm_area_t *i, **ptr, *tmp;
 
-    p->mmap = NULL;
     ptr = &p->mmap;
+
     for (i = parent->mmap; i != NULL; i = i->next) {
         tmp = (vm_area_t *)kmalloc(sizeof(vm_area_t));
         if (!tmp)
@@ -64,12 +64,12 @@ int dup_mmap(process_t *p, process_t *parent) {
 
 // !!! p->kstack point to stack bottom (really important)
 process_t *process_create(process_t *parent) {
-    process_t *p = (process_t *)kmalloc_i(sizeof(process_t), 0, 0);
+    process_t *p = (process_t *)kmalloc(sizeof(process_t));
     p->id = _next_pid++;
     p->uid = 500;
     p->gid = 500;
     p->next = 0;
-    memcpy(p->name, "[default]", sizeof("[default]"));
+    memcpy(p->name, "[default]", 10);
 
     p->esp = 0;
     p->ebp = 0;
@@ -78,8 +78,8 @@ process_t *process_create(process_t *parent) {
     p->state = PROCESS_READY;
 
     if (parent) {
-        p->kstack = kmalloc_i(sizeof(KSTACK_SIZE), 1, 0) + KSTACK_SIZE;
-        memset((void *)p->kstack - KSTACK_SIZE, 0, KSTACK_SIZE);
+        p->kstack = kmalloc(KSTACK_SIZE) + KSTACK_SIZE;
+        memset((void *)(p->kstack - KSTACK_SIZE), 0, KSTACK_SIZE);
 
         p->ustack = parent->ustack;
 
@@ -87,7 +87,15 @@ process_t *process_create(process_t *parent) {
         p->img_entry = parent->img_entry;
         p->img_size = parent->img_size;
 
+        p->mmap = NULL;
+
+        /*printk("parent id %d", parent->id);*/
+        /*dump_vm_area(parent->mmap);*/
+
         dup_mmap(p, parent);
+
+        /*printk("child id %d", p->id);*/
+        /*dump_vm_area(p->mmap);*/
 
         p->fds = kmalloc(sizeof(fd_set_t));
         p->fds->refs = 1;
@@ -96,7 +104,7 @@ process_t *process_create(process_t *parent) {
         p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
 
         for (uint32_t i = 0; i < parent->fds->length; i++) {
-            p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);  // clone ?
+            p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);
         }
     } else {
         p->brk = 0;
@@ -111,10 +119,13 @@ process_t *process_create(process_t *parent) {
     }
 
     p->status = 0;
+
+    return p;
 }
 
 void process_exit(int ret) {
     IRQ_OFF;
+    printk("process_exit %d",_current_process->id);
 
     ASSERT(_current_process);
 
@@ -237,8 +248,16 @@ void process_init() {
     IRQ_ON;
 }
 
+#define PUSH(stack,type,item) stack -= sizeof(type); \
+                                       *((type*)stack) = item
+
 int sys_fork() {
     IRQ_OFF;
+
+    _current_process->syscall_regs->eax = 0;
+
+    uint32_t magic = 0xEEEEEEEE;
+    uint32_t esp, ebp, eip;
     process_t *parent = (process_t *)_current_process;
     page_dir_t *ppd = page_dir_clone(parent->pd);
 
@@ -246,36 +265,24 @@ int sys_fork() {
 
     new->pd = ppd;
 
-    uint32_t eip = read_eip();
 
-    if (_current_process == parent) {
-        // parent
-        uint32_t esp;
-        __asm__ __volatile__("mov %%esp, %0" : "=r"(esp));
-        uint32_t ebp;
-        __asm__ __volatile__("mov %%ebp, %0" : "=r"(ebp));
+    registers_t regs;
+    memcpy(&regs,_current_process->syscall_regs,sizeof(registers_t));
+    new->syscall_regs = &regs;
 
-        if (parent->kstack > new->kstack) {
-            new->esp = esp - (parent->kstack - new->kstack);
-            new->ebp = ebp - (parent->kstack - new->kstack);
-        } else {
-            new->esp = esp + (new->kstack - parent->kstack);
-            new->ebp = ebp + (new->kstack - parent->kstack);
-        }
+    esp = new->kstack;
+    ebp = esp;
+    new->syscall_regs->eax = 0;
+    PUSH(esp,registers_t,regs);
 
-        memcpy((void *)new->kstack - KSTACK_SIZE, (void *)parent->kstack - KSTACK_SIZE, KSTACK_SIZE);
+    new->esp = esp;
+    new->ebp = ebp;
+    new->eip = (uint32_t)&return_to_userspace;
 
-        new->eip = eip;
-
-        sched_enqueue(new);
-
-        IRQ_ON;
-
-        return new->id;
-    } else {
-        // child
-        return 0;
-    }
+    sched_enqueue(new);
+   
+    IRQ_ON;
+    return new->id;
 }
 
 void context_switch(int reschedule) {
@@ -338,59 +345,57 @@ void switch_to_next() {
         : "%ecx", "%esp", "%eax");
 }
 
-int getpid() { return _current_process->id; }
+/*int sys_exec(char *path, int argc, char **argv) {*/
+    /*int ret = -1;*/
+    /*vfs_node_t *n;*/
+    /*elf32_ehdr *ehdr;*/
 
-int sys_exec(char *path, int argc, char **argv) {
-    int ret = -1;
-    vfs_node_t *n;
-    elf32_ehdr *ehdr;
+    /*n = vfs_lookup(path, 0);*/
 
-    n = vfs_lookup(path, 0);
+    /*ASSERT(n);*/
 
-    ASSERT(n);
+    /*ptr_t virt;*/
+    /*ptr_t entry;*/
+    /*page_t *page;*/
 
-    ptr_t virt;
-    ptr_t entry;
-    page_t *page;
+    /*ret = do_mmap(USTACK_BOTTOM, n->length);*/
+    /*ASSERT(!ret);*/
 
-    ret = do_mmap(USTACK_BOTTOM, n->length);
-    ASSERT(!ret);
+    /*ehdr = (elf32_ehdr *)USTACK_BOTTOM;*/
 
-    ehdr = (elf32_ehdr *)USTACK_BOTTOM;
+    /*ret = vfs_read(n, 0, n->length, (uint8_t *)ehdr);*/
+    /*ASSERT(ret >= sizeof(elf32_ehdr));*/
 
-    ret = vfs_read(n, 0, n->length, (uint8_t *)ehdr);
-    ASSERT(ret >= sizeof(elf32_ehdr));
+    /*if (!elf_ehdr_check(ehdr)) {*/
+        /*printk("invalid elf header");*/
+        /*return -1;*/
+    /*}*/
 
-    if (!elf_ehdr_check(ehdr)) {
-        printk("invalid elf header");
-        return -1;
-    }
+    /*if (!elf_load_sections(ehdr)) {*/
+        /*printk("load elf sections error");*/
+        /*return -1;*/
+    /*}*/
 
-    if (!elf_load_sections(ehdr)) {
-        printk("load elf sections error");
-        return -1;
-    }
+    /*entry = ehdr->e_entry;*/
 
-    entry = ehdr->e_entry;
+    /*ret = do_munmap(USTACK_BOTTOM, n->length);*/
+    /*ASSERT(!ret);*/
 
-    ret = do_munmap(USTACK_BOTTOM, n->length);
-    ASSERT(!ret);
+    /*ret = do_mmap(USTACK_BOTTOM, USTACK_SIZE);*/
+    /*ASSERT(!ret);*/
 
-    ret = do_mmap(USTACK_BOTTOM, USTACK_SIZE);
-    ASSERT(!ret);
+    /*ret = do_mmap(UHEAP_START, UHEAP_INITIAL_SIZE);*/
+    /*ASSERT(!ret);*/
 
-    ret = do_mmap(UHEAP_START, UHEAP_INITIAL_SIZE);
-    ASSERT(!ret);
+    /*_current_process->brk = UHEAP_START;*/
+    /*_current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;*/
 
-    _current_process->brk = UHEAP_START;
-    _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
+    /*switch_to_user_mode(entry, _current_process->ustack);*/
 
-    switch_to_user_mode(entry, _current_process->ustack);
+    /*ASSERT(0);*/
 
-    ASSERT(0);
-
-    return ret;
-}
+    /*return ret;*/
+/*}*/
 
 int sys_getpid() {
     if (!_current_process)
@@ -399,16 +404,14 @@ int sys_getpid() {
 }
 
 int sys_waitpid(int pid) {
-    process_t *p;
+    process_t *p = NULL;
 
     if (pid < 0)
         return -ECHILD;
 
 repeat:
-    IRQ_ON;
     while ((p = sched_lookup_finished(pid)) != NULL) {
         if (p->state == PROCESS_FINISHED) {
-            IRQ_OFF;
             // free process
             return p->status;
         } else {
@@ -417,10 +420,10 @@ repeat:
     }
 
     if (p == NULL) {
+        context_switch(1);
         goto repeat;
     }
 
-    IRQ_OFF;
     return -ECHILD;
 }
 

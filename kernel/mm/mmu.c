@@ -120,6 +120,7 @@ void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt) {
         page->user = kernel ? 0 : 1;
         page->present = 1;
         page->addr = virt >> 12;
+        get_frame(virt >> 12);
     }
 }
 
@@ -163,12 +164,13 @@ page_dir_t* page_dir_clone(page_dir_t* src) {
         if (!src->tabls[i])
             continue;
 
+        /*printk("src 0x%x %d", src->tabls[i], i);*/
+
         if (_kernel_pd->tabls[i] == src->tabls[i]) {
             dir->tabls[i] = src->tabls[i];
             dir->entries[i] = src->entries[i];
         } else {
             uint32_t tabl_phys;
-            /*printk("src 0x%x %d", src->tabls[i], i);*/
             dir->tabls[i] = table_clone(src->tabls[i], &tabl_phys);
 
             paged_entry_t* entry = &dir->entries[i];

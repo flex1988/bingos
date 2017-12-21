@@ -57,6 +57,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     sys_exec("/bin/init", 0, NULL);
 
-    while (1)
-        ;
+    context_switch(0);
+
+    return 0;
 }

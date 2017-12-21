@@ -1,5 +1,7 @@
 CC := /root/opt/cross/bin/i686-elf-gcc
 
+AS := yasm
+
 CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -I../include -I../include/libc
 
 obj_dir := ../build/objs
@@ -12,7 +14,7 @@ $(obj_dir)/%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(obj_dir)/interrupt.o:
-	nasm -felf32 -o $(obj_dir)/interrupt.o interrupt.asm
+	$(AS) -felf -o $(obj_dir)/interrupt.o interrupt.asm
 
 $(obj_dir)/gdt.o:
-	nasm -felf32 -o $(obj_dir)/gdt.o gdt.asm
+	$(AS) -felf -o $(obj_dir)/gdt.o gdt.asm

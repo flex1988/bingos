@@ -171,14 +171,14 @@
 .extern get_first_frames
 .type get_first_frames, @function
 
+.extern get_frame
+.type get_frame, @function
+
 .extern get_page
 .type get_page, @function
 
 .extern get_physaddr
 .type get_physaddr, @function
-
-.extern getpid
-.type getpid, @function
 
 .extern graphic_init
 .type graphic_init, @function
@@ -480,6 +480,9 @@
 .extern kmalloc_i
 .type kmalloc_i, @function
 
+.extern lfind
+.type lfind, @function
+
 .extern list_create
 .type list_create, @function
 
@@ -639,6 +642,9 @@
 .extern pre_alloc
 .type pre_alloc, @function
 
+.extern printc
+.type printc, @function
+
 .extern printk
 .type printk, @function
 
@@ -671,6 +677,12 @@
 
 .extern remove_ordered_array
 .type remove_ordered_array, @function
+
+.extern return_to_userspace
+.type return_to_userspace, @function
+
+.extern rfind
+.type rfind, @function
 
 .extern root_nodes
 .type root_nodes, @function
@@ -741,6 +753,15 @@
 .extern strnlen
 .type strnlen, @function
 
+.extern strpbrk
+.type strpbrk, @function
+
+.extern strspn
+.type strspn, @function
+
+.extern strtok_r
+.type strtok_r, @function
+
 .extern switch_to_next
 .type switch_to_next, @function
 
@@ -776,6 +797,9 @@
 
 .extern sys_open
 .type sys_open, @function
+
+.extern sys_printc
+.type sys_printc, @function
 
 .extern sys_println
 .type sys_println, @function
@@ -1059,14 +1083,14 @@ kernel_symbols_start:
 .long get_first_frames
 .asciz "get_first_frames"
 
+.long get_frame
+.asciz "get_frame"
+
 .long get_page
 .asciz "get_page"
 
 .long get_physaddr
 .asciz "get_physaddr"
-
-.long getpid
-.asciz "getpid"
 
 .long graphic_init
 .asciz "graphic_init"
@@ -1368,6 +1392,9 @@ kernel_symbols_start:
 .long kmalloc_i
 .asciz "kmalloc_i"
 
+.long lfind
+.asciz "lfind"
+
 .long list_create
 .asciz "list_create"
 
@@ -1527,6 +1554,9 @@ kernel_symbols_start:
 .long pre_alloc
 .asciz "pre_alloc"
 
+.long printc
+.asciz "printc"
+
 .long printk
 .asciz "printk"
 
@@ -1559,6 +1589,12 @@ kernel_symbols_start:
 
 .long remove_ordered_array
 .asciz "remove_ordered_array"
+
+.long return_to_userspace
+.asciz "return_to_userspace"
+
+.long rfind
+.asciz "rfind"
 
 .long root_nodes
 .asciz "root_nodes"
@@ -1629,6 +1665,15 @@ kernel_symbols_start:
 .long strnlen
 .asciz "strnlen"
 
+.long strpbrk
+.asciz "strpbrk"
+
+.long strspn
+.asciz "strspn"
+
+.long strtok_r
+.asciz "strtok_r"
+
 .long switch_to_next
 .asciz "switch_to_next"
 
@@ -1664,6 +1709,9 @@ kernel_symbols_start:
 
 .long sys_open
 .asciz "sys_open"
+
+.long sys_printc
+.asciz "sys_printc"
 
 .long sys_println
 .asciz "sys_println"

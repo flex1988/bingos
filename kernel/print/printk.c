@@ -22,6 +22,11 @@ int printk(const char *fmt, ...) {
     return i;
 }
 
+int printc(char c) {
+    console.printc(c);
+    return 0;
+}
+
 void panic(const char *file, uint32_t line, const char *msg) {
     printk("KERNEL PANIC(%s) at %s:%d", msg, file, line);
     for (;;)

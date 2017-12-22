@@ -8,7 +8,7 @@ all: $(target)
 
 initrd:
 	$(CC) initrd.c -o initrd 
-	./initrd $(bin_dir)/init init $(bin_dir)/sh sh
+	./initrd $(bin_dir)/init init $(bin_dir)/sh sh $(bin_dir)/helloworld helloworld
 	rm initrd
 
 font:

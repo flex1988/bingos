@@ -39,7 +39,6 @@ static int do_exec(char *path, int argc, char **argv) {
     }
 
     entry = ehdr->e_entry;
-    printk("entry 0x%x",entry);
 
     ret = do_munmap(USTACK_BOTTOM, n->length);
     ASSERT(!ret);

@@ -28,18 +28,16 @@ void sh_loop() {
         line = sh_read_line(buffer);
         sh_split_line(line, tokens, &tlen);
         status = sh_execute(tlen, tokens);
-        println("stats %d", status);
     } while (status);
 }
 
 int sh_execute(int argc, char **argv) {
     int pid;
     if ((pid = fork()) == 0) {
-        println("child %d", getpid());
-        return 1;
+        execve(argv[0]);
     } else {
         int s = waitpid(pid);
-        return s;
+        return 1;
     }
 }
 

@@ -66,4 +66,6 @@ typedef unsigned int size_t;
 #define INT32_MAX 0x7fffffffL
 #define UINT32_MAX 0xffffffffL
 
+#define NULL 0
+
 #endif /* __TYPES_H__ */

@@ -54,6 +54,29 @@ typedef struct vfs_node_s {
     void *ioctl;
 } vfs_node_t;
 
+typedef struct vfs_stat_s {
+    uint16_t st_dev;
+    uint16_t __pad1;
+    uint32_t st_ino;
+    uint16_t st_mode;
+    uint16_t st_nlink;
+    uint16_t st_uid;
+    uint16_t st_gid;
+    uint16_t st_rdev;
+    uint16_t __pad2;
+    uint32_t st_size;
+    uint32_t st_blksize;
+    uint32_t st_blocks;
+    uint32_t st_atime;
+    uint32_t __unused1;
+    uint32_t st_mtime;
+    uint32_t __unused2;
+    uint32_t st_ctime;
+    uint32_t __unused3;
+    uint32_t __unused4;
+    uint32_t __unused5;
+} vfs_stat_t;
+
 typedef struct vfs_entry_s {
     char name[64];
     vfs_node_t *file;
@@ -73,4 +96,6 @@ vfs_node_t *vfs_lookup(const char *path, int type);
 void vfs_init();
 int vfs_register(char *name, vfs_mount_callback callback);
 int vfs_mount_type(char *type, char *arg, char *mount_point);
+
+int namei(const char* path, vfs_node_t** res);
 #endif

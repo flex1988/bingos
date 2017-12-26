@@ -15,6 +15,7 @@ int sys_stat(char *filename, vfs_stat_t *statbuf) {
     int error;
 
     error = namei(filename, &node);
+
     if (error)
         return error;
 

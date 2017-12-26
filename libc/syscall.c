@@ -32,4 +32,3 @@ int open(const char *filename, int flags, int mode) { return syscall_open(filena
 int read(int fd, void *buf, size_t count) { return syscall_read(fd, buf, count); }
 
 int stat(const char *filename, stat_t *statbuf) { return syscall_stat(filename, statbuf); }
-

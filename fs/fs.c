@@ -191,7 +191,7 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
     ASSERT(path[0] == '/');
 
     dup = kmalloc(strlen(path) + 1);
-    strcpy(dup, path);
+    memcpy(dup, path, strlen(path) + 1);
 
     size_t path_size = strlen(path);
 
@@ -200,19 +200,18 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
         return vfs_root;
     }
 
-    char* p = path;
+    char* p = dup;
     uint32_t pdepth = 0;
 
     // split path
-    while (p < path + path_size) {
+    while (p < dup + path_size) {
         if (*p == '/') {
             *p = '\0';
             pdepth++;
         }
         p++;
     }
-    p[path_size] = '\0';
-    p = path + 1;
+    p = dup + 1;
 
     char* mount_path = p;
     uint32_t mount_depth = 0;

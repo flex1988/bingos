@@ -5,5 +5,6 @@
 
 void *malloc(size_t size);
 void free(void *p);
+int execvp(const char *file, char **argv);
 
 #endif

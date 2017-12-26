@@ -540,6 +540,9 @@
 .extern move_stack
 .type move_stack, @function
 
+.extern namei
+.type namei, @function
+
 .extern _next_pid
 .type _next_pid, @function
 
@@ -806,6 +809,9 @@
 
 .extern sys_read
 .type sys_read, @function
+
+.extern sys_stat
+.type sys_stat, @function
 
 .extern sys_waitpid
 .type sys_waitpid, @function
@@ -1452,6 +1458,9 @@ kernel_symbols_start:
 .long move_stack
 .asciz "move_stack"
 
+.long namei
+.asciz "namei"
+
 .long _next_pid
 .asciz "_next_pid"
 
@@ -1718,6 +1727,9 @@ kernel_symbols_start:
 
 .long sys_read
 .asciz "sys_read"
+
+.long sys_stat
+.asciz "sys_stat"
 
 .long sys_waitpid
 .asciz "sys_waitpid"

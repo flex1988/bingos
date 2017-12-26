@@ -14,4 +14,5 @@ extern int sys_fork();
 extern int sys_getpid();
 extern void *sys_brk();
 extern int sys_waitpid(int pid);
+extern int sys_stat(char *filename, vfs_stat_t *statbuf);
 #endif

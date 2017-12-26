@@ -28,7 +28,7 @@ static void* syscalls[] = {
     sys_getpid,   // 9
     sys_waitpid,  // 10
     sys_brk,      // 11
-    sys_exit      // 12
+    sys_stat      // 12
 };
 
 void syscall_handler(registers_t* regs) {

@@ -20,7 +20,7 @@ void sh_loop() {
     char *line;
     char *args;
     int status = 0;
-    
+
     int tlen;
 
     do {
@@ -33,8 +33,11 @@ void sh_loop() {
 
 int sh_execute(int argc, char **argv) {
     int pid;
+    int ret;
     if ((pid = fork()) == 0) {
-        execve(argv[0]);
+        ret = execvp(argv[0], NULL);
+        if (ret == -1)
+            exit(0);
     } else {
         int s = waitpid(pid);
         return 1;

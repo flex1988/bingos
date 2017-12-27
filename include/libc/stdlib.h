@@ -3,8 +3,10 @@
 
 #include <types.h>
 
-void *malloc(size_t size);
-void free(void *p);
+extern void *malloc(size_t size);
+extern void free(void *p);
+extern void *realloc(void *ptr, size_t size);
+extern void *calloc(size_t nelem, size_t elsize);
 int execvp(const char *file, char **argv);
 
 #endif

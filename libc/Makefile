@@ -6,7 +6,7 @@ CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfil
 
 obj_dir := ../build/libc/objs
 
-objs := $(obj_dir)/string.o $(obj_dir)/stdio.o $(obj_dir)/crt0.o $(obj_dir)/syscall.o $(obj_dir)/vsprintf.o $(obj_dir)/errno.o $(obj_dir)/heap.o $(obj_dir)/stdlib.o
+objs := $(obj_dir)/string.o $(obj_dir)/stdio.o $(obj_dir)/crt0.o $(obj_dir)/syscall.o $(obj_dir)/vsprintf.o $(obj_dir)/errno.o $(obj_dir)/heap.o $(obj_dir)/stdlib.o $(obj_dir)/malloc.o
 
 all: libc
 

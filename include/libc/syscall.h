@@ -37,7 +37,7 @@ void syscalls_init();
 #define DEFN_SYSCALL2(fn,num,P1,P2) \
     int syscall_##fn(P1 p1,P2 p2)   {   \
         int a;  \
-        __asm__ __volatile__("int $0x80":"=a"(a):"0"(num),"b"((int)p1),"c"((int)p2)); \
+        __asm__ __volatile__("int $0x80": "=a"(a) : "0"(num),"b"((int)p1),"c"((int)p2)); \
         if(a >= 0)   \
             return a;   \
         errno = -a; \
@@ -51,7 +51,7 @@ void syscalls_init();
         if(a >= 0)   \
             return a;   \
         errno = -a; \
-        return a;   \
+        return -1;   \
     } 
 
 
@@ -67,6 +67,8 @@ DECL_SYSCALL1(brk, const void *);
 DECL_SYSCALL3(open,const char*,int,int);
 DECL_SYSCALL3(read,int,void *,size_t);
 DECL_SYSCALL2(stat,const char *,stat_t *);
+
+void *sbrk(int increment);
 
 #define SYSCALL_EXIT 0
 #define SYSCALL_PRINTLN 1

@@ -10,6 +10,8 @@ lib := ../build/lib.a
 
 target := $(bin_dir)/init $(bin_dir)/sh $(bin_dir)/helloworld
 
+.PHONY: $(target)
+
 all: $(target)
 
 CFLAGS := -m32 -nostdlib -nostdinc -fno-builtin -I ../include/libc

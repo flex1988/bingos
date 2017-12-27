@@ -1,3 +1,4 @@
+#include "kernel.h"
 #include "fs/fs.h"
 
 static copy_stat(vfs_node_t *node, vfs_stat_t *statbuf) {

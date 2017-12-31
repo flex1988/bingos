@@ -513,6 +513,9 @@
 .extern lookup_ordered_array
 .type lookup_ordered_array, @function
 
+.extern malloc_debug
+.type malloc_debug, @function
+
 .extern memcmp
 .type memcmp, @function
 
@@ -1430,6 +1433,9 @@ kernel_symbols_start:
 
 .long lookup_ordered_array
 .asciz "lookup_ordered_array"
+
+.long malloc_debug
+.asciz "malloc_debug"
 
 .long memcmp
 .asciz "memcmp"

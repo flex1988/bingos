@@ -3,7 +3,7 @@
 
 #include "lib/ordered_array.h"
 
-#define HEAP_INDEX_SIZE 0x20000
+#define HEAP_INDEX_SIZE 0x40000
 #define HEAP_MAGIC 0x12345678
 
 typedef struct {

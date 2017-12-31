@@ -170,7 +170,6 @@ void frame_init(struct multiboot_info *mbi) {
     }
 
     _max_frames = (uint32_t)((mbi->mem_lower + mbi->mem_upper) / 4);
-    printk("xxx0x%x",_max_frames);
 
     // pre_alloc frame bitmap
     _frame_map = pre_alloc(_max_frames / 32, 0, 0);

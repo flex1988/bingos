@@ -7,6 +7,7 @@
 #include "kernel.h"
 #include "kernel/console.h"
 #include "kernel/frame.h"
+#include "kernel/malloc.h"
 #include "kernel/mmu.h"
 #include "kernel/printk.h"
 #include "kernel/process.h"
@@ -42,9 +43,10 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     frame_init(boot_info);
     mmu_init();
+    kmalloc_init(0xc0000000, 0x10000000);
     process_init();
     vfs_init();
-    
+
     modules_init(boot_info);
 
     vfs_node_t *ramdisk = initrd_init(*(uint32_t *)(boot_info->mods_addr));

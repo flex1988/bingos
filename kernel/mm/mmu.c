@@ -4,7 +4,7 @@
 #include "hal/isr.h"
 #include "kernel.h"
 #include "kernel/frame.h"
-#include "kernel/kheap.h"
+/*#include "kernel/kheap.h"*/
 #include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 #include "multiboot.h"
@@ -15,7 +15,7 @@ page_dir_t* _current_pd = 0;
 uint32_t _pdbr;
 
 extern ptr_t _placement_addr;
-extern heap_t* kheap;
+/*extern heap_t* kheap;*/
 extern void copy_page_physical(uint32_t src, uint32_t dst);
 
 extern uint8_t* frame_buffer;
@@ -195,7 +195,7 @@ void mmu_init() {
     ptr_t phys, virt;
     page_t* page;
 
-    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE; virt += 0x1000) {
+    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_MAX_SIZE; virt += 0x1000) {
         get_page(virt, 1, _kernel_pd);
     }
 
@@ -216,7 +216,7 @@ void mmu_init() {
 
     // map 0x100000 physic to virtual 0xc0000000
     for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE; virt += 0x1000) {
-        page = get_page(virt, 1, _kernel_pd);
+        page = get_page(virt, 0, _kernel_pd);
         ASSERT(page != 0);
         page_map(page, 1, 0);
     }
@@ -233,7 +233,7 @@ void mmu_init() {
     page_dir_switch(_kernel_pd);
     enable_paging();
 
-    kheap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 0, 0);
+    /*kheap = create_heap(KHEAP_START, KHEAP_START + KHEAP_INITIAL_SIZE, 0xCFFFF000, 1, 0);*/
 
     _current_pd = page_dir_clone(_kernel_pd);
     page_dir_switch(_current_pd);

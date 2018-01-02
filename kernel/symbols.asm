@@ -453,6 +453,9 @@
 .extern kfree
 .type kfree, @function
 
+.extern __kfree
+.type __kfree, @function
+
 .extern kmain
 .type kmain, @function
 
@@ -1349,6 +1352,9 @@ kernel_symbols_start:
 
 .long kfree
 .asciz "kfree"
+
+.long __kfree
+.asciz "__kfree"
 
 .long kmain
 .asciz "kmain"

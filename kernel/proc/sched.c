@@ -5,6 +5,8 @@
 volatile list_t *_process_queue;
 volatile list_t *_finished_queue;
 
+extern int malloc_debug;
+
 void sched_init() {
     _process_queue = list_create();
     _finished_queue = list_create();
@@ -22,8 +24,8 @@ process_t *sched_dequeue() {
         return NULL;
 
     process_t *p = (process_t *)n->value;
+
     kfree(n);
-    ASSERT(p);
 
     return p;
 }

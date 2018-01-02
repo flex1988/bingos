@@ -23,7 +23,7 @@ int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)); }
 
 static inline uint32_t get_frame_count() { return _max_frames; }
 
-ptr_t pre_alloc(size_t size, int align, uint32_t *phys) {
+uint32_t pre_alloc(size_t size, int align, uint32_t *phys) {
     ptr_t t;
 
     if (align && (_placement_addr & 0xfff)) {
@@ -170,7 +170,6 @@ void frame_init(struct multiboot_info *mbi) {
     }
 
     _max_frames = (uint32_t)((mbi->mem_lower + mbi->mem_upper) / 4);
-    printk("xxx0x%x",_max_frames);
 
     // pre_alloc frame bitmap
     _frame_map = pre_alloc(_max_frames / 32, 0, 0);

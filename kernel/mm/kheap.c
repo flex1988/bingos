@@ -1,11 +1,16 @@
 #include "kernel/kheap.h"
 #include "kernel.h"
 #include "kernel/memlayout.h"
+#include "kernel/mm.h"
 #include "kernel/mmu.h"
+#include "kernel/process.h"
 #include "lib/ordered_array.h"
 
 extern page_dir_t *_kernel_pd;
+extern process_t *_current_process;
 heap_t *kheap = 0;
+
+int malloc_debug = 0;
 
 uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
     if (kheap != 0) {
@@ -34,11 +39,13 @@ static int32_t find_smallest_hole(uint32_t size, uint8_t align, heap_t *heap) {
             if ((location + sizeof(header_t)) & 0xfffff000 != 0)
                 offset = 0x1000 - (location + sizeof(header_t)) % 0x1000;
             int32_t hole_size = (int32_t)header->size - offset;
+
             if (hole_size >= size)
                 break;
         } else if (header->size >= size) {
             break;
         }
+
         iterator++;
     }
 
@@ -72,6 +79,7 @@ heap_t *create_heap(uint32_t start, uint32_t end, uint32_t max, uint8_t supervis
     hole->size = end - start;
     hole->magic = HEAP_MAGIC;
     hole->hole = 1;
+
     insert_ordered_array((void *)hole, &heap->index);
 
     return heap;
@@ -83,11 +91,16 @@ static void expand(uint32_t new, heap_t *heap) {
         new += 0x1000;
     }
 
+    ASSERT(new < heap->max);
+
     uint32_t old = heap->end - heap->start;
-    while (old < new) {
-        page_map(get_page(heap->start + old, 1, _kernel_pd), heap->supervisor ? 1 : 0, heap->readonly ? 0 : 1);
-        old += 0x1000;
+
+    uint32_t virt;
+    for (virt = heap->end; virt < heap->start + new; virt += 0x1000) {
+        page_t *page = get_page(virt, 0, _kernel_pd);
+        page_map(page, heap->supervisor ? 1 : 0, heap->readonly ? 0 : 1);
     }
+
     heap->end = heap->start + new;
 }
 

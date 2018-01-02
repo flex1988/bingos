@@ -4,21 +4,24 @@
 int8_t default_comparer(type_t a, type_t b) { return *(uint32_t*)a - *(uint32_t*)b; }
 
 /*ordered_array_t create_ordered_array(uint32_t max, comparer_t comparer) {*/
-    /*ordered_array_t arr;*/
-    /*arr.array = (type_t*)malloc(sizeof(type_t) * max);*/
-    /*arr.size = 0;*/
-    /*arr.max = max;*/
-    /*arr.comparer = comparer;*/
-    /*return arr;*/
+/*ordered_array_t arr;*/
+/*arr.array = (type_t*)malloc(sizeof(type_t) * max);*/
+/*arr.size = 0;*/
+/*arr.max = max;*/
+/*arr.comparer = comparer;*/
+/*return arr;*/
 /*}*/
 
 void destroy_ordered_array(ordered_array_t* arr) {
-    ;//free(arr->array);
+    ;  // free(arr->array);
 }
 
 void insert_ordered_array(type_t item, ordered_array_t* arr) {
-    if (arr->size == arr->max)
+    if (arr->size == arr->max) {
+        printk("order array max size %d limited", arr->max);
         return;
+    }
+
     uint32_t i = 0;
     while (arr->array[i] && arr->comparer(arr->array[i], item) < 0) i++;
 

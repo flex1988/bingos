@@ -23,7 +23,7 @@ int bitmap_test(int bit) { return _frame_map[bit / 32] & (1 << (bit % 32)); }
 
 static inline uint32_t get_frame_count() { return _max_frames; }
 
-ptr_t pre_alloc(size_t size, int align, uint32_t *phys) {
+uint32_t pre_alloc(size_t size, int align, uint32_t *phys) {
     ptr_t t;
 
     if (align && (_placement_addr & 0xfff)) {

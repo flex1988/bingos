@@ -14,4 +14,5 @@ uint32_t get_first_frame();
 void get_frame(uint32_t frame);
 void memory_region_init(ptr_t base, uint64_t size);
 void memory_region_deinit(ptr_t base, uint64_t size);
+uint32_t pre_alloc(size_t size, int align, uint32_t *phys);
 #endif

@@ -1,5 +1,7 @@
 #include "kernel.h"
+#include "kernel/frame.h"
 #include "kernel/malloc.h"
+#include "kernel/memlayout.h"
 #include "kernel/mmu.h"
 
 typedef struct block_header_s block_header_t;
@@ -49,6 +51,8 @@ size_descriptor_t sizes[] = {{NULL, 32, 127, 0, 0, 0, 0}, {NULL, 64, 63, 0, 0, 0
 
 static page_dir_t *_kernel_pd;
 
+static uint32_t __kmalloc(size_t size);
+
 int get_order(int size) {
     int order;
     size += sizeof(block_header_t);
@@ -62,15 +66,13 @@ int get_order(int size) {
 static uint32_t kmalloc_start;
 static uint32_t kmalloc_end;
 
-void kmalloc_init(uint32_t start, uint32_t size) { kmalloc_start = start; }
+void kmalloc_init(uint32_t start, uint32_t size) {
+    kmalloc_start = kmalloc_end = start;
+    printk("kmalloc init...");
+}
 
 static uint32_t __get_free_page() {
     uint32_t ret;
-    page_t *page;
-
-    page = get_page(kmalloc_end, 0, _kernel_pd);
-    ASSERT(page);
-    page_map(page, 1, 0);
 
     ret = kmalloc_end;
     kmalloc_end += 0x1000;
@@ -78,15 +80,36 @@ static uint32_t __get_free_page() {
     return ret;
 }
 
-void *kmalloc(size_t size) {
+uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
+    if (kmalloc_start) {
+        void *addr = __kmalloc(size);
+
+        if (phys) {
+            *phys = (uint32_t)get_physaddr((uint32_t)addr);
+        }
+
+        return (uint32_t)addr;
+    } else {
+        return pre_alloc(size, align, phys);
+    }
+}
+
+uint32_t kmalloc(size_t size) { return kmalloc_i(size, 0, 0); }
+
+static uint32_t __kmalloc(size_t size) {
     uint32_t flags;
     int order, i, sz, tries;
     block_header_t *p;
     page_descriptor_t *page;
 
-    if (size > MAX_KMALLOC_K * 1024) {
-        printk("kmalloc: I refuse to allocate %d bytes", size);
-        return NULL;
+    if (size > 4080) {
+        if (kmalloc_end & 0xfffff000) {
+            kmalloc_end &= 0xfffff000;
+            kmalloc_end += 0x1000;
+        }
+        uint32_t ret = kmalloc_end;
+        kmalloc_end += size;
+        return ret;
     }
 
     order = get_order(size);
@@ -98,6 +121,25 @@ void *kmalloc(size_t size) {
     tries = MAX_GET_FREE_PAGE_TRIES;
     while (tries--) {
         if ((page = sizes[order].firstfree) && (p = page->firstfree)) {
+            if (p->bh_flags == MF_FREE) {
+                page->firstfree = p->bh_next;
+                page->nfree--;
+
+                if (!page->nfree) {
+                    sizes[order].firstfree = page->next;
+                    page->next = NULL;
+                }
+
+                sizes[order].nmallocs++;
+                sizes[order].nbytesmalloced += size;
+
+                p->bh_flags = MF_USED;
+                p->bh_length = size;
+                return p + 1;
+            }
+
+            printk("blocks on freelist at 0x%x isn't free size 0x%x", p, size);
+            return NULL;
         }
 
         sz = BLOCKSIZE(order);
@@ -112,8 +154,8 @@ void *kmalloc(size_t size) {
         sizes[order].npages++;
 
         for (i = NBLOCKS(order), p = BH(page + 1); i > 1; i--, p = p->bh_next) {
-            // p->bh_flags = MF_FREE;
-            p->bh_next = BH(((long)p) + sz);
+            p->bh_flags = MF_FREE;
+            p->bh_next = BH(((uint32_t)p) + sz);
         }
 
         p->bh_flags = MF_FREE;

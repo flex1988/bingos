@@ -1,8 +1,5 @@
 .section .symbols
 
-.extern alloc
-.type alloc, @function
-
 .extern alloc_frame
 .type alloc_frame, @function
 
@@ -63,9 +60,6 @@
 .extern copy_page_physical
 .type copy_page_physical, @function
 
-.extern create_heap
-.type create_heap, @function
-
 .extern create_pipe
 .type create_pipe, @function
 
@@ -83,12 +77,6 @@
 
 .extern data
 .type data, @function
-
-.extern default_comparer
-.type default_comparer, @function
-
-.extern destroy_ordered_array
-.type destroy_ordered_array, @function
 
 .extern dirent
 .type dirent, @function
@@ -153,9 +141,6 @@
 .extern frame_init
 .type frame_init, @function
 
-.extern free
-.type free, @function
-
 .extern free_frame
 .type free_frame, @function
 
@@ -173,6 +158,9 @@
 
 .extern get_frame
 .type get_frame, @function
+
+.extern get_order
+.type get_order, @function
 
 .extern get_page
 .type get_page, @function
@@ -281,9 +269,6 @@
 
 .extern ins
 .type ins, @function
-
-.extern insert_ordered_array
-.type insert_ordered_array, @function
 
 .extern insert_vm
 .type insert_vm, @function
@@ -468,9 +453,6 @@
 .extern kfree
 .type kfree, @function
 
-.extern kheap
-.type kheap, @function
-
 .extern kmain
 .type kmain, @function
 
@@ -479,6 +461,9 @@
 
 .extern kmalloc_i
 .type kmalloc_i, @function
+
+.extern kmalloc_init
+.type kmalloc_init, @function
 
 .extern lfind
 .type lfind, @function
@@ -509,12 +494,6 @@
 
 .extern local_irq_enable
 .type local_irq_enable, @function
-
-.extern lookup_ordered_array
-.type lookup_ordered_array, @function
-
-.extern malloc_debug
-.type malloc_debug, @function
 
 .extern memcmp
 .type memcmp, @function
@@ -642,9 +621,6 @@
 .extern _placement_addr
 .type _placement_addr, @function
 
-.extern place_ordered_array
-.type place_ordered_array, @function
-
 .extern pre_alloc
 .type pre_alloc, @function
 
@@ -681,9 +657,6 @@
 .extern relocate_stack
 .type relocate_stack, @function
 
-.extern remove_ordered_array
-.type remove_ordered_array, @function
-
 .extern return_to_userspace
 .type return_to_userspace, @function
 
@@ -716,6 +689,9 @@
 
 .extern set_tree_root
 .type set_tree_root, @function
+
+.extern sizes
+.type sizes, @function
 
 .extern sleep_on
 .type sleep_on, @function
@@ -921,9 +897,6 @@
 .global kernel_symbols_start
 kernel_symbols_start:
 
-.long alloc
-.asciz "alloc"
-
 .long alloc_frame
 .asciz "alloc_frame"
 
@@ -984,9 +957,6 @@ kernel_symbols_start:
 .long copy_page_physical
 .asciz "copy_page_physical"
 
-.long create_heap
-.asciz "create_heap"
-
 .long create_pipe
 .asciz "create_pipe"
 
@@ -1004,12 +974,6 @@ kernel_symbols_start:
 
 .long data
 .asciz "data"
-
-.long default_comparer
-.asciz "default_comparer"
-
-.long destroy_ordered_array
-.asciz "destroy_ordered_array"
 
 .long dirent
 .asciz "dirent"
@@ -1074,9 +1038,6 @@ kernel_symbols_start:
 .long frame_init
 .asciz "frame_init"
 
-.long free
-.asciz "free"
-
 .long free_frame
 .asciz "free_frame"
 
@@ -1094,6 +1055,9 @@ kernel_symbols_start:
 
 .long get_frame
 .asciz "get_frame"
+
+.long get_order
+.asciz "get_order"
 
 .long get_page
 .asciz "get_page"
@@ -1202,9 +1166,6 @@ kernel_symbols_start:
 
 .long ins
 .asciz "ins"
-
-.long insert_ordered_array
-.asciz "insert_ordered_array"
 
 .long insert_vm
 .asciz "insert_vm"
@@ -1389,9 +1350,6 @@ kernel_symbols_start:
 .long kfree
 .asciz "kfree"
 
-.long kheap
-.asciz "kheap"
-
 .long kmain
 .asciz "kmain"
 
@@ -1400,6 +1358,9 @@ kernel_symbols_start:
 
 .long kmalloc_i
 .asciz "kmalloc_i"
+
+.long kmalloc_init
+.asciz "kmalloc_init"
 
 .long lfind
 .asciz "lfind"
@@ -1430,12 +1391,6 @@ kernel_symbols_start:
 
 .long local_irq_enable
 .asciz "local_irq_enable"
-
-.long lookup_ordered_array
-.asciz "lookup_ordered_array"
-
-.long malloc_debug
-.asciz "malloc_debug"
 
 .long memcmp
 .asciz "memcmp"
@@ -1563,9 +1518,6 @@ kernel_symbols_start:
 .long _placement_addr
 .asciz "_placement_addr"
 
-.long place_ordered_array
-.asciz "place_ordered_array"
-
 .long pre_alloc
 .asciz "pre_alloc"
 
@@ -1602,9 +1554,6 @@ kernel_symbols_start:
 .long relocate_stack
 .asciz "relocate_stack"
 
-.long remove_ordered_array
-.asciz "remove_ordered_array"
-
 .long return_to_userspace
 .asciz "return_to_userspace"
 
@@ -1637,6 +1586,9 @@ kernel_symbols_start:
 
 .long set_tree_root
 .asciz "set_tree_root"
+
+.long sizes
+.asciz "sizes"
 
 .long sleep_on
 .asciz "sleep_on"

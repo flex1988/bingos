@@ -40,10 +40,9 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
 
     IRQ_ON;
     timer_init(50);
-
     frame_init(boot_info);
     mmu_init();
-    kmalloc_init(0xc0000000, 0x10000000);
+    
     process_init();
     vfs_init();
 

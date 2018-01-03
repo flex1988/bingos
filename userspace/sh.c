@@ -8,9 +8,6 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
 
-static char buffer[LSH_RL_BUFSIZE];
-static char *tokens[LSH_TOK_BUFSIZE];
-
 void sh_loop();
 char *sh_read_line(char *buffer);
 int sh_split_line(char *line, char **tokens, int *tlen);
@@ -19,16 +16,23 @@ int sh_execute(int argc, char **argv);
 void sh_loop() {
     char *line;
     char *args;
+    char *tokens = malloc(LSH_TOK_BUFSIZE);
+    char *buffer = malloc(LSH_RL_BUFSIZE);
+    
     int status = 0;
 
     int tlen;
 
     do {
+        memset(tokens,0x0,LSH_TOK_BUFSIZE);
         printf("> ");
         line = sh_read_line(buffer);
         sh_split_line(line, tokens, &tlen);
         status = sh_execute(tlen, tokens);
     } while (status);
+
+    free(tokens);
+    free(buffer);
 }
 
 int sh_execute(int argc, char **argv) {

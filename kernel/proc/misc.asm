@@ -43,6 +43,7 @@ enter_userspace:
 	mov ebp, esp
 	mov edx,[ebp+12]
 	mov esp, edx
+	push MAGIC
 
 	mov ax, 0x23
 
@@ -64,7 +65,7 @@ enter_userspace:
 	push eax
 	push 0x1b
 
-	push long [ebp+4]
+	push long [ebp+8]
 
 	iret
 	pop ebp

@@ -150,7 +150,7 @@ void switch_to_user_mode(uint32_t location, int argc, char **argv, uint32_t usta
     PUSH(ustack, uint32_t, argv);
     PUSH(ustack, int, argc);
 
-    enter_userspace(location,ustack);
+    enter_userspace(location, ustack);
 }
 
 void relocate_stack(uint32_t nstack, uint32_t ostack, uint32_t size) {

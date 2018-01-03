@@ -14,15 +14,13 @@ static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path, int depth) {
     char* dir = NULL;
     vfs_node_t* ret = NULL;
 
-    /*while (path[0] == '/') path++;*/
-
     if (!path[0])
         return n;
 
     if (depth == 0)
         return vfs_finddir(n, path);
 
-    while (depth--) {
+    while (depth-- > 0) {
         dir = path;
 
         path = path + strlen(path) + 1;
@@ -64,8 +62,9 @@ dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
 }
 
 vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
-    if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir)
+    if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir) {
         return node->finddir(node, name);
+    }
     else
         return 0;
 }

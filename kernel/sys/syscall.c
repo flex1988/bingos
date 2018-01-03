@@ -93,7 +93,7 @@ int sys_gettimeofday() { return 0; }
 int sys_execve(const char* filename, char* const argv[], char* const envp[]) {
     int argc = 0;
 
-    while (argv[argc++])
-        ;
+    while (argv[argc])
+        argc++;
     return sys_exec(filename, argc, argv);
 }

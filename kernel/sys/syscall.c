@@ -95,6 +95,5 @@ int sys_execve(const char* filename, char* const argv[], char* const envp[]) {
 
     while (argv[argc++])
         ;
-
     return sys_exec(filename, argc, argv);
 }

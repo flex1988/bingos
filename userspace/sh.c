@@ -24,7 +24,7 @@ void sh_loop() {
     int tlen;
 
     do {
-        printf("root@local ~/# ");
+        printf("> ");
         line = sh_read_line(buffer);
         sh_split_line(line, tokens, &tlen);
         status = sh_execute(tlen, tokens);
@@ -35,7 +35,7 @@ int sh_execute(int argc, char **argv) {
     int pid;
     int ret;
     if ((pid = fork()) == 0) {
-        ret = execvp(argv[0], NULL);
+        ret = execvp(argv[0], argv);
         if (ret == -1)
             exit(0);
     } else {

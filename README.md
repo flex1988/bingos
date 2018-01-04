@@ -41,12 +41,12 @@
 
 ### TODO
 
-- [] Multi core support
+- [ ] multi core support
 
-- [] Network tcp/ip stack
+- [ ] network tcp/ip stack
 
-- [] windows
+- [ ] windows
 
-- [] ext2/3 filesystem
+- [ ] ext2/3 filesystem
 
-- [] threads
+- [ ] threads

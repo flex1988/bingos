@@ -39,9 +39,8 @@ int sh_execute(int argc, char **argv) {
     int pid;
     int ret;
     if ((pid = fork()) == 0) {
-        ret = execvp(argv[0], argv);
-        if (ret == -1)
-            exit(0);
+        execvp(argv[0], argv);
+        exit(0);
     } else {
         int s = waitpid(pid);
         return 1;

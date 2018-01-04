@@ -657,6 +657,9 @@
 .extern register_interrupt_handler
 .type register_interrupt_handler, @function
 
+.extern release_process
+.type release_process, @function
+
 .extern relocate_stack
 .type relocate_stack, @function
 
@@ -1559,6 +1562,9 @@ kernel_symbols_start:
 
 .long register_interrupt_handler
 .asciz "register_interrupt_handler"
+
+.long release_process
+.asciz "release_process"
 
 .long relocate_stack
 .asciz "relocate_stack"

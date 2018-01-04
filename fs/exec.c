@@ -52,7 +52,7 @@ static int do_exec(char *path, int argc, char **argv) {
     _current_process->brk = UHEAP_START;
     _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
-    switch_to_user_mode(entry, _current_process->ustack);
+    switch_to_user_mode(entry, argc, argv, _current_process->ustack);
 }
 
 int sys_exec(char *path, int argc, char **argv) {

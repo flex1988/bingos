@@ -16,6 +16,8 @@
 #define PROCESS_RUNING 1
 #define PROCESS_FINISHED 2
 
+#define CP _current_process
+
 typedef struct process_s process_t;
 
 typedef struct {
@@ -64,8 +66,6 @@ typedef struct process_s {
 
 process_t *process_create(process_t *parent);
 
-extern volatile process_t *_curr_process;
-
 void process_init();
 
 void context_switch(int reschedule);
@@ -74,7 +74,7 @@ int sys_fork();
 
 void move_stack(uint32_t new_stack_start, uint32_t size);
 
-void switch_to_user_mode(uint32_t location, uint32_t ustack);
+void switch_to_user_mode(uint32_t location, int argc, char **argv, uint32_t ustack);
 
 int sys_exec(char *path, int argc, char **argv);
 
@@ -83,4 +83,7 @@ int sys_getpid();
 int sleep_on(list_t *queue);
 
 extern void return_to_userspace(void);
+extern void enter_userspace(uint32_t location, uint32_t ustack);
+
+extern process_t *_current_process;
 #endif

@@ -35,13 +35,14 @@ read_eip:
 	pop eax
 	jmp eax
 
-MAGIC equ 0xdecade21
+MAGIC equ 0xDECADE21
 
 [GLOBAL enter_userspace]
 enter_userspace:
 	push ebp
 	mov ebp, esp
 	mov edx,[ebp+12]
+	mov esp, edx
 	push MAGIC
 
 	mov ax, 0x23

@@ -15,7 +15,7 @@ int execvp(const char *file, char **argv) {
             int ret;
             stat_t buf;
             char *x = malloc(128);
-            memset(x,0x0,128);
+            memset(x, 0x0, 128);
 
             sprintf(x, "%s/%s", p, file);
 
@@ -26,14 +26,14 @@ int execvp(const char *file, char **argv) {
                 continue;
             }
 
-            return execve(x, NULL, NULL);
+            return execve(x, argv, NULL);
         }
 
         errno = ENOENT;
         return -1;
 
     } else if (file) {
-        return execve(file, NULL, NULL);
+        return execve(file, argv, NULL);
     }
 
     errno = ENOENT;

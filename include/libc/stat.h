@@ -24,4 +24,12 @@ typedef struct stat_s {
     uint32_t __unused5;
 } stat_t;
 
+#define S_FILE 0x01
+#define S_DIRECTORY 0x02
+#define S_CHARDEVICE 0x03
+#define S_BLOCKDEVICE 0x04
+#define S_PIPE 0x05
+#define S_SYMLINK 0x06
+#define S_MOUNTPOINT 0x08
+
 #endif

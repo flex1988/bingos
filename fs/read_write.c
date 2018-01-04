@@ -2,14 +2,12 @@
 #include "kernel.h"
 #include "kernel/process.h"
 
-extern process_t *_current_process;
-
 static int validate_fd(uint32_t fd) {
-    if (fd >= _current_process->fds->length) {
+    if (fd >= CP->fds->length) {
         return 0;
     }
 
-    if (!_current_process->fds->entries[fd]) {
+    if (!CP->fds->entries[fd]) {
         return 0;
     }
 
@@ -22,11 +20,27 @@ int sys_read(uint32_t fd, char *buf, uint32_t count) {
         return -1;
     }
 
-    vfs_node_t *node = _current_process->fds->entries[fd];
+    vfs_node_t *node = CP->fds->entries[fd];
 
     int nread = vfs_read(node, node->offset, count, buf);
 
     node->offset += nread;
 
     return nread;
+}
+
+int sys_readdir(int fd, int index, dirent_t *dir) {
+    if (!validate_fd(fd)) {
+        printk("invalid fd");
+        return -1;
+    }
+
+    dirent_t *entry = vfs_readdir(CP->fds->entries[fd], index);
+
+    if (entry) {
+        memcpy(dir, entry, sizeof(dirent_t));
+        return 0;
+    } else {
+        return 1;
+    }
 }

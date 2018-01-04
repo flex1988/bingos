@@ -22,6 +22,10 @@ process_t *_init_process = NULL;
 
 uint32_t _next_pid = 1;
 
+#define PUSH(stack, type, item) \
+    stack -= sizeof(type);      \
+    *((type *)stack) = item
+
 void cmp_page_dir(page_dir_t *a, page_dir_t *b) {
     int i;
     for (i = 0; i < 1024; i++) {
@@ -114,7 +118,7 @@ process_t *process_create(process_t *parent) {
         p->fds = kmalloc(sizeof(fd_set_t));
         p->fds->refs = 1;
         p->fds->length = 0;
-        p->fds->capacity = 4;
+        p->fds->capacity = NR_OPEN;
         p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
     }
 
@@ -139,28 +143,14 @@ void process_exit(int ret) {
     switch_to_next();
 }
 
-void switch_to_user_mode(uint32_t location, uint32_t ustack) {
+void switch_to_user_mode(uint32_t location, int argc, char **argv, uint32_t ustack) {
     IRQ_OFF;
     set_kernel_stack(_current_process->kstack);
-    __asm__ __volatile__(
-        "mov %1, %%esp\n"
-        "mov $0x23, %%ax\n"
-        "mov %%ax, %%ds\n"
-        "mov %%ax, %%es\n"
-        "mov %%ax, %%fs\n"
-        "mov %%ax, %%gs\n"
-        "mov %%esp, %%eax\n"
-        "pushl $0x23\n"
-        "pushl %%eax\n"
-        "pushf\n"
-        "pop %%eax\n"
-        "orl $0x200, %%eax\n"
-        "pushl %%eax\n"
-        "pushl $0x1B\n"
-        "pushl %0\n"
-        "iret\n" ::"m"(location),
-        "r"(ustack)
-        : "%ax", "%esp", "%eax");
+
+    PUSH(ustack, uint32_t, argv);
+    PUSH(ustack, int, argc);
+
+    enter_userspace(location, ustack);
 }
 
 void relocate_stack(uint32_t nstack, uint32_t ostack, uint32_t size) {
@@ -247,9 +237,6 @@ void process_init() {
     IRQ_ON;
 }
 
-#define PUSH(stack,type,item) stack -= sizeof(type); \
-                                       *((type*)stack) = item
-
 int sys_fork() {
     IRQ_OFF;
 
@@ -264,22 +251,21 @@ int sys_fork() {
 
     new->pd = ppd;
 
-
     registers_t regs;
-    memcpy(&regs,_current_process->syscall_regs,sizeof(registers_t));
+    memcpy(&regs, _current_process->syscall_regs, sizeof(registers_t));
     new->syscall_regs = &regs;
 
     esp = new->kstack;
     ebp = esp;
     new->syscall_regs->eax = 0;
-    PUSH(esp,registers_t,regs);
+    PUSH(esp, registers_t, regs);
 
     new->esp = esp;
     new->ebp = ebp;
     new->eip = (uint32_t)&return_to_userspace;
 
     sched_enqueue(new);
-   
+
     IRQ_ON;
     return new->id;
 }

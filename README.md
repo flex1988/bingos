@@ -38,3 +38,15 @@
      * +------------+
      */
 ```
+
+### TODO
+
+- [] Multi core support
+
+- [] Network tcp/ip stack
+
+- [] windows
+
+- [] ext2/3 filesystem
+
+- [] threads

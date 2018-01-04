@@ -3,9 +3,12 @@
 #include "kernel/malloc.h"
 #include "kernel/memlayout.h"
 #include "kernel/mmu.h"
+#include "lib/list.h"
 
 #define SKIP_MAX_LEVEL 6
 #define SKIP_P INT32_MAX
+
+volatile list_t *__huge_queue;
 
 typedef struct block_header_s {
     uint32_t bh_flags;
@@ -92,6 +95,7 @@ static uint32_t kmalloc_end;
 
 void kmalloc_init(uint32_t start, uint32_t size) {
     kmalloc_start = kmalloc_end = start;
+    __huge_queue = list_create();
     printk("kmalloc init...");
 }
 
@@ -215,14 +219,24 @@ static uint32_t __kmalloc(size_t size) {
     page_descriptor_t *page;
 
     if (size > 4080) {
-        huge_block_header_t *header = __kmalloc_skip_list_find_huge_block(size);
+        huge_block_header_t *header = NULL;
+
+        list_node_t *n = __huge_queue->head;
+        for (; n != NULL; n = n->next) {
+            header = (huge_block_header_t *)n->value;
+            if (header->size >= size) {
+                list_delete(__huge_queue, n);
+                kfree(n);
+            }
+        }
+
         if (header) {
             return (uint32_t)header + 0x1000;
         } else {
             uint32_t pages = (size + sizeof(huge_block_header_t)) / PAGE_SIZE + 2;
             header = __get_free_pages(pages);
             header->magic = BLOCK_MAGIC;
-            header->size = pages * (PAGE_SIZE - 1);
+            header->size = (pages - 1) * PAGE_SIZE;
 
             return (uint32_t)header + 0x1000;  //(align ? 0x1000 : sizeof(huge_block_header_t));
         }
@@ -327,9 +341,11 @@ void __kfree(void *p) {
         sizes[order].nfrees++;
         sizes[order].nbytesmalloced -= size;
     } else {
-        huge_block_header_t *hheader = (huge_block_header_t *)((uint32_t)p - 0x1000);
-        ASSERT(hheader->magic == BLOCK_MAGIC);
+        huge_block_header_t *huge = (huge_block_header_t *)((uint32_t)p - 0x1000);
+        ASSERT(huge->magic == BLOCK_MAGIC);
 
-        __kmalloc_skip_list_insert(hheader);
+        list_push_front(__huge_queue, huge);
+
+        /*__kmalloc_skip_list_insert(huge);*/
     }
 }

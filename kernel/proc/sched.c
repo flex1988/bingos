@@ -42,8 +42,11 @@ process_t *sched_lookup_finished(int pid) {
     for (; n != NULL; n = n->next) {
         process_t *p = (process_t *)n->value;
         ASSERT(p);
-        if (p->id == pid)
+        if (p->id == pid) {
+            list_delete(_finished_queue, n);
+            kfree(n);
             return p;
+        }
     }
 
     return NULL;

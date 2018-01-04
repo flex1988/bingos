@@ -330,6 +330,13 @@ void switch_to_next() {
         : "%ecx", "%esp", "%eax");
 }
 
+void release_process(process_t *p) {
+    kfree(p->fds->entries);
+    kfree(p->fds);
+    kfree(p->kstack - KSTACK_SIZE);
+    kfree(p);
+}
+
 int sys_getpid() {
     if (!_current_process)
         return 0;
@@ -345,8 +352,9 @@ int sys_waitpid(int pid) {
 repeat:
     while ((p = sched_lookup_finished(pid)) != NULL) {
         if (p->state == PROCESS_FINISHED) {
-            // free process
-            return p->status;
+            int status = p->status;
+            release_process(p);
+            return status;
         } else {
             break;
         }

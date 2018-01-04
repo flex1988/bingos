@@ -3,9 +3,10 @@
 
 static copy_stat(vfs_node_t *node, vfs_stat_t *statbuf) {
     // statbuf->st_dev = ;
-    statbuf->st_ino = 1;
+    statbuf->st_ino = node->inode;
     statbuf->st_uid = node->uid;
     statbuf->st_gid = node->gid;
+    statbuf->st_mode = (uint16_t)node->flags;
     statbuf->st_atime = node->atime;
     statbuf->st_mtime = node->mtime;
     statbuf->st_ctime = node->ctime;

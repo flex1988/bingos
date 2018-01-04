@@ -44,12 +44,12 @@ uint32_t vfs_write(vfs_node_t* node, uint32_t offset, uint32_t size, uint8_t* bu
     return 0;
 }
 
-void vfs_open(vfs_node_t* node, uint8_t read, uint8_t write) {
+void vfs_open(vfs_node_t* node, uint8_t flags) {
     if (node->open)
         return node->open(node);
 }
 
-void vfs_close(vfs_node_t* node) {
+int vfs_close(vfs_node_t* node) {
     if (node->close)
         return node->close(node);
 }
@@ -64,8 +64,7 @@ dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
 vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir) {
         return node->finddir(node, name);
-    }
-    else
+    } else
         return 0;
 }
 
@@ -217,7 +216,11 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
 
     vfs_node_t* node = vfs_get_mount_point(p, pdepth, &mount_path, &mount_depth);
 
-    ret = vfs_lookup_internal(node, mount_path, pdepth - mount_depth);
+    if (mount_depth <= pdepth) {
+        ret = vfs_lookup_internal(node, mount_path, pdepth - mount_depth);
+    } else {
+        ret = node;
+    }
 
     kfree(dup);
 

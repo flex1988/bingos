@@ -792,6 +792,9 @@
 .extern sys_read
 .type sys_read, @function
 
+.extern sys_readdir
+.type sys_readdir, @function
+
 .extern sys_stat
 .type sys_stat, @function
 
@@ -1691,6 +1694,9 @@ kernel_symbols_start:
 
 .long sys_read
 .asciz "sys_read"
+
+.long sys_readdir
+.asciz "sys_readdir"
 
 .long sys_stat
 .asciz "sys_stat"

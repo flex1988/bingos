@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+#define NR_OPEN 256
+
 #define VFS_FILE 0x01
 #define VFS_DIRECTORY 0x02
 #define VFS_CHARDEVICE 0x03
@@ -19,23 +21,23 @@ typedef vfs_node_t *(*vfs_mount_callback)(char *arg, char *mount_point);
 typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef uint32_t (*write_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef void (*open_type_t)(vfs_node_t *);
-typedef void (*close_type_t)(vfs_node_t *);
+typedef int (*close_type_t)(vfs_node_t *);
 typedef dirent_t *(*readdir_type_t)(vfs_node_t *, uint32_t);
 typedef vfs_node_t *(*finddir_type_t)(vfs_node_t *, char *name);
 
 struct dirent {
-    char name[128];
-    uint32_t ino;
+    uint32_t d_ino;
+    char d_name[256];
 };
 
 typedef struct vfs_node_s {
+    uint32_t inode;
     char name[128];
     void *device;
     uint32_t mask;
     uint32_t uid;
     uint32_t gid;
     uint32_t flags;
-    uint32_t inode;
     uint32_t length;
     uint32_t impl;
     uint32_t atime;
@@ -88,8 +90,8 @@ extern vfs_node_t *vfs_root;
 
 uint32_t vfs_read(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
 uint32_t vfs_write(vfs_node_t *node, uint32_t offset, uint32_t size, uint8_t *buffer);
-void vfs_open(vfs_node_t *node, uint8_t read, uint8_t write);
-void vfs_close(vfs_node_t *node);
+void vfs_open(vfs_node_t *node, uint8_t flags);
+int vfs_close(vfs_node_t *node);
 dirent_t *vfs_readdir(vfs_node_t *node, uint32_t index);
 vfs_node_t *vfs_finddir(vfs_node_t *node, char *name);
 vfs_node_t *vfs_lookup(const char *path, int type);

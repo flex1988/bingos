@@ -23,18 +23,18 @@ static uint32_t initrd_read(vfs_node_t *node, uint32_t offset, uint32_t size, ui
 
 static dirent_t *initrd_readdir(vfs_node_t *node, uint32_t index) {
     if (node == initrd_root && index == 0) {
-        strcpy(dirent.name, "dev");
-        dirent.name[3] = '\0';
-        dirent.ino = 0;
+        strcpy(dirent.d_name, "dev");
+        dirent.d_name[3] = '\0';
+        dirent.d_ino = 0;
         return &dirent;
     }
 
     if (index - 1 >= nroot_nodes)
         return 0;
 
-    strcpy(dirent.name, root_nodes[index - 1].name);
-    dirent.name[strlen(root_nodes[index - 1].name)] = 0;
-    dirent.ino = root_nodes[index - 1].inode;
+    strcpy(dirent.d_name, root_nodes[index - 1].name);
+    dirent.d_name[strlen(root_nodes[index - 1].name)] = 0;
+    dirent.d_ino = root_nodes[index - 1].inode;
     return &dirent;
 }
 

@@ -7,9 +7,7 @@
 #include "kernel/syscall.h"
 #include "kernel/vga.h"
 
-uint32_t nsyscalls = 13;
-
-extern process_t* _current_process;
+uint32_t nsyscalls = 14;
 
 static void syscall_handler(registers_t* regs);
 
@@ -28,7 +26,8 @@ static void* syscalls[] = {
     sys_getpid,   // 9
     sys_waitpid,  // 10
     sys_brk,      // 11
-    sys_stat      // 12
+    sys_stat,     // 12
+    sys_readdir   // 13
 };
 
 void syscall_handler(registers_t* regs) {
@@ -40,8 +39,8 @@ void syscall_handler(registers_t* regs) {
     if (!location)
         return;
 
-    _current_process->syscall_regs = regs;
-    volatile uint32_t stack = _current_process->kstack - KSTACK_SIZE;
+    CP->syscall_regs = regs;
+    volatile uint32_t stack = CP->kstack - KSTACK_SIZE;
 
     uint32_t ret;
 
@@ -61,8 +60,8 @@ void syscall_handler(registers_t* regs) {
         : "=a"(ret)
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
-    volatile uint32_t nstack = _current_process->kstack - KSTACK_SIZE;
-    if (_current_process->syscall_regs == regs || (location != (uint32_t)sys_fork)) {
+    volatile uint32_t nstack = CP->kstack - KSTACK_SIZE;
+    if (CP->syscall_regs == regs || (location != (uint32_t)sys_fork)) {
         regs->eax = ret;
     }
 }
@@ -87,7 +86,6 @@ int sys_printc(char c) {
 }
 
 int sys_write(int fd, const void* buf, size_t nbytes) { return 0; }
-int sys_close(int fd) { return 0; }
 int sys_gettimeofday() { return 0; }
 
 int sys_execve(const char* filename, char* const argv[], char* const envp[]) {

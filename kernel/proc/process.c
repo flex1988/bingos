@@ -118,7 +118,7 @@ process_t *process_create(process_t *parent) {
         p->fds = kmalloc(sizeof(fd_set_t));
         p->fds->refs = 1;
         p->fds->length = 0;
-        p->fds->capacity = 4;
+        p->fds->capacity = NR_OPEN;
         p->fds->entries = kmalloc(sizeof(vfs_node_t *) * p->fds->capacity);
     }
 

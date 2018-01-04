@@ -14,6 +14,8 @@ DEFN_SYSCALL1(brk, SYSCALL_BRK, const void *);
 DEFN_SYSCALL3(open, SYSCALL_OPEN, const char *, int, int);
 DEFN_SYSCALL3(read, SYSCALL_READ, int, void *, size_t);
 DEFN_SYSCALL2(stat, SYSCALL_STAT, const char *, stat_t *);
+DEFN_SYSCALL1(close, SYSCALL_CLOSE, int);
+DEFN_SYSCALL3(readdir, SYSCALL_READDIR, int, int, dirent_t *);
 
 int exit(int val) { return syscall_exit(val); }
 
@@ -38,3 +40,5 @@ void *sbrk(int increment) {
     syscall_brk((uint32_t)p + increment);
     return p;
 }
+
+int close(int fd) { return syscall_close(fd); }

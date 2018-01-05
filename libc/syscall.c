@@ -5,7 +5,6 @@
 DEFN_SYSCALL1(exit, SYSCALL_EXIT, int);
 DEFN_SYSCALL1(println, SYSCALL_PRINTLN, const char *);
 DEFN_SYSCALL1(printc, SYSCALL_PRINTC, char);
-/*DEFN_SYSCALL1(printf, SYSCALL_PRINTF, const char *);*/
 DEFN_SYSCALL3(execve, SYSCALL_EXECVE, const char *, char **, char **);
 DEFN_SYSCALL0(fork, SYSCALL_FORK);
 DEFN_SYSCALL0(getpid, SYSCALL_GETPID);
@@ -16,6 +15,7 @@ DEFN_SYSCALL3(read, SYSCALL_READ, int, void *, size_t);
 DEFN_SYSCALL2(stat, SYSCALL_STAT, const char *, stat_t *);
 DEFN_SYSCALL1(close, SYSCALL_CLOSE, int);
 DEFN_SYSCALL3(readdir, SYSCALL_READDIR, int, int, dirent_t *);
+DEFN_SYSCALL2(socketcall, SYSCALL_SOCKETCALL, int, int *);
 
 int exit(int val) { return syscall_exit(val); }
 

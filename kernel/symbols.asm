@@ -201,6 +201,9 @@
 .extern hashmap_string_hash
 .type hashmap_string_hash, @function
 
+.extern __huge_queue
+.type __huge_queue, @function
+
 .extern ide_buf
 .type ide_buf, @function
 
@@ -534,8 +537,8 @@
 .extern nroot_nodes
 .type nroot_nodes, @function
 
-.extern nsyscalls
-.type nsyscalls, @function
+.extern NR_syscalls
+.type NR_syscalls, @function
 
 .extern open_pipe
 .type open_pipe, @function
@@ -702,6 +705,12 @@
 .extern sleep_on
 .type sleep_on, @function
 
+.extern sock_init
+.type sock_init, @function
+
+.extern sock_register
+.type sock_register, @function
+
 .extern SOLARIZED_BASE0
 .type SOLARIZED_BASE0, @function
 
@@ -797,6 +806,9 @@
 
 .extern sys_readdir
 .type sys_readdir, @function
+
+.extern sys_socketcall
+.type sys_socketcall, @function
 
 .extern sys_stat
 .type sys_stat, @function
@@ -1106,6 +1118,9 @@ kernel_symbols_start:
 
 .long hashmap_string_hash
 .asciz "hashmap_string_hash"
+
+.long __huge_queue
+.asciz "__huge_queue"
 
 .long ide_buf
 .asciz "ide_buf"
@@ -1440,8 +1455,8 @@ kernel_symbols_start:
 .long nroot_nodes
 .asciz "nroot_nodes"
 
-.long nsyscalls
-.asciz "nsyscalls"
+.long NR_syscalls
+.asciz "NR_syscalls"
 
 .long open_pipe
 .asciz "open_pipe"
@@ -1608,6 +1623,12 @@ kernel_symbols_start:
 .long sleep_on
 .asciz "sleep_on"
 
+.long sock_init
+.asciz "sock_init"
+
+.long sock_register
+.asciz "sock_register"
+
 .long SOLARIZED_BASE0
 .asciz "SOLARIZED_BASE0"
 
@@ -1703,6 +1724,9 @@ kernel_symbols_start:
 
 .long sys_readdir
 .asciz "sys_readdir"
+
+.long sys_socketcall
+.asciz "sys_socketcall"
 
 .long sys_stat
 .asciz "sys_stat"

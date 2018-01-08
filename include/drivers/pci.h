@@ -1,6 +1,8 @@
 #ifndef __PCI_H__
 #define __PCI_H__
 
+#include <types.h>
+
 #define PCI_VENDOR_ID 0x00    // 2
 #define PCI_DEVICE_ID 0x02    // 2
 #define PCI_COMMAND 0x04      // 2

@@ -2,6 +2,7 @@
 #include <syscall.h>
 #include <stdlib.h>
 #include <stat.h>
+#include <socket.h>
 
 int main () {
     char *a = malloc(1000);
@@ -13,5 +14,6 @@ int main () {
     free(a);
 
     printf("hello world!\n");
+
     return 0;
 }

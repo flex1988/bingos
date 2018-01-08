@@ -1,23 +1,24 @@
 #ifndef __FS_H__
 #define __FS_H__
 
-#include "types.h"
+#include <types.h>
+#include "net/net.h"
 
 #define NR_OPEN 256
 
-#define VFS_FILE 0x01
-#define VFS_DIRECTORY 0x02
-#define VFS_CHARDEVICE 0x03
+#define VFS_FILE        0x01
+#define VFS_DIRECTORY   0x02
+#define VFS_CHARDEVICE  0x03
 #define VFS_BLOCKDEVICE 0x04
-#define VFS_PIPE 0x05
-#define VFS_SYMLINK 0x06
-#define VFS_MOUNTPOINT 0x08
+#define VFS_PIPE        0x05
+#define VFS_SYMLINK     0x06
+#define VFS_MOUNTPOINT  0x08
+#define VFS_SOCKET      0x09
 
 typedef struct vfs_node_s vfs_node_t;
 typedef struct dirent dirent_t;
 
 typedef vfs_node_t *(*vfs_mount_callback)(char *arg, char *mount_point);
-
 typedef uint32_t (*read_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef uint32_t (*write_type_t)(vfs_node_t *, uint32_t, uint32_t, uint8_t *);
 typedef void (*open_type_t)(vfs_node_t *);
@@ -46,6 +47,7 @@ typedef struct vfs_node_s {
     uint32_t nlink;
     uint32_t refs;
     uint32_t offset;
+    socket_t *socket;
     read_type_t read;
     write_type_t write;
     open_type_t open;
@@ -99,5 +101,5 @@ void vfs_init();
 int vfs_register(char *name, vfs_mount_callback callback);
 int vfs_mount_type(char *type, char *arg, char *mount_point);
 
-int namei(const char* path, vfs_node_t** res);
+int namei(const char *path, vfs_node_t **res);
 #endif

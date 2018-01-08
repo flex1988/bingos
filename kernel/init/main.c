@@ -42,16 +42,15 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     timer_init(50);
     frame_init(boot_info);
     mmu_init();
-    
     process_init();
     vfs_init();
-
     modules_init(boot_info);
 
     vfs_node_t *ramdisk = initrd_init(*(uint32_t *)(boot_info->mods_addr));
     vfs_mount("/bin", ramdisk);
     vfs_mount_type("ext2", "/dev/hda", "/");
 
+    sock_init();
     syscalls_init();
 
     message();

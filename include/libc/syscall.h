@@ -70,6 +70,7 @@ DECL_SYSCALL3(read,int,void *,size_t);
 DECL_SYSCALL2(stat,const char *,stat_t *);
 DECL_SYSCALL1(close,int);
 DECL_SYSCALL3(readdir,int,int,dirent_t *);
+DECL_SYSCALL2(socketcall,int,int *);
 
 void *sbrk(int increment);
 
@@ -87,5 +88,6 @@ void *sbrk(int increment);
 #define SYSCALL_BRK 11
 #define SYSCALL_STAT 12
 #define SYSCALL_READDIR 13
+#define SYSCALL_SOCKETCALL 14
 
 #endif

@@ -7,8 +7,6 @@
 #include "kernel/syscall.h"
 #include "kernel/vga.h"
 
-uint32_t nsyscalls = 14;
-
 static void syscall_handler(registers_t* regs);
 
 void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
@@ -27,11 +25,14 @@ static void* syscalls[] = {
     sys_waitpid,  // 10
     sys_brk,      // 11
     sys_stat,     // 12
-    sys_readdir   // 13
+    sys_readdir,  // 13
+    sys_socketcall// 14
 };
 
+uint32_t NR_syscalls = sizeof(syscalls)/sizeof(void *);
+
 void syscall_handler(registers_t* regs) {
-    if (regs->eax >= nsyscalls)
+    if (regs->eax >= NR_syscalls)
         return;
 
     uint32_t location = syscalls[regs->eax];
@@ -40,7 +41,6 @@ void syscall_handler(registers_t* regs) {
         return;
 
     CP->syscall_regs = regs;
-    volatile uint32_t stack = CP->kstack - KSTACK_SIZE;
 
     uint32_t ret;
 
@@ -60,7 +60,6 @@ void syscall_handler(registers_t* regs) {
         : "=a"(ret)
         : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
-    volatile uint32_t nstack = CP->kstack - KSTACK_SIZE;
     if (CP->syscall_regs == regs || (location != (uint32_t)sys_fork)) {
         regs->eax = ret;
     }

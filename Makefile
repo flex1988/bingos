@@ -18,6 +18,7 @@ modules := lib	\
 	libc \
 	hal \
 	fs	\
+	net	\
 	drivers \
 	userspace	\
 	modules		\

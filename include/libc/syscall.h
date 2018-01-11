@@ -5,6 +5,7 @@
 #include <stat.h>
 #include <errno.h>
 #include <dirent.h>
+#include <time.h>
 
 void syscalls_init();
 

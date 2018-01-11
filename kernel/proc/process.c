@@ -143,8 +143,8 @@ void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
     esp = new->kstack;
     ebp = esp;
 
-    PUSH(esp,uint32_t,(uint32_t)"xxxx");
-    PUSH(esp,uint32_t,(uint32_t)argp);
+    PUSH(esp, uint32_t, (uint32_t) "xxxx");
+    PUSH(esp, uint32_t, (uint32_t)argp);
 
     new->esp = esp;
     new->ebp = ebp;
@@ -364,10 +364,29 @@ void switch_to_next() {
         : "%ecx", "%esp", "%eax");
 }
 
+static void release_directory(page_dir_t *dir) {
+    uint32_t i;
+    for (i = 0; i < 1024; i++) {
+        if (!dir->tabls[i]) {
+            continue;
+        }
+        if (_kernel_pd->tabls[i] != dir->tabls[i]) {
+            for (uint32_t j = 0; j < 1024; j++) {
+                if (dir->tabls[i]->pages[j].addr) {
+                    free_frame(dir->tabls[i]->pages[j].addr);
+                }
+            }
+            kfree(dir->tabls[i]);
+        }
+    }
+    kfree(dir);
+}
+
 void release_process(process_t *p) {
     kfree(p->fds->entries);
     kfree(p->fds);
     kfree(p->kstack - KSTACK_SIZE);
+    release_directory(p->pd);
     kfree(p);
 }
 

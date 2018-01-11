@@ -8,13 +8,13 @@ extern int sys_open(const char *filename, int flags, int mode);
 extern int sys_read(int fd, void *buf, size_t nbytes);
 int sys_write(int fd, const void *buf, size_t nbytes);
 extern int sys_close(fd);
-int sys_gettimeofday();
+extern int sys_gettimeofday(timeval_t *t, void *z);
 int sys_execve();
 extern int sys_fork();
 extern int sys_getpid();
 extern void *sys_brk();
 extern int sys_waitpid(int pid);
 extern int sys_stat(char *filename, vfs_stat_t *statbuf);
-extern int sys_readdir(int fd,int index,dirent_t *dir);
-extern int sys_socketcall(int call,int *args);
+extern int sys_readdir(int fd, int index, dirent_t *dir);
+extern int sys_socketcall(int call, int *args);
 #endif

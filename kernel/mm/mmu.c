@@ -120,7 +120,7 @@ void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt) {
         page->user = kernel ? 0 : 1;
         page->present = 1;
         page->addr = virt >> 12;
-        /*get_frame(virt >> 12);*/
+        get_frame(virt >> 12);
     }
 }
 

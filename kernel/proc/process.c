@@ -127,6 +127,36 @@ process_t *process_create(process_t *parent) {
     return p;
 }
 
+void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
+    IRQ_OFF;
+
+    uint32_t esp, ebp;
+
+    page_dir_t *dir = _kernel_pd;
+    process_t *new = process_create(CP);
+    new->pd = dir;
+
+    registers_t regs;
+    memcpy(&regs, CP->syscall_regs, sizeof(registers_t));
+    new->syscall_regs = &regs;
+
+    esp = new->kstack;
+    ebp = esp;
+
+    PUSH(esp,uint32_t,(uint32_t)"xxxx");
+    PUSH(esp,uint32_t,(uint32_t)argp);
+
+    new->esp = esp;
+    new->ebp = ebp;
+    new->eip = (uint32_t)tasklet;
+
+    sched_enqueue(new);
+
+    IRQ_OFF;
+
+    return new->id;
+}
+
 void process_exit(int ret) {
     IRQ_OFF;
 
@@ -143,7 +173,8 @@ void process_exit(int ret) {
     switch_to_next();
 }
 
-void switch_to_user_mode(uint32_t location, int argc, char **argv, uint32_t ustack) {
+void switch_to_user_mode(uint32_t location, int argc, char **argv,
+                         uint32_t ustack) {
     IRQ_OFF;
     set_kernel_stack(_current_process->kstack);
 
@@ -182,7 +213,8 @@ void relocate_stack(uint32_t nstack, uint32_t ostack, uint32_t size) {
 void move_stack(uint32_t new_stack_start, uint32_t size) {
     uint32_t i;
 
-    for (i = new_stack_start - size; i < new_stack_start + 0x1000; i += 0x1000) {
+    for (i = new_stack_start - size; i < new_stack_start + 0x1000;
+         i += 0x1000) {
         page_t *p = get_page(i, 1, _current_pd);
         page_map(p, 0, 1);
     }
@@ -202,9 +234,11 @@ void move_stack(uint32_t new_stack_start, uint32_t size) {
     uint32_t new_stack_pointer = old_stack_pointer + offset;
     uint32_t new_base_pointer = old_base_pointer + offset;
 
-    memcpy((void *)new_stack_pointer, (void *)old_stack_pointer, _initial_esp - old_stack_pointer);
+    memcpy((void *)new_stack_pointer, (void *)old_stack_pointer,
+           _initial_esp - old_stack_pointer);
 
-    for (i = (uint32_t)new_stack_start; i > (uint32_t)new_stack_start - size; i -= 4) {
+    for (i = (uint32_t)new_stack_start; i > (uint32_t)new_stack_start - size;
+         i -= 4) {
         uint32_t tmp = *(uint32_t *)i;
         if ((old_stack_pointer < tmp) && (tmp < _initial_esp)) {
             tmp = tmp + offset;

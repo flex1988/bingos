@@ -1,6 +1,8 @@
 #ifndef __STAT_H__
 #define __STAT_H__
 
+#include <types.h>
+
 typedef struct stat_s {
     uint16_t st_dev;
     uint16_t __pad1;

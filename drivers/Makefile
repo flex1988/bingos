@@ -4,7 +4,7 @@ CFLAGS := -m32 -std=c99 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -n
 
 obj_dir := ../build/objs
 
-target := $(obj_dir)/pci.o $(obj_dir)/ide.o
+target := $(obj_dir)/pci.o $(obj_dir)/ide.o  $(obj_dir)/cmos.o
 
 all: $(target)
 

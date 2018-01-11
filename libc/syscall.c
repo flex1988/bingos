@@ -16,12 +16,15 @@ DEFN_SYSCALL2(stat, SYSCALL_STAT, const char *, stat_t *);
 DEFN_SYSCALL1(close, SYSCALL_CLOSE, int);
 DEFN_SYSCALL3(readdir, SYSCALL_READDIR, int, int, dirent_t *);
 DEFN_SYSCALL2(socketcall, SYSCALL_SOCKETCALL, int, int *);
+DEFN_SYSCALL2(gettimeofday, SYSCALL_GETTIMEOFDAY, timeval_t *, void *);
 
 int exit(int val) { return syscall_exit(val); }
 
 int fork() { return syscall_fork(); }
 
-int execve(const char *path, char **argv, char **envp) { return syscall_execve(path, argv, envp); }
+int execve(const char *path, char **argv, char **envp) {
+    return syscall_execve(path, argv, envp);
+}
 
 int getpid() { return syscall_getpid(); }
 
@@ -29,11 +32,17 @@ int waitpid(int pid) { return syscall_waitpid(pid); }
 
 void *brk(const void *addr) { return syscall_brk(addr); }
 
-int open(const char *filename, int flags, int mode) { return syscall_open(filename, flags, mode); }
+int open(const char *filename, int flags, int mode) {
+    return syscall_open(filename, flags, mode);
+}
 
-int read(int fd, void *buf, size_t count) { return syscall_read(fd, buf, count); }
+int read(int fd, void *buf, size_t count) {
+    return syscall_read(fd, buf, count);
+}
 
-int stat(const char *filename, stat_t *statbuf) { return syscall_stat(filename, statbuf); }
+int stat(const char *filename, stat_t *statbuf) {
+    return syscall_stat(filename, statbuf);
+}
 
 void *sbrk(int increment) {
     void *p = syscall_brk(0);
@@ -42,3 +51,5 @@ void *sbrk(int increment) {
 }
 
 int close(int fd) { return syscall_close(fd); }
+
+int gettimeofday(timeval_t *tv, void *z) { return syscall_gettimeofday(tv, z); }

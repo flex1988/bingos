@@ -3,7 +3,6 @@
 #include "fs/fs.h"
 #include "fs/initrd.h"
 #include "hal/descriptor.h"
-#include "hal/timer.h"
 #include "kernel.h"
 #include "kernel/console.h"
 #include "kernel/frame.h"
@@ -11,6 +10,7 @@
 #include "kernel/mmu.h"
 #include "kernel/printk.h"
 #include "kernel/process.h"
+#include "kernel/timer.h"
 #include "kernel/vesa.h"
 #include "kernel/vga.h"
 #include "lib/tree.h"
@@ -39,7 +39,7 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     init_descriptor_tables();
 
     IRQ_ON;
-    timer_init(50);
+    timer_init();
     frame_init(boot_info);
     mmu_init();
     process_init();

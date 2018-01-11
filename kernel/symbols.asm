@@ -24,6 +24,9 @@
 .extern BLUE
 .type BLUE, @function
 
+.extern boot_time
+.type boot_time, @function
+
 .extern bss
 .type bss, @function
 
@@ -38,6 +41,9 @@
 
 .extern close_pipe
 .type close_pipe, @function
+
+.extern cmos_dump
+.type cmos_dump, @function
 
 .extern cmp_page_dir
 .type cmp_page_dir, @function
@@ -150,6 +156,9 @@
 .extern gdt_flush
 .type gdt_flush, @function
 
+.extern get_date
+.type get_date, @function
+
 .extern get_first_frame
 .type get_first_frame, @function
 
@@ -167,6 +176,9 @@
 
 .extern get_physaddr
 .type get_physaddr, @function
+
+.extern get_time
+.type get_time, @function
 
 .extern graphic_init
 .type graphic_init, @function
@@ -441,6 +453,9 @@
 .extern isr_handler
 .type isr_handler, @function
 
+.extern is_update_in_progress
+.type is_update_in_progress, @function
+
 .extern kernel_end
 .type kernel_end, @function
 
@@ -651,6 +666,9 @@
 .extern process_spawn_tasklet
 .type process_spawn_tasklet, @function
 
+.extern read_cmos
+.type read_cmos, @function
+
 .extern read_eip
 .type read_eip, @function
 
@@ -695,6 +713,12 @@
 
 .extern sched_lookup_finished
 .type sched_lookup_finished, @function
+
+.extern secs_of_month
+.type secs_of_month, @function
+
+.extern secs_of_years
+.type secs_of_years, @function
 
 .extern set_kernel_stack
 .type set_kernel_stack, @function
@@ -825,8 +849,20 @@
 .extern table_clone
 .type table_clone, @function
 
+.extern timer_drift
+.type timer_drift, @function
+
 .extern timer_init
 .type timer_init, @function
+
+.extern timer_phase
+.type timer_phase, @function
+
+.extern timer_subticks
+.type timer_subticks, @function
+
+.extern timer_ticks
+.type timer_ticks, @function
 
 .extern traverse_tree
 .type traverse_tree, @function
@@ -945,6 +981,9 @@ kernel_symbols_start:
 .long BLUE
 .asciz "BLUE"
 
+.long boot_time
+.asciz "boot_time"
+
 .long bss
 .asciz "bss"
 
@@ -959,6 +998,9 @@ kernel_symbols_start:
 
 .long close_pipe
 .asciz "close_pipe"
+
+.long cmos_dump
+.asciz "cmos_dump"
 
 .long cmp_page_dir
 .asciz "cmp_page_dir"
@@ -1071,6 +1113,9 @@ kernel_symbols_start:
 .long gdt_flush
 .asciz "gdt_flush"
 
+.long get_date
+.asciz "get_date"
+
 .long get_first_frame
 .asciz "get_first_frame"
 
@@ -1088,6 +1133,9 @@ kernel_symbols_start:
 
 .long get_physaddr
 .asciz "get_physaddr"
+
+.long get_time
+.asciz "get_time"
 
 .long graphic_init
 .asciz "graphic_init"
@@ -1362,6 +1410,9 @@ kernel_symbols_start:
 .long isr_handler
 .asciz "isr_handler"
 
+.long is_update_in_progress
+.asciz "is_update_in_progress"
+
 .long kernel_end
 .asciz "kernel_end"
 
@@ -1572,6 +1623,9 @@ kernel_symbols_start:
 .long process_spawn_tasklet
 .asciz "process_spawn_tasklet"
 
+.long read_cmos
+.asciz "read_cmos"
+
 .long read_eip
 .asciz "read_eip"
 
@@ -1616,6 +1670,12 @@ kernel_symbols_start:
 
 .long sched_lookup_finished
 .asciz "sched_lookup_finished"
+
+.long secs_of_month
+.asciz "secs_of_month"
+
+.long secs_of_years
+.asciz "secs_of_years"
 
 .long set_kernel_stack
 .asciz "set_kernel_stack"
@@ -1746,8 +1806,20 @@ kernel_symbols_start:
 .long table_clone
 .asciz "table_clone"
 
+.long timer_drift
+.asciz "timer_drift"
+
 .long timer_init
 .asciz "timer_init"
+
+.long timer_phase
+.asciz "timer_phase"
+
+.long timer_subticks
+.asciz "timer_subticks"
+
+.long timer_ticks
+.asciz "timer_ticks"
 
 .long traverse_tree
 .asciz "traverse_tree"

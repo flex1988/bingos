@@ -119,5 +119,5 @@ int sock_register(int family, proto_ops_t *ops) {
 void sock_init(void) {
     int i;
     for (i = 0; i < NPROTO; i++) pops[i] = NULL;
-    printk("network init...");
+    printk("Network init...");
 }

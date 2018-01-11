@@ -118,6 +118,8 @@ uint32_t alloc_frame() {
 }
 
 void get_frame(uint32_t frame) {
+    if (frame > _max_frames)
+        return;
     ASSERT(!bitmap_test(frame));
     bitmap_set(frame);
     _used_frames++;

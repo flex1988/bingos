@@ -648,6 +648,9 @@
 .extern _process_queue
 .type _process_queue, @function
 
+.extern process_spawn_tasklet
+.type process_spawn_tasklet, @function
+
 .extern read_eip
 .type read_eip, @function
 
@@ -1565,6 +1568,9 @@ kernel_symbols_start:
 
 .long _process_queue
 .asciz "_process_queue"
+
+.long process_spawn_tasklet
+.asciz "process_spawn_tasklet"
 
 .long read_eip
 .asciz "read_eip"

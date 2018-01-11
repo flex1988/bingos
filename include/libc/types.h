@@ -68,9 +68,6 @@ typedef unsigned int size_t;
 
 #define NULL 0
 
-typedef struct timeval {
-    uint32_t tv_sec;
-    uint32_t tv_usec;
-} timeval_t;
+typedef int32_t time_t;
 
 #endif /* __TYPES_H__ */

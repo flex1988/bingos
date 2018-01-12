@@ -4,17 +4,36 @@
 
 volatile list_t *_process_queue;
 volatile list_t *_finished_queue;
+volatile list_t *_sleep_queue;
 
 extern int malloc_debug;
 
 void sched_init() {
     _process_queue = list_create();
     _finished_queue = list_create();
+    _sleep_queue = list_create();
 }
 
 void sched_enqueue(process_t *p) {
     ASSERT(p);
     list_push_front(_process_queue, (void *)p);
+}
+
+void sleep_enqueue(process_t *process, uint32_t seconds, uint32_t subseconds) {
+    list_node_t *prev = NULL;
+
+    foreach(node, _sleep_queue) {
+        process_t *p = (process_t *)node->value;
+        if (p->end_tick > seconds ||
+            (p->end_tick == seconds && p->end_subtick > subseconds))
+            break;
+        prev = node;
+    }
+
+    process->end_tick = seconds;
+    process->end_subtick = subseconds;
+
+    list_insert_after(_sleep_queue, prev, process);
 }
 
 process_t *sched_dequeue() {

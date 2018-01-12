@@ -105,3 +105,20 @@ list_node_t *list_pop_back(list_t *l) {
 
     return n;
 }
+
+void list_insert_after(list_t *l, list_node_t *prev, void *value) {
+    if (!prev) {
+        list_push_front(l, value);
+    } else {
+        list_node_t *n = kmalloc(sizeof(list_node_t));
+        n->value = value;
+        n->next = 0;
+        n->prev = 0;
+
+        n->next = prev->next;
+        n->prev = prev;
+        prev->next = n;
+
+        l->length++;
+    }
+}

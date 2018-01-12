@@ -1,6 +1,7 @@
 #include <types.h>
 #include "drivers/pci.h"
 #include "kernel/mmu.h"
+#include "kernel/process.h"
 #include "module.h"
 
 #define E1000_NUM_RX_DESC 32
@@ -39,6 +40,8 @@ static uint32_t e1000_device_pci = 0x00000000;
 static uint32_t mem_base = 0;
 static int has_eeprom = 0;
 static uint8_t mac[6];
+static list_t *net_queue = NULL;
+static list_t *rx_wait = NULL;
 
 static uint32_t mmio_read32(uint32_t addr) {
     return *((volatile uint32_t *)(addr));
@@ -121,7 +124,31 @@ static void e1000_init(char *name, void *data) {
     // initialize
     write_command(E1000_REG_CTRL, (1 << 26));
 
-    uint32_t s,ss;
+    process_sleep_until(CP, 0, 10);
+    context_switch(0);
+
+    uint32_t status = read_command(E1000_REG_CTRL);
+    status |= (1 << 5);
+    status |= (1 << 6);
+    status &= ~(1 << 3);
+    status &= ~(1 << 31);
+    status &= ~(1 << 7);
+    write_command(E1000_REG_CTRL, status);
+
+    write_command(0x0028, 0);
+    write_command(0x002c, 0);
+    write_command(0x0030, 0);
+    write_command(0x0170, 0);
+
+    status = read_command(E1000_REG_CTRL);
+    status &= ~(1 << 30);
+    write_command(E1000_REG_CTRL, status);
+
+    process_sleep_until(CP, 0, 10);
+    context_switch(0);
+
+    net_queue = list_create();
+    rx_wait = list_create();
 
     process_exit(0);
 }

@@ -39,10 +39,10 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     init_descriptor_tables();
 
     IRQ_ON;
-    timer_init();
     frame_init(boot_info);
     mmu_init();
     process_init();
+    timer_init();
     vfs_init();
     modules_init(boot_info);
 

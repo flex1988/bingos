@@ -81,6 +81,9 @@ process_t *process_create(process_t *parent) {
 
     p->state = PROCESS_READY;
 
+    p->end_tick = 0;
+    p->end_subtick = 0;
+
     if (parent) {
         p->kstack = kmalloc(KSTACK_SIZE) + KSTACK_SIZE;
         memset((void *)(p->kstack - KSTACK_SIZE), 0, KSTACK_SIZE);
@@ -155,6 +158,14 @@ void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
     IRQ_OFF;
 
     return new->id;
+}
+
+void process_sleep_until(process_t *process, uint32_t seconds,
+                         uint32_t subseconds) {
+    uint32_t s, ss;
+
+    relative_time(seconds, subseconds, &s, &ss);
+    sleep_enqueue(process, s, ss);
 }
 
 void process_exit(int ret) {
@@ -419,6 +430,32 @@ repeat:
     }
 
     return -ECHILD;
+}
+
+void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
+    IRQ_OFF;
+    if (_sleep_queue->length) {
+        process_t *p = _sleep_queue->head->value;
+        list_node_t *n;
+        while (p && (p->end_tick < ticks ||
+                     (p->end_tick == ticks && p->end_subtick <= subticks))) {
+            p->end_tick = 0;
+            p->end_subtick = 0;
+            p->status = PROCESS_READY;
+
+            sched_enqueue(p);
+
+            n = list_pop_front(_sleep_queue);
+            kfree(n);
+
+            if (_sleep_queue->length) {
+                p = _sleep_queue->head->value;
+            } else {
+                break;
+            }
+        }
+    }
+    IRQ_ON;
 }
 
 int sleep_on(list_t *queue) {

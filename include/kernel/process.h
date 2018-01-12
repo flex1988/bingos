@@ -15,6 +15,7 @@
 #define PROCESS_READY 0
 #define PROCESS_RUNING 1
 #define PROCESS_FINISHED 2
+#define PROCESS_SLEEP 3
 
 #define CP _current_process
 
@@ -49,6 +50,9 @@ typedef struct process_s {
     uint32_t ustack;
     size_t size;
 
+    uint32_t end_tick;
+    uint32_t end_subtick;
+
     uint32_t img_entry;
     uint32_t img_size;
 
@@ -69,28 +73,26 @@ typedef void (*tasklet_t)(void *, void *);
 process_t *process_create(process_t *parent);
 
 void process_init();
+void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp);
+void process_exit(int ret);
+void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks);
 
 void context_switch(int reschedule);
-
-int sys_fork();
 
 void move_stack(uint32_t new_stack_start, uint32_t size);
 
 void switch_to_user_mode(uint32_t location, int argc, char **argv,
                          uint32_t ustack);
 
+int sys_fork();
 int sys_exec(char *path, int argc, char **argv);
-
 int sys_getpid();
 
 int sleep_on(list_t *queue);
-
-void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp);
-void process_exit(int ret);
-process_t *process_create(process_t *parent);
 
 extern void return_to_userspace(void);
 extern void enter_userspace(uint32_t location, uint32_t ustack);
 
 extern process_t *_current_process;
+extern volatile list_t *_sleep_queue;
 #endif

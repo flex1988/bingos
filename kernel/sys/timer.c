@@ -50,7 +50,20 @@ static void timer_callback(registers_t *regs) {
 
     irq_ack(IRQ0);
 
+    process_wakeup_sleepers(timer_ticks, timer_subticks);
+
     context_switch(1);
+}
+
+void relative_time(uint32_t seconds, uint32_t subseconds, uint32_t *out_seconds,
+                   uint32_t *out_subseconds) {
+    if (subseconds + timer_subticks > SUBTICKS_PER_TICK) {
+        *out_seconds = timer_subticks + seconds + 1;
+        *out_subseconds = (subseconds + timer_subticks) - SUBTICKS_PER_TICK;
+    } else {
+        *out_seconds = timer_ticks + seconds;
+        *out_subseconds = timer_subticks + subseconds;
+    }
 }
 
 void timer_init() {

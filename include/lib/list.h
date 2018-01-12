@@ -28,7 +28,9 @@ void list_push_front(list_t *l, void *value);
 void list_push_back(list_t *l, void *value);
 list_node_t *list_pop_front(list_t *l);
 list_node_t *list_pop_back(list_t *l);
+void list_insert_after(list_t *l, list_node_t *prev, void *value);
 
-#define foreach(i, list) for (list_node_t *i = list->head; i != NULL; i = i->next)
+#define foreach(i, list) \
+    for (list_node_t *i = list->head; i != NULL; i = i->next)
 
 #endif

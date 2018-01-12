@@ -498,6 +498,9 @@
 .extern list_destroy
 .type list_destroy, @function
 
+.extern list_insert_after
+.type list_insert_after, @function
+
 .extern list_pop_back
 .type list_pop_back, @function
 
@@ -663,8 +666,14 @@
 .extern _process_queue
 .type _process_queue, @function
 
+.extern process_sleep_until
+.type process_sleep_until, @function
+
 .extern process_spawn_tasklet
 .type process_spawn_tasklet, @function
+
+.extern process_wakeup_sleepers
+.type process_wakeup_sleepers, @function
 
 .extern read_cmos
 .type read_cmos, @function
@@ -680,6 +689,9 @@
 
 .extern register_interrupt_handler
 .type register_interrupt_handler, @function
+
+.extern relative_time
+.type relative_time, @function
 
 .extern release_process
 .type release_process, @function
@@ -729,8 +741,14 @@
 .extern sizes
 .type sizes, @function
 
+.extern sleep_enqueue
+.type sleep_enqueue, @function
+
 .extern sleep_on
 .type sleep_on, @function
+
+.extern _sleep_queue
+.type _sleep_queue, @function
 
 .extern sock_init
 .type sock_init, @function
@@ -1455,6 +1473,9 @@ kernel_symbols_start:
 .long list_destroy
 .asciz "list_destroy"
 
+.long list_insert_after
+.asciz "list_insert_after"
+
 .long list_pop_back
 .asciz "list_pop_back"
 
@@ -1620,8 +1641,14 @@ kernel_symbols_start:
 .long _process_queue
 .asciz "_process_queue"
 
+.long process_sleep_until
+.asciz "process_sleep_until"
+
 .long process_spawn_tasklet
 .asciz "process_spawn_tasklet"
+
+.long process_wakeup_sleepers
+.asciz "process_wakeup_sleepers"
 
 .long read_cmos
 .asciz "read_cmos"
@@ -1637,6 +1664,9 @@ kernel_symbols_start:
 
 .long register_interrupt_handler
 .asciz "register_interrupt_handler"
+
+.long relative_time
+.asciz "relative_time"
 
 .long release_process
 .asciz "release_process"
@@ -1686,8 +1716,14 @@ kernel_symbols_start:
 .long sizes
 .asciz "sizes"
 
+.long sleep_enqueue
+.asciz "sleep_enqueue"
+
 .long sleep_on
 .asciz "sleep_on"
+
+.long _sleep_queue
+.asciz "_sleep_queue"
 
 .long sock_init
 .asciz "sock_init"

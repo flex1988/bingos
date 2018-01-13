@@ -12,6 +12,7 @@ void sched_init() {
     _process_queue = list_create();
     _finished_queue = list_create();
     _sleep_queue = list_create();
+    printk("sched_init...");
 }
 
 void sched_enqueue(process_t *p) {

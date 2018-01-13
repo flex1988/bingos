@@ -433,7 +433,8 @@ repeat:
 }
 
 void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
-    IRQ_OFF;
+    /*IRQ_OFF;*/
+    ASSERT(_sleep_queue);
     if (_sleep_queue->length) {
         process_t *p = _sleep_queue->head->value;
         list_node_t *n;
@@ -449,13 +450,14 @@ void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
             kfree(n);
 
             if (_sleep_queue->length) {
+                ASSERT(_sleep_queue->head);
                 p = _sleep_queue->head->value;
             } else {
                 break;
             }
         }
     }
-    IRQ_ON;
+    /*IRQ_ON;*/
 }
 
 int sleep_on(list_t *queue) {

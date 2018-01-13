@@ -67,9 +67,12 @@ typedef struct size_descriptor_s {
     int npages;
 } size_descriptor_t;
 
-size_descriptor_t sizes[] = {{NULL, 32, 127, 0, 0, 0, 0}, {NULL, 64, 63, 0, 0, 0, 0},  {NULL, 128, 31, 0, 0, 0, 0},
-                             {NULL, 252, 16, 0, 0, 0, 0}, {NULL, 508, 8, 0, 0, 0, 0},  {NULL, 1020, 4, 0, 0, 0, 0},
-                             {NULL, 2040, 2, 0, 0, 0, 0}, {NULL, 4080, 1, 0, 0, 0, 0}, {NULL, 0, 0, 0, 0, 0, 0}};
+size_descriptor_t sizes[] = {
+    {NULL, 32, 127, 0, 0, 0, 0}, {NULL, 64, 63, 0, 0, 0, 0},
+    {NULL, 128, 31, 0, 0, 0, 0}, {NULL, 252, 16, 0, 0, 0, 0},
+    {NULL, 508, 8, 0, 0, 0, 0},  {NULL, 1020, 4, 0, 0, 0, 0},
+    {NULL, 2040, 2, 0, 0, 0, 0}, {NULL, 4080, 1, 0, 0, 0, 0},
+    {NULL, 0, 0, 0, 0, 0, 0}};
 
 #define NBLOCKS(order) (sizes[order].nblocks)
 #define BLOCKSIZE(order) (sizes[order].size)
@@ -142,7 +145,12 @@ uint32_t kmalloc_i(size_t size, int align, uint32_t *phys) {
 }
 
 uint32_t kmalloc(size_t size) { return kmalloc_i(size, 0, 0); }
-void kfree(void *p) { return __kfree(p); }
+
+void kfree(void *p) {
+    if (!p)
+        return;
+    __kfree(p);
+}
 
 static uint32_t skip_rand(void) {
     static uint32_t x = 123456789;
@@ -233,12 +241,14 @@ static uint32_t __kmalloc(size_t size) {
         if (header) {
             return (uint32_t)header + 0x1000;
         } else {
-            uint32_t pages = (size + sizeof(huge_block_header_t)) / PAGE_SIZE + 2;
+            uint32_t pages =
+                (size + sizeof(huge_block_header_t)) / PAGE_SIZE + 2;
             header = __get_free_pages(pages);
             header->magic = BLOCK_MAGIC;
             header->size = (pages - 1) * PAGE_SIZE;
 
-            return (uint32_t)header + 0x1000;  //(align ? 0x1000 : sizeof(huge_block_header_t));
+            return (uint32_t)header +
+                   0x1000;  //(align ? 0x1000 : sizeof(huge_block_header_t));
         }
     }
 
@@ -341,7 +351,8 @@ void __kfree(void *p) {
         sizes[order].nfrees++;
         sizes[order].nbytesmalloced -= size;
     } else {
-        huge_block_header_t *huge = (huge_block_header_t *)((uint32_t)p - 0x1000);
+        huge_block_header_t *huge =
+            (huge_block_header_t *)((uint32_t)p - 0x1000);
         ASSERT(huge->magic == BLOCK_MAGIC);
 
         list_push_front(__huge_queue, huge);

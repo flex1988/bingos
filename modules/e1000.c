@@ -171,7 +171,7 @@ int init(void) {
         page_identical_map(page, 1, 1, addr);
     }
 
-    process_spawn_tasklet(e1000_init, "[e1000]", NULL);
+    /*process_spawn_tasklet(e1000_init, "[e1000]", NULL);*/
 
     return 0;
 }

@@ -125,7 +125,6 @@ static void e1000_init(char *name, void *data) {
     write_command(E1000_REG_CTRL, (1 << 26));
 
     process_sleep_until(CP, 0, 10);
-    context_switch(0);
 
     uint32_t status = read_command(E1000_REG_CTRL);
     status |= (1 << 5);
@@ -145,7 +144,6 @@ static void e1000_init(char *name, void *data) {
     write_command(E1000_REG_CTRL, status);
 
     process_sleep_until(CP, 0, 10);
-    context_switch(0);
 
     net_queue = list_create();
     rx_wait = list_create();

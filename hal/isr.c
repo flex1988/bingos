@@ -32,7 +32,9 @@ void irq_handler(registers_t *regs) {
         isr_t handler = _interrupt_handlers[regs->int_no];
 
         handler(regs);
+
     }
 }
-
-void register_interrupt_handler(uint8_t n, isr_t handler) { _interrupt_handlers[n] = handler; }
+void register_interrupt_handler(uint8_t n, isr_t handler) {
+    _interrupt_handlers[n] = handler;
+}

@@ -32,7 +32,7 @@ void timer_phase(int hz) {
     outb(PIT_A, (divisor >> 8) & PIT_MASK);
 }
 
-static void timer_callback(registers_t *regs) {
+void timer_callback(registers_t *regs) {
     if (++timer_subticks == SUBTICKS_PER_TICK) {
         timer_ticks++;
         timer_subticks = 0;
@@ -48,7 +48,7 @@ static void timer_callback(registers_t *regs) {
         }
     }
 
-    irq_ack(IRQ0);
+    irq_ack(IRQ0 - 32);
 
     process_wakeup_sleepers(timer_ticks, timer_subticks);
 
@@ -67,9 +67,7 @@ void relative_time(uint32_t seconds, uint32_t subseconds, uint32_t *out_seconds,
 }
 
 void timer_init() {
-    register_interrupt_handler(IRQ0, &timer_callback);
-
     boot_time = read_cmos();
-
+    register_interrupt_handler(IRQ0, timer_callback);
     timer_phase(SUBTICKS_PER_TICK);
 }

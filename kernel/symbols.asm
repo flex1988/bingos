@@ -867,6 +867,9 @@
 .extern table_clone
 .type table_clone, @function
 
+.extern timer_callback
+.type timer_callback, @function
+
 .extern timer_drift
 .type timer_drift, @function
 
@@ -1841,6 +1844,9 @@ kernel_symbols_start:
 
 .long table_clone
 .asciz "table_clone"
+
+.long timer_callback
+.asciz "timer_callback"
 
 .long timer_drift
 .asciz "timer_drift"

@@ -15,6 +15,7 @@ extern page_dir_t *_current_pd;
 extern void page_map(page_t *, int, int);
 extern uint32_t _initial_esp;
 extern uint32_t read_eip();
+extern volatile list_t *_sleep_queue;
 
 process_t *_current_process;
 
@@ -166,6 +167,8 @@ void process_sleep_until(process_t *process, uint32_t seconds,
 
     relative_time(seconds, subseconds, &s, &ss);
     sleep_enqueue(process, s, ss);
+
+    context_switch(CP == process ? 0 : 1);
 }
 
 void process_exit(int ret) {
@@ -335,6 +338,8 @@ void context_switch(int reschedule) {
         return;
     }
 
+    IRQ_OFF;
+
     ASSERT(_current_process);
 
     _current_process->eip = eip;
@@ -359,6 +364,8 @@ void switch_to_next() {
     esp = _current_process->esp;
     ebp = _current_process->ebp;
 
+    ASSERT(eip != 0x12345678);
+
     set_kernel_stack(_current_process->kstack);
 
     _current_pd = _current_process->pd;
@@ -369,7 +376,7 @@ void switch_to_next() {
          mov %2, %%ebp;       \
          mov %3, %%cr3;       \
          mov $0x12345678, %%eax; \
-         sti;                 \
+         sti;                   \
          jmp *%%ecx" ::"r"(eip),
         "r"(esp), "r"(ebp), "r"(_current_pd->physical)
         : "%ecx", "%esp", "%eax");
@@ -433,9 +440,9 @@ repeat:
 }
 
 void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
-    /*IRQ_OFF;*/
+    IRQ_OFF;
     ASSERT(_sleep_queue);
-    if (_sleep_queue->length) {
+    if (_sleep_queue && _sleep_queue->length) {
         process_t *p = _sleep_queue->head->value;
         list_node_t *n;
         while (p && (p->end_tick < ticks ||
@@ -457,7 +464,7 @@ void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
             }
         }
     }
-    /*IRQ_ON;*/
+    IRQ_ON;
 }
 
 int sleep_on(list_t *queue) {

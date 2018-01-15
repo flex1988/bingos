@@ -94,5 +94,4 @@ extern void return_to_userspace(void);
 extern void enter_userspace(uint32_t location, uint32_t ustack);
 
 extern process_t *_current_process;
-extern volatile list_t *_sleep_queue;
 #endif

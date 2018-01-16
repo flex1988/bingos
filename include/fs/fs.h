@@ -2,7 +2,7 @@
 #define __FS_H__
 
 #include <types.h>
-#include "net/net.h"
+#include "net/socket.h"
 
 #define NR_OPEN 256
 

@@ -4,7 +4,7 @@ CFLAGS := -m32 -std=c99 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -n
 
 obj_dir := ../build/objs
 
-target := $(obj_dir)/socket.o
+target := $(obj_dir)/socket.o $(obj_dir)/net.o
  
 all: $(target)
 

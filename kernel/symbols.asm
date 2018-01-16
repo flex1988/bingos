@@ -264,6 +264,9 @@
 .extern _initial_esp
 .type _initial_esp, @function
 
+.extern init_netif_funcs
+.type init_netif_funcs, @function
+
 .extern _init_process
 .type _init_process, @function
 
@@ -1241,6 +1244,9 @@ kernel_symbols_start:
 
 .long _initial_esp
 .asciz "_initial_esp"
+
+.long init_netif_funcs
+.asciz "init_netif_funcs"
 
 .long _init_process
 .asciz "_init_process"

@@ -85,6 +85,8 @@ process_t *process_create(process_t *parent) {
     p->end_tick = 0;
     p->end_subtick = 0;
 
+    p->syscall_regs = 0;
+
     if (parent) {
         p->kstack = kmalloc(KSTACK_SIZE) + KSTACK_SIZE;
         memset((void *)(p->kstack - KSTACK_SIZE), 0, KSTACK_SIZE);
@@ -131,23 +133,22 @@ process_t *process_create(process_t *parent) {
     return p;
 }
 
-void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
+int process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
     IRQ_OFF;
+
+    printk("spawn tasklet %s", name);
 
     uint32_t esp, ebp;
 
     page_dir_t *dir = _kernel_pd;
+
     process_t *new = process_create(CP);
     new->pd = dir;
-
-    registers_t regs;
-    memcpy(&regs, CP->syscall_regs, sizeof(registers_t));
-    new->syscall_regs = &regs;
 
     esp = new->kstack;
     ebp = esp;
 
-    PUSH(esp, uint32_t, (uint32_t) "xxxx");
+    PUSH(esp, uint32_t, (uint32_t)name);
     PUSH(esp, uint32_t, (uint32_t)argp);
 
     new->esp = esp;
@@ -156,7 +157,7 @@ void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
 
     sched_enqueue(new);
 
-    IRQ_OFF;
+    IRQ_ON;
 
     return new->id;
 }

@@ -73,7 +73,7 @@ typedef void (*tasklet_t)(void *, void *);
 process_t *process_create(process_t *parent);
 
 void process_init();
-void process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp);
+int process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp);
 void process_exit(int ret);
 void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks);
 

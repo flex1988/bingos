@@ -1,6 +1,4 @@
-### kernel x86
-
-`kernel are magic!`
+## PhenixOS
 
 ### Build && Run
 

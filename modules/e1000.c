@@ -2,15 +2,78 @@
 #include "drivers/pci.h"
 #include "kernel/mmu.h"
 #include "kernel/process.h"
+#include "lib/list.h"
 #include "module.h"
-
-#define E1000_NUM_RX_DESC 32
-#define E1000_NUM_TX_DESC 8
+#include "net/net.h"
 
 #define E1000_REG_CTRL 0x0000
 #define E1000_REG_STATUS 0x0008
 #define E1000_REG_EEPROM 0x0014
 #define E1000_REG_CTRL_EXT 0x0018
+
+#define E1000_REG_RCTRL 0x0100
+#define E1000_REG_RXDESCLO 0x2800
+#define E1000_REG_RXDESCHI 0x2804
+#define E1000_REG_RXDESCLEN 0x2808
+#define E1000_REG_RXDESCHEAD 0x2810
+#define E1000_REG_RXDESCTAIL 0x2818
+
+#define E1000_REG_TCTRL 0x0400
+#define E1000_REG_TXDESCLO 0x3800
+#define E1000_REG_TXDESCHI 0x3804
+#define E1000_REG_TXDESCLEN 0x3808
+#define E1000_REG_TXDESCHEAD 0x3810
+#define E1000_REG_TXDESCTAIL 0x3818
+
+#define RCTL_EN (1 << 1)         /* Receiver Enable */
+#define RCTL_SBP (1 << 2)        /* Store Bad Packets */
+#define RCTL_UPE (1 << 3)        /* Unicast Promiscuous Enabled */
+#define RCTL_MPE (1 << 4)        /* Multicast Promiscuous Enabled */
+#define RCTL_LPE (1 << 5)        /* Long Packet Reception Enable */
+#define RCTL_LBM_NONE (0 << 6)   /* No Loopback */
+#define RCTL_LBM_PHY (3 << 6)    /* PHY or external SerDesc loopback */
+#define RTCL_RDMTS_HALF (0 << 8) /* Free Buffer Threshold is 1/2 of RDLEN */
+#define RTCL_RDMTS_QUARTER                                                  \
+    (1 << 8)                       /* Free Buffer Threshold is 1/4 of RDLEN \
+                                          */
+#define RTCL_RDMTS_EIGHTH (2 << 8) /* Free Buffer Threshold is 1/8 of RDLEN */
+#define RCTL_MO_36 (0 << 12)       /* Multicast Offset - bits 47:36 */
+#define RCTL_MO_35 (1 << 12)       /* Multicast Offset - bits 46:35 */
+#define RCTL_MO_34 (2 << 12)       /* Multicast Offset - bits 45:34 */
+#define RCTL_MO_32 (3 << 12)       /* Multicast Offset - bits 43:32 */
+#define RCTL_BAM (1 << 15)         /* Broadcast Accept Mode */
+#define RCTL_VFE (1 << 18)         /* VLAN Filter Enable */
+#define RCTL_CFIEN (1 << 19)       /* Canonical Form Indicator Enable */
+#define RCTL_CFI (1 << 20)         /* Canonical Form Indicator Bit Value */
+#define RCTL_DPF (1 << 22)         /* Discard Pause Frames */
+#define RCTL_PMCF (1 << 23)        /* Pass MAC Control Frames */
+#define RCTL_SECRC (1 << 26)       /* Strip Ethernet CRC */
+
+#define RCTL_BSIZE_256 (3 << 16)
+#define RCTL_BSIZE_512 (2 << 16)
+#define RCTL_BSIZE_1024 (1 << 16)
+#define RCTL_BSIZE_2048 (0 << 16)
+#define RCTL_BSIZE_4096 ((3 << 16) | (1 << 25))
+#define RCTL_BSIZE_8192 ((2 << 16) | (1 << 25))
+#define RCTL_BSIZE_16384 ((1 << 16) | (1 << 25))
+
+#define TCTL_EN (1 << 1)      /* Transmit Enable */
+#define TCTL_PSP (1 << 3)     /* Pad Short Packets */
+#define TCTL_CT_SHIFT 4       /* Collision Threshold */
+#define TCTL_COLD_SHIFT 12    /* Collision Distance */
+#define TCTL_SWXOFF (1 << 22) /* Software XOFF Transmission */
+#define TCTL_RTLC (1 << 24)   /* Re-transmit on Late Collision */
+
+#define CMD_EOP (1 << 0)  /* End of Packet */
+#define CMD_IFCS (1 << 1) /* Insert FCS */
+#define CMD_IC (1 << 2)   /* Insert Checksum */
+#define CMD_RS (1 << 3)   /* Report Status */
+#define CMD_RPS (1 << 4)  /* Report Packet Sent */
+#define CMD_VLE (1 << 6)  /* VLAN Packet Enable */
+#define CMD_IDE (1 << 7)  /* Interrupt Delay Enable */
+
+#define E1000_NUM_RX_DESC 32
+#define E1000_NUM_TX_DESC 8
 
 struct rx_desc {
     volatile uint64_t addr;
@@ -40,8 +103,17 @@ static uint32_t e1000_device_pci = 0x00000000;
 static uint32_t mem_base = 0;
 static int has_eeprom = 0;
 static uint8_t mac[6];
+static int rx_index = 0;
+static int tx_index = 0;
 static list_t *net_queue = NULL;
 static list_t *rx_wait = NULL;
+static int e1000_irq = 0;
+
+static struct rx_desc *rx;
+static struct tx_desc *tx;
+
+static uint32_t rx_phys;
+static uint32_t tx_phys;
 
 static uint32_t mmio_read32(uint32_t addr) {
     return *((volatile uint32_t *)(addr));
@@ -81,6 +153,44 @@ static uint16_t eeprom_read(uint8_t addr) {
     return (uint16_t)((temp >> 16) & 0xffff);
 }
 
+static int e1000_irq_handler(registers_t *regs) {
+    uint32_t status = read_command(0xc0);
+    irq_ack(e1000_irq);
+
+    if (!status) {
+        return 0;
+    }
+
+    if (status & 0x04) {
+        ;
+    } else if (status & 0x10) {
+        ;
+    } else if (status & ((1 << 6) | (1 << 7))) {
+        do {
+            rx_index = read_command(E1000_REG_RXDESCTAIL);
+            if (rx_index == (int)read_command(E1000_REG_RXDESCHEAD))
+                return 1;
+            rx_index = (rx_index + 1) % E1000_NUM_RX_DESC;
+            if (rx[rx_index].status & 0x01) {
+                uint8_t *pbuf = (uint8_t *)rx_virt[rx_index];
+                uint16_t plen = rx[rx_index].length;
+
+                void *packet = kmalloc(plen);
+                memcpy(packet, pbuf, plen);
+
+                rx[rx_index].status = 0;
+
+                list_push_front(net_queue, packet);
+
+                write_command(E1000_REG_RXDESCTAIL, rx_index);
+            } else {
+                break;
+            }
+        } while (1);
+    }
+    return 1;
+}
+
 static void read_mac(void) {
     if (has_eeprom) {
         uint32_t t;
@@ -110,6 +220,37 @@ static void find_e1000(uint32_t device, uint16_t vendorid, uint16_t deviceid,
         (deviceid == 0x100e || deviceid == 0x1004 || deviceid == 0x100f)) {
         *((uint32_t *)extra) = device;
     }
+}
+
+static void init_rx(void) {
+    write_command(E1000_REG_RXDESCLO, rx_phys);
+    write_command(E1000_REG_RXDESCHI, 0);
+
+    write_command(E1000_REG_RXDESCLEN,
+                  E1000_NUM_RX_DESC * sizeof(struct rx_desc));
+    write_command(E1000_REG_RXDESCHEAD, 0);
+    write_command(E1000_REG_RXDESCTAIL, E1000_NUM_RX_DESC - 1);
+
+    rx_index = 0;
+
+    write_command(E1000_REG_RCTRL, RCTL_EN | (read_command(E1000_REG_RCTRL) &
+                                              (~((1 << 17) | (1 << 16)))));
+}
+
+static void init_tx(void) {
+    write_command(E1000_REG_TXDESCLO, tx_phys);
+    write_command(E1000_REG_TXDESCHI, 0);
+
+    write_command(E1000_REG_TXDESCLEN,
+                  E1000_NUM_TX_DESC * sizeof(struct tx_desc));
+
+    write_command(E1000_REG_TXDESCHEAD, 0);
+    write_command(E1000_REG_TXDESCTAIL, 0);
+
+    tx_index = 0;
+
+    write_command(E1000_REG_TCTRL,
+                  TCTL_EN | TCTL_PSP | read_command(E1000_REG_TCTRL));
 }
 
 static void e1000_init(char *name, void *data) {
@@ -148,6 +289,32 @@ static void e1000_init(char *name, void *data) {
     net_queue = list_create();
     rx_wait = list_create();
 
+    e1000_irq = pci_read_field(e1000_device_pci, PCI_INTERRUPT_LINE, 1);
+    register_interrupt_handler(e1000_irq + 32, e1000_irq_handler);
+
+    for (int i = 0; i < 128; i++) {
+        write_command(0x5200 + i * 4, 0);
+    }
+
+    for (int i = 0; i < 64; i++) {
+        write_command(0x4000 + i * 4, 0);
+    }
+
+    write_command(E1000_REG_RCTRL, (1 << 4));
+
+    init_rx();
+    init_tx();
+
+    write_command(0x00d0, 0xff);
+    write_command(0x00d8, 0xff);
+    write_command(0x00d0, (1 << 2) | (1 << 6) | (1 << 7) | (1 << 1) | (1 << 0));
+
+    process_sleep_until(CP, 0, 10);
+
+    int link_is_up = (read_command(E1000_REG_STATUS) & (1 << 1));
+
+    init_netif_funcs();
+
     process_exit(0);
 }
 
@@ -169,7 +336,7 @@ int init(void) {
         page_identical_map(page, 1, 1, addr);
     }
 
-    /*process_spawn_tasklet(e1000_init, "[e1000]", NULL);*/
+    process_spawn_tasklet(e1000_init, "[e1000]", NULL);
 
     return 0;
 }

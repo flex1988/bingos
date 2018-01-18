@@ -136,8 +136,6 @@ process_t *process_create(process_t *parent) {
 int process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
     IRQ_OFF;
 
-    printk("spawn tasklet %s", name);
-
     uint32_t esp, ebp;
 
     page_dir_t *dir = _kernel_pd;
@@ -157,7 +155,7 @@ int process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
 
     sched_enqueue(new);
 
-    IRQ_ON;
+    IRQ_RES;
 
     return new->id;
 }
@@ -166,14 +164,16 @@ void process_sleep_until(process_t *process, uint32_t seconds,
                          uint32_t subseconds) {
     uint32_t s, ss;
 
+    IRQ_OFF;
+
     relative_time(seconds, subseconds, &s, &ss);
     sleep_enqueue(process, s, ss);
 
-    context_switch(CP == process ? 0 : 1);
+    IRQ_RES;
 }
 
 void process_exit(int ret) {
-    IRQ_OFF;
+    /*IRQ_OFF;*/
 
     ASSERT(_current_process);
 
@@ -283,7 +283,7 @@ void process_init() {
 
     _current_process = _init_process = init;
 
-    IRQ_ON;
+    IRQ_RES;
 }
 
 int sys_fork() {
@@ -315,7 +315,7 @@ int sys_fork() {
 
     sched_enqueue(new);
 
-    IRQ_ON;
+    IRQ_RES;
     return new->id;
 }
 
@@ -335,11 +335,9 @@ void context_switch(int reschedule) {
     eip = read_eip();
     // hack magic
     if (eip == 0x12345678) {
-        IRQ_ON;
+        /*IRQ_ON;*/
         return;
     }
-
-    IRQ_OFF;
 
     ASSERT(_current_process);
 
@@ -377,7 +375,6 @@ void switch_to_next() {
          mov %2, %%ebp;       \
          mov %3, %%cr3;       \
          mov $0x12345678, %%eax; \
-         sti;                   \
          jmp *%%ecx" ::"r"(eip),
         "r"(esp), "r"(ebp), "r"(_current_pd->physical)
         : "%ecx", "%esp", "%eax");
@@ -405,7 +402,8 @@ void release_process(process_t *p) {
     kfree(p->fds->entries);
     kfree(p->fds);
     kfree(p->kstack - KSTACK_SIZE);
-    release_directory(p->pd);
+    if (p->pd != _kernel_pd)
+        release_directory(p->pd);
     kfree(p);
 }
 
@@ -465,7 +463,7 @@ void process_wakeup_sleepers(uint32_t ticks, uint32_t subticks) {
             }
         }
     }
-    IRQ_ON;
+    IRQ_RES;
 }
 
 int sleep_on(list_t *queue) {

@@ -45,7 +45,7 @@ ptr_t get_physaddr(ptr_t virtualaddr) {
     return page->addr << 12 + offset;
 }
 
-void page_fault(registers_t* regs) {
+int page_fault(registers_t* regs) {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
     uint32_t faulting_address;
@@ -225,7 +225,7 @@ void mmu_init() {
         page_identical_map(page, 1, 0, virt);
     }
 
-    register_interrupt_handler(14, page_fault);
+    isrs_install_handler(14, page_fault);
 
     page_dir_switch(_kernel_pd);
     enable_paging();

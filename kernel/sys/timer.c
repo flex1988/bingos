@@ -19,6 +19,8 @@
 #define PIT_SCALE 1193180
 #define PIT_SET 0x34
 
+#define TIMER_IRQ 0
+
 uint32_t timer_ticks = 0;
 uint32_t timer_subticks = 0;
 int32_t timer_drift = 0;
@@ -32,7 +34,7 @@ void timer_phase(int hz) {
     outb(PIT_A, (divisor >> 8) & PIT_MASK);
 }
 
-void timer_callback(registers_t *regs) {
+int timer_callback(registers_t *regs) {
     if (++timer_subticks == SUBTICKS_PER_TICK) {
         timer_ticks++;
         timer_subticks = 0;
@@ -48,7 +50,7 @@ void timer_callback(registers_t *regs) {
         }
     }
 
-    irq_ack(IRQ0 - 32);
+    irq_ack(TIMER_IRQ);
 
     process_wakeup_sleepers(timer_ticks, timer_subticks);
 
@@ -68,6 +70,6 @@ void relative_time(uint32_t seconds, uint32_t subseconds, uint32_t *out_seconds,
 
 void timer_init() {
     boot_time = read_cmos();
-    register_interrupt_handler(IRQ0, timer_callback);
+    register_interrupt_handler(TIMER_IRQ, timer_callback);
     timer_phase(SUBTICKS_PER_TICK);
 }

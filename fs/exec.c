@@ -5,8 +5,6 @@
 #include "kernel/mm.h"
 #include "kernel/process.h"
 
-extern process_t *_current_process;
-
 static int do_exec(char *path, int argc, char **argv) {
     int ret = -1;
     vfs_node_t *n;
@@ -49,10 +47,10 @@ static int do_exec(char *path, int argc, char **argv) {
     ret = do_mmap(UHEAP_START, UHEAP_INITIAL_SIZE);
     ASSERT(!ret);
 
-    _current_process->brk = UHEAP_START;
-    _current_process->ustack = USTACK_BOTTOM + USTACK_SIZE;
+    CP->brk = UHEAP_START;
+    CP->ustack = USTACK_BOTTOM + USTACK_SIZE;
 
-    switch_to_user_mode(entry, argc, argv, _current_process->ustack);
+    switch_to_user_mode(entry, argc, argv, CP->ustack);
 }
 
 int sys_exec(char *path, int argc, char **argv) {

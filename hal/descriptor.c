@@ -14,13 +14,21 @@
 
 #define PCI_EOI 0x20
 
+#define PIC_WAIT()            \
+    do {                      \
+        /* May be fragile */  \
+        __asm__ __volatile__( \
+            "jmp 1f\n\t"      \
+            "1:\n\t"          \
+            "    jmp 2f\n\t"  \
+            "2:");            \
+    } while (0)
+
 static gdt_t _gdt[6];
 static gdtr_t _gdtr;
 
 static idt_t _idt[256];
 static idtr_t _idtr;
-
-extern isr_t _interrupt_handlers[];
 
 extern void gdt_flush(uint32_t);
 extern void idt_flush(uint32_t);
@@ -31,9 +39,10 @@ tss_entry_t tss_entry;
 
 void set_kernel_stack(uint32_t stack) { tss_entry.esp0 = stack; }
 
-static void gdt_install() { asm volatile("lgdt %0" ::"m"(_gdtr)); }
+static void gdt_install() { __asm__ __volatile__("lgdt %0" ::"m"(_gdtr)); }
 
-static void gdt_set_gate(int32_t i, uint32_t base, uint32_t limit, uint8_t access, uint8_t grand) {
+static void gdt_set_gate(int32_t i, uint32_t base, uint32_t limit,
+                         uint8_t access, uint8_t grand) {
     _gdt[i].base_low = base & 0xffff;
     _gdt[i].base_mid = (base >> 16) & 0xff;
     _gdt[i].base_high = (base >> 24) & 0xff;
@@ -44,7 +53,8 @@ static void gdt_set_gate(int32_t i, uint32_t base, uint32_t limit, uint8_t acces
     _gdt[i].grand |= grand & 0xf0;
 }
 
-static void idt_set_gate(uint8_t i, uint32_t base, uint16_t selector, uint8_t flags) {
+static void idt_set_gate(uint8_t i, uint32_t base, uint16_t selector,
+                         uint8_t flags) {
     _idt[i].base_low = base & 0xFFFF;
     _idt[i].base_high = (base >> 16) & 0xFFFF;
 
@@ -64,7 +74,8 @@ static void write_tss(int32_t num, uint16_t ss0, uint32_t esp0) {
     tss_entry.esp0 = esp0;
 
     tss_entry.cs = 0x0b;
-    tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs = 0x13;
+    tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs =
+        0x13;
 }
 
 static void gdt_init() {
@@ -92,16 +103,15 @@ static void idt_init() {
     memset((void *)&_idt, 0, sizeof(idt_t) * 256);
 
     // Remap the irq table.
-    outb(0x20, 0x11);
-    outb(0xA0, 0x11);
-    outb(0x21, 0x20);
-    outb(0xA1, 0x28);
-    outb(0x21, 0x04);
-    outb(0xA1, 0x02);
-    outb(0x21, 0x01);
-    outb(0xA1, 0x01);
-    outb(0x21, 0x0);
-    outb(0xA1, 0x0);
+    outb(0x20, 0x11);   PIC_WAIT();
+    outb(0xA0, 0x11);   PIC_WAIT();
+    outb(0x21, 0x20);   PIC_WAIT();
+    outb(0xA1, 0x28);   PIC_WAIT();
+    outb(0x21, 0x04);   PIC_WAIT();
+    outb(0xA1, 0x02);   PIC_WAIT();
+    outb(0x21, 0x01);   PIC_WAIT();
+    outb(0xA1, 0x01);   PIC_WAIT();
+    
 
     /* set default interrupt service routine */
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
@@ -162,7 +172,6 @@ static void idt_init() {
 void init_descriptor_tables() {
     gdt_init();
     idt_init();
-    memset(&_interrupt_handlers, 0, sizeof(isr_t) * 256);
 }
 
 void irq_ack(uint32_t irq_no) {

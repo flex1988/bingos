@@ -9,6 +9,9 @@
 .extern atapi_packet
 .type atapi_packet, @function
 
+.extern atoi
+.type atoi, @function
+
 .extern bitmap_set
 .type bitmap_set, @function
 
@@ -27,17 +30,29 @@
 .extern boot_time
 .type boot_time, @function
 
+.extern brk
+.type brk, @function
+
 .extern bss
 .type bss, @function
 
 .extern _bss
 .type _bss, @function
 
+.extern calculate_ipv4_checksum
+.type calculate_ipv4_checksum, @function
+
+.extern calloc
+.type calloc, @function
+
 .extern char_height
 .type char_height, @function
 
 .extern char_width
 .type char_width, @function
+
+.extern close
+.type close, @function
 
 .extern close_pipe
 .type close_pipe, @function
@@ -120,8 +135,26 @@
 .extern enter_userspace
 .type enter_userspace, @function
 
+.extern errno
+.type errno, @function
+
+.extern execve
+.type execve, @function
+
+.extern execvp
+.type execvp, @function
+
+.extern exit
+.type exit, @function
+
+.extern fault_handler
+.type fault_handler, @function
+
 .extern file_headers
 .type file_headers, @function
+
+.extern find_free_block
+.type find_free_block, @function
 
 .extern _finished_queue
 .type _finished_queue, @function
@@ -138,6 +171,9 @@
 .extern fonts_system_large
 .type fonts_system_large, @function
 
+.extern fork
+.type fork, @function
+
 .extern frame_buffer
 .type frame_buffer, @function
 
@@ -147,6 +183,9 @@
 .extern frame_init
 .type frame_init, @function
 
+.extern free
+.type free, @function
+
 .extern free_frame
 .type free_frame, @function
 
@@ -155,6 +194,9 @@
 
 .extern gdt_flush
 .type gdt_flush, @function
+
+.extern get_block_ptr
+.type get_block_ptr, @function
 
 .extern get_date
 .type get_date, @function
@@ -177,8 +219,14 @@
 .extern get_physaddr
 .type get_physaddr, @function
 
+.extern getpid
+.type getpid, @function
+
 .extern get_time
 .type get_time, @function
+
+.extern gettimeofday
+.type gettimeofday, @function
 
 .extern graphic_init
 .type graphic_init, @function
@@ -297,8 +345,20 @@
 .extern insm
 .type insm, @function
 
-.extern _interrupt_handlers
-.type _interrupt_handlers, @function
+.extern interrupt_disable
+.type interrupt_disable, @function
+
+.extern interrupt_enable
+.type interrupt_enable, @function
+
+.extern interrupt_resume
+.type interrupt_resume, @function
+
+.extern ip_aton
+.type ip_aton, @function
+
+.extern ip_ntoa
+.type ip_ntoa, @function
 
 .extern irq0
 .type irq0, @function
@@ -453,8 +513,11 @@
 .extern isr9
 .type isr9, @function
 
-.extern isr_handler
-.type isr_handler, @function
+.extern isrs_install_handler
+.type isrs_install_handler, @function
+
+.extern isrs_uninstall_handler
+.type isrs_uninstall_handler, @function
 
 .extern is_update_in_progress
 .type is_update_in_progress, @function
@@ -522,6 +585,9 @@
 .extern local_irq_enable
 .type local_irq_enable, @function
 
+.extern malloc
+.type malloc, @function
+
 .extern memcmp
 .type memcmp, @function
 
@@ -552,6 +618,9 @@
 .extern namei
 .type namei, @function
 
+.extern net_handler
+.type net_handler, @function
+
 .extern _next_pid
 .type _next_pid, @function
 
@@ -560,6 +629,9 @@
 
 .extern NR_syscalls
 .type NR_syscalls, @function
+
+.extern open
+.type open, @function
 
 .extern open_pipe
 .type open_pipe, @function
@@ -678,6 +750,9 @@
 .extern process_wakeup_sleepers
 .type process_wakeup_sleepers, @function
 
+.extern read
+.type read, @function
+
 .extern read_cmos
 .type read_cmos, @function
 
@@ -686,6 +761,9 @@
 
 .extern read_pipe
 .type read_pipe, @function
+
+.extern realloc
+.type realloc, @function
 
 .extern RED
 .type RED, @function
@@ -702,6 +780,9 @@
 .extern relocate_stack
 .type relocate_stack, @function
 
+.extern request_space
+.type request_space, @function
+
 .extern return_to_userspace
 .type return_to_userspace, @function
 
@@ -710,6 +791,9 @@
 
 .extern root_nodes
 .type root_nodes, @function
+
+.extern sbrk
+.type sbrk, @function
 
 .extern sched_available
 .type sched_available, @function
@@ -771,6 +855,9 @@
 .extern _start
 .type _start, @function
 
+.extern stat
+.type stat, @function
+
 .extern strcat
 .type strcat, @function
 
@@ -816,8 +903,53 @@
 .extern sys_brk
 .type sys_brk, @function
 
+.extern syscall_brk
+.type syscall_brk, @function
+
+.extern syscall_close
+.type syscall_close, @function
+
+.extern syscall_execve
+.type syscall_execve, @function
+
+.extern syscall_exit
+.type syscall_exit, @function
+
+.extern syscall_fork
+.type syscall_fork, @function
+
+.extern syscall_getpid
+.type syscall_getpid, @function
+
+.extern syscall_gettimeofday
+.type syscall_gettimeofday, @function
+
+.extern syscall_open
+.type syscall_open, @function
+
+.extern syscall_printc
+.type syscall_printc, @function
+
+.extern syscall_println
+.type syscall_println, @function
+
+.extern syscall_read
+.type syscall_read, @function
+
+.extern syscall_readdir
+.type syscall_readdir, @function
+
 .extern syscalls_init
 .type syscalls_init, @function
+
+.extern syscall_socketcall
+.type syscall_socketcall, @function
+
+.extern syscall_stat
+.type syscall_stat, @function
+
+.extern syscall_waitpid
+.type syscall_waitpid, @function
 
 .extern sys_close
 .type sys_close, @function
@@ -972,6 +1104,9 @@
 .extern vsprintf
 .type vsprintf, @function
 
+.extern waitpid
+.type waitpid, @function
+
 .extern wakeup_from
 .type wakeup_from, @function
 
@@ -989,6 +1124,9 @@ kernel_symbols_start:
 
 .long atapi_packet
 .asciz "atapi_packet"
+
+.long atoi
+.asciz "atoi"
 
 .long bitmap_set
 .asciz "bitmap_set"
@@ -1008,17 +1146,29 @@ kernel_symbols_start:
 .long boot_time
 .asciz "boot_time"
 
+.long brk
+.asciz "brk"
+
 .long bss
 .asciz "bss"
 
 .long _bss
 .asciz "_bss"
 
+.long calculate_ipv4_checksum
+.asciz "calculate_ipv4_checksum"
+
+.long calloc
+.asciz "calloc"
+
 .long char_height
 .asciz "char_height"
 
 .long char_width
 .asciz "char_width"
+
+.long close
+.asciz "close"
 
 .long close_pipe
 .asciz "close_pipe"
@@ -1101,8 +1251,26 @@ kernel_symbols_start:
 .long enter_userspace
 .asciz "enter_userspace"
 
+.long errno
+.asciz "errno"
+
+.long execve
+.asciz "execve"
+
+.long execvp
+.asciz "execvp"
+
+.long exit
+.asciz "exit"
+
+.long fault_handler
+.asciz "fault_handler"
+
 .long file_headers
 .asciz "file_headers"
+
+.long find_free_block
+.asciz "find_free_block"
 
 .long _finished_queue
 .asciz "_finished_queue"
@@ -1119,6 +1287,9 @@ kernel_symbols_start:
 .long fonts_system_large
 .asciz "fonts_system_large"
 
+.long fork
+.asciz "fork"
+
 .long frame_buffer
 .asciz "frame_buffer"
 
@@ -1128,6 +1299,9 @@ kernel_symbols_start:
 .long frame_init
 .asciz "frame_init"
 
+.long free
+.asciz "free"
+
 .long free_frame
 .asciz "free_frame"
 
@@ -1136,6 +1310,9 @@ kernel_symbols_start:
 
 .long gdt_flush
 .asciz "gdt_flush"
+
+.long get_block_ptr
+.asciz "get_block_ptr"
 
 .long get_date
 .asciz "get_date"
@@ -1158,8 +1335,14 @@ kernel_symbols_start:
 .long get_physaddr
 .asciz "get_physaddr"
 
+.long getpid
+.asciz "getpid"
+
 .long get_time
 .asciz "get_time"
+
+.long gettimeofday
+.asciz "gettimeofday"
 
 .long graphic_init
 .asciz "graphic_init"
@@ -1278,8 +1461,20 @@ kernel_symbols_start:
 .long insm
 .asciz "insm"
 
-.long _interrupt_handlers
-.asciz "_interrupt_handlers"
+.long interrupt_disable
+.asciz "interrupt_disable"
+
+.long interrupt_enable
+.asciz "interrupt_enable"
+
+.long interrupt_resume
+.asciz "interrupt_resume"
+
+.long ip_aton
+.asciz "ip_aton"
+
+.long ip_ntoa
+.asciz "ip_ntoa"
 
 .long irq0
 .asciz "irq0"
@@ -1434,8 +1629,11 @@ kernel_symbols_start:
 .long isr9
 .asciz "isr9"
 
-.long isr_handler
-.asciz "isr_handler"
+.long isrs_install_handler
+.asciz "isrs_install_handler"
+
+.long isrs_uninstall_handler
+.asciz "isrs_uninstall_handler"
 
 .long is_update_in_progress
 .asciz "is_update_in_progress"
@@ -1503,6 +1701,9 @@ kernel_symbols_start:
 .long local_irq_enable
 .asciz "local_irq_enable"
 
+.long malloc
+.asciz "malloc"
+
 .long memcmp
 .asciz "memcmp"
 
@@ -1533,6 +1734,9 @@ kernel_symbols_start:
 .long namei
 .asciz "namei"
 
+.long net_handler
+.asciz "net_handler"
+
 .long _next_pid
 .asciz "_next_pid"
 
@@ -1541,6 +1745,9 @@ kernel_symbols_start:
 
 .long NR_syscalls
 .asciz "NR_syscalls"
+
+.long open
+.asciz "open"
 
 .long open_pipe
 .asciz "open_pipe"
@@ -1659,6 +1866,9 @@ kernel_symbols_start:
 .long process_wakeup_sleepers
 .asciz "process_wakeup_sleepers"
 
+.long read
+.asciz "read"
+
 .long read_cmos
 .asciz "read_cmos"
 
@@ -1667,6 +1877,9 @@ kernel_symbols_start:
 
 .long read_pipe
 .asciz "read_pipe"
+
+.long realloc
+.asciz "realloc"
 
 .long RED
 .asciz "RED"
@@ -1683,6 +1896,9 @@ kernel_symbols_start:
 .long relocate_stack
 .asciz "relocate_stack"
 
+.long request_space
+.asciz "request_space"
+
 .long return_to_userspace
 .asciz "return_to_userspace"
 
@@ -1691,6 +1907,9 @@ kernel_symbols_start:
 
 .long root_nodes
 .asciz "root_nodes"
+
+.long sbrk
+.asciz "sbrk"
 
 .long sched_available
 .asciz "sched_available"
@@ -1752,6 +1971,9 @@ kernel_symbols_start:
 .long _start
 .asciz "_start"
 
+.long stat
+.asciz "stat"
+
 .long strcat
 .asciz "strcat"
 
@@ -1797,8 +2019,53 @@ kernel_symbols_start:
 .long sys_brk
 .asciz "sys_brk"
 
+.long syscall_brk
+.asciz "syscall_brk"
+
+.long syscall_close
+.asciz "syscall_close"
+
+.long syscall_execve
+.asciz "syscall_execve"
+
+.long syscall_exit
+.asciz "syscall_exit"
+
+.long syscall_fork
+.asciz "syscall_fork"
+
+.long syscall_getpid
+.asciz "syscall_getpid"
+
+.long syscall_gettimeofday
+.asciz "syscall_gettimeofday"
+
+.long syscall_open
+.asciz "syscall_open"
+
+.long syscall_printc
+.asciz "syscall_printc"
+
+.long syscall_println
+.asciz "syscall_println"
+
+.long syscall_read
+.asciz "syscall_read"
+
+.long syscall_readdir
+.asciz "syscall_readdir"
+
 .long syscalls_init
 .asciz "syscalls_init"
+
+.long syscall_socketcall
+.asciz "syscall_socketcall"
+
+.long syscall_stat
+.asciz "syscall_stat"
+
+.long syscall_waitpid
+.asciz "syscall_waitpid"
 
 .long sys_close
 .asciz "sys_close"
@@ -1952,6 +2219,9 @@ kernel_symbols_start:
 
 .long vsprintf
 .asciz "vsprintf"
+
+.long waitpid
+.asciz "waitpid"
 
 .long wakeup_from
 .asciz "wakeup_from"

@@ -112,7 +112,7 @@ int sock_register(int family, proto_ops_t *ops) {
         return i;
     }
 
-    IRQ_ON;
+    IRQ_RES;
     return -ENOMEM;
 }
 

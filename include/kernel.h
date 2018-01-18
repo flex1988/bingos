@@ -16,7 +16,12 @@ extern void panic(const char *file, uint32_t line, const char *msg);
 #define true 1
 #define false 0
 
-#define IRQ_ON __asm__ volatile("sti")
-#define IRQ_OFF __asm__ volatile("cli")
+extern void interrupt_enable(void);
+extern void interrupt_disable(void);
+extern void interrupt_resume(void);
+
+#define IRQ_ON interrupt_enable()
+#define IRQ_OFF interrupt_disable()
+#define IRQ_RES interrupt_resume()
 
 #endif

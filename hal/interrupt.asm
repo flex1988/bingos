@@ -88,7 +88,7 @@ IRQ  15,    47
 
 
 ; Interrupt handlers
-extern isr_handler
+extern fault_handler
 isr_common_stub:
 	pusha
 	push ds
@@ -100,16 +100,18 @@ isr_common_stub:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-	mov eax, esp
-	push eax
+	cld
+	
+	push esp
 	; Call the C kernel fault handler
-	mov eax, isr_handler
-	call eax
-	pop eax
+	call fault_handler
+	add esp, 4
+
 	pop gs
 	pop fs
 	pop es
 	pop ds
+
 	popa
 	add esp, 8
 	iret
@@ -126,12 +128,13 @@ irq_common_stub:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
-	mov eax, esp
-	push eax
+	cld
+
+	push esp
 	; Call the C kernel hardware interrupt handler
-	mov eax, irq_handler
-	call eax
-	pop eax
+	call irq_handler
+	add esp, 4
+
 	pop gs
 	pop fs
 	pop es

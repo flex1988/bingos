@@ -9,8 +9,6 @@
 
 static void syscall_handler(registers_t* regs);
 
-void syscalls_init() { register_interrupt_handler(0x80, syscall_handler); }
-
 static void* syscalls[] = {
     sys_exit,         // 0
     sys_println,      // 1
@@ -31,6 +29,11 @@ static void* syscalls[] = {
 };
 
 uint32_t NR_syscalls = sizeof(syscalls) / sizeof(void*);
+
+void syscalls_init() {
+    printk("Init syscall table size: %d", NR_syscalls);
+    isrs_install_handler(0x80, syscall_handler);
+}
 
 void syscall_handler(registers_t* regs) {
     if (regs->eax >= NR_syscalls)

@@ -35,7 +35,7 @@
 #define RTCL_RDMTS_HALF (0 << 8) /* Free Buffer Threshold is 1/2 of RDLEN */
 #define RTCL_RDMTS_QUARTER                                                  \
     (1 << 8)                       /* Free Buffer Threshold is 1/4 of RDLEN \
-                                          */
+                                              */
 #define RTCL_RDMTS_EIGHTH (2 << 8) /* Free Buffer Threshold is 1/8 of RDLEN */
 #define RCTL_MO_36 (0 << 12)       /* Multicast Offset - bits 47:36 */
 #define RCTL_MO_35 (1 << 12)       /* Multicast Offset - bits 46:35 */
@@ -115,6 +115,20 @@ static struct tx_desc *tx;
 static uint32_t rx_phys;
 static uint32_t tx_phys;
 
+static uint8_t *get_mac() { return mac; }
+
+static struct ethernet_packet *dequeue_packet(void) {
+    while (!net_queue->length) {
+        sleep_on(rx_wait);
+    }
+
+    list_node_t *n = list_pop_back(net_queue);
+    void *value = n->value;
+    kfree(n);
+
+    return value;
+}
+
 static uint32_t mmio_read32(uint32_t addr) {
     return *((volatile uint32_t *)(addr));
 }
@@ -129,6 +143,18 @@ static void write_command(uint16_t addr, uint32_t val) {
 
 static uint32_t read_command(uint16_t addr) {
     return mmio_read32(mem_base + addr);
+}
+
+static void send_packet(uint8_t *payload, size_t payload_size) {
+    tx_index = read_command(E1000_REG_TXDESCTAIL);
+
+    memcpy(tx_virt[tx_index], payload, payload_size);
+    tx[tx_index].length = payload_size;
+    tx[tx_index].cmd = CMD_EOP | CMD_IFCS | CMD_RS;
+    tx[tx_index].status = 0;
+
+    tx_index = (tx_index + 1) % E1000_NUM_TX_DESC;
+    write_command(E1000_REG_TXDESCTAIL, tx_index);
 }
 
 static int eeprom_detect(void) {
@@ -187,7 +213,10 @@ static int e1000_irq_handler(registers_t *regs) {
                 break;
             }
         } while (1);
+
+        wakeup_from(rx_wait);
     }
+
     return 1;
 }
 
@@ -266,6 +295,7 @@ static void e1000_init(char *name, void *data) {
     write_command(E1000_REG_CTRL, (1 << 26));
 
     process_sleep_until(CP, 0, 10);
+    context_switch(0);
 
     uint32_t status = read_command(E1000_REG_CTRL);
     status |= (1 << 5);
@@ -285,12 +315,14 @@ static void e1000_init(char *name, void *data) {
     write_command(E1000_REG_CTRL, status);
 
     process_sleep_until(CP, 0, 10);
+    context_switch(0);
 
     net_queue = list_create();
     rx_wait = list_create();
 
     e1000_irq = pci_read_field(e1000_device_pci, PCI_INTERRUPT_LINE, 1);
-    register_interrupt_handler(e1000_irq + 32, e1000_irq_handler);
+    printk("e1000_irq %d",e1000_irq);
+    register_interrupt_handler(e1000_irq, e1000_irq_handler);
 
     for (int i = 0; i < 128; i++) {
         write_command(0x5200 + i * 4, 0);
@@ -310,12 +342,13 @@ static void e1000_init(char *name, void *data) {
     write_command(0x00d0, (1 << 2) | (1 << 6) | (1 << 7) | (1 << 1) | (1 << 0));
 
     process_sleep_until(CP, 0, 10);
+    context_switch(0);
 
     int link_is_up = (read_command(E1000_REG_STATUS) & (1 << 1));
 
-    init_netif_funcs();
+    init_netif_funcs(get_mac, dequeue_packet, send_packet, "Intel E1000");
 
-    process_exit(0);
+    context_switch(0);
 }
 
 int init(void) {

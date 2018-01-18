@@ -38,7 +38,6 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     tty_init(boot_info);
     init_descriptor_tables();
 
-    IRQ_ON;
     frame_init(boot_info);
     mmu_init();
     process_init();

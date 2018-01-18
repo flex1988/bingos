@@ -6,7 +6,7 @@ LDFLAGS := -melf_i386 -T link.ld
 
 obj_dir := ../build/modules
 
-target := $(obj_dir)/ext2.ko $(obj_dir)/ata.ko $(obj_dir)/kbd.ko $(obj_dir)/e1000.ko $(obj_dir)/net.ko
+target := $(obj_dir)/ext2.ko $(obj_dir)/ata.ko $(obj_dir)/kbd.ko $(obj_dir)/e1000.ko
 
 all: $(target)
 

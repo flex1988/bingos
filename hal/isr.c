@@ -2,39 +2,57 @@
 #include "hal/common.h"
 #include "kernel.h"
 
-isr_t _interrupt_handlers[256];
+#define ISR_COUNT 32
 
-/*
- * Software interrupt handler, call the exception handlers
- */
-void isr_handler(registers_t *regs) {
-    uint8_t int_no = regs->int_no;
-    if (_interrupt_handlers[int_no]) {
-        isr_t handler = _interrupt_handlers[int_no];
+static irq_handler_t isr_routines[256] = {0};
+
+void isrs_install_handler(uint8_t isrs, irq_handler_t handler) {
+    isr_routines[isrs] = handler;
+}
+
+void isrs_uninstall_handler(uint8_t isrs) { isr_routines[isrs] = 0; }
+
+static const char *exception_messages[32] = {"Division by zero",
+                                             "Debug",
+                                             "Non-maskable interrupt",
+                                             "Breakpoint",
+                                             "Detected overflow",
+                                             "Out-of-bounds",
+                                             "Invalid opcode",
+                                             "No coprocessor",
+                                             "Double fault",
+                                             "Coprocessor segment overrun",
+                                             "Bad TSS",
+                                             "Segment not present",
+                                             "Stack fault",
+                                             "General protection fault",
+                                             "Page fault",
+                                             "Unknown interrupt",
+                                             "Coprocessor fault",
+                                             "Alignment check",
+                                             "Machine check",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved",
+                                             "Reserved"};
+
+void fault_handler(registers_t *regs) {
+    irq_handler_t handler = isr_routines[regs->int_no & 0x000000ff];
+
+    if (handler) {
         handler(regs);
     } else {
-        printk("unhandled interrupt: %d", int_no);
-        PANIC("unhandled interrupt");
+        printk("Unhandled exception: [%d] %s", regs->int_no,
+               exception_messages[regs->int_no]);
+        PANIC(0);
     }
-}
-
-void irq_handler(registers_t *regs) {
-    // Send an EOI (end of interrupt) signal to the PICs.
-    // If this interrupt involved the slave.
-    if (regs->int_no >= 40) {
-        // Send reset signal to slave.
-        outb(0xA0, 0x20);
-    }
-    // Send reset signal to master. (As well as slave, if necessary).
-    outb(0x20, 0x20);
-
-    if (_interrupt_handlers[regs->int_no]) {
-        isr_t handler = _interrupt_handlers[regs->int_no];
-
-        handler(regs);
-
-    }
-}
-void register_interrupt_handler(uint8_t n, isr_t handler) {
-    _interrupt_handlers[n] = handler;
 }

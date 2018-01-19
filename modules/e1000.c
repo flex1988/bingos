@@ -35,7 +35,7 @@
 #define RTCL_RDMTS_HALF (0 << 8) /* Free Buffer Threshold is 1/2 of RDLEN */
 #define RTCL_RDMTS_QUARTER                                                  \
     (1 << 8)                       /* Free Buffer Threshold is 1/4 of RDLEN \
-                                              */
+                                                      */
 #define RTCL_RDMTS_EIGHTH (2 << 8) /* Free Buffer Threshold is 1/8 of RDLEN */
 #define RCTL_MO_36 (0 << 12)       /* Multicast Offset - bits 47:36 */
 #define RCTL_MO_35 (1 << 12)       /* Multicast Offset - bits 46:35 */
@@ -108,6 +108,7 @@ static int tx_index = 0;
 static list_t *net_queue = NULL;
 static list_t *rx_wait = NULL;
 static int e1000_irq = 0;
+static int e1000_tasklet = 0;
 
 static struct rx_desc *rx;
 static struct tx_desc *tx;
@@ -134,7 +135,7 @@ static uint32_t mmio_read32(uint32_t addr) {
 }
 
 static void mmio_write32(uint32_t addr, uint32_t val) {
-    (*((volatile uint32_t *)(addr))) = val;
+    *((volatile uint32_t *)(addr)) = val;
 }
 
 static void write_command(uint16_t addr, uint32_t val) {
@@ -149,11 +150,13 @@ static void send_packet(uint8_t *payload, size_t payload_size) {
     tx_index = read_command(E1000_REG_TXDESCTAIL);
 
     memcpy(tx_virt[tx_index], payload, payload_size);
+
     tx[tx_index].length = payload_size;
     tx[tx_index].cmd = CMD_EOP | CMD_IFCS | CMD_RS;
     tx[tx_index].status = 0;
 
     tx_index = (tx_index + 1) % E1000_NUM_TX_DESC;
+
     write_command(E1000_REG_TXDESCTAIL, tx_index);
 }
 
@@ -180,6 +183,9 @@ static uint16_t eeprom_read(uint8_t addr) {
 }
 
 static int e1000_irq_handler(registers_t *regs) {
+    if (CP->id != e1000_tasklet)
+        return 0;
+
     uint32_t status = read_command(0xc0);
     irq_ack(e1000_irq);
 
@@ -321,7 +327,6 @@ static void e1000_init(char *name, void *data) {
     rx_wait = list_create();
 
     e1000_irq = pci_read_field(e1000_device_pci, PCI_INTERRUPT_LINE, 1);
-    printk("e1000_irq %d",e1000_irq);
     register_interrupt_handler(e1000_irq, e1000_irq_handler);
 
     for (int i = 0; i < 128; i++) {
@@ -348,7 +353,7 @@ static void e1000_init(char *name, void *data) {
 
     init_netif_funcs(get_mac, dequeue_packet, send_packet, "Intel E1000");
 
-    context_switch(0);
+    process_exit(0);
 }
 
 int init(void) {
@@ -363,13 +368,31 @@ int init(void) {
     printk("mem_base 0x%x", mem_base);
 
     page_t *page;
-    for (size_t x = 0; x < 0x10000; x += 0x1000) {
+    for (uint32_t x = 0; x < 0x10000; x += 0x1000) {
         uint32_t addr = (mem_base & 0xfffff000) + x;
+        printk("dma: 0x%x", addr);
         page = get_page(addr, 1, _kernel_pd);
         page_identical_map(page, 1, 1, addr);
     }
 
-    process_spawn_tasklet(e1000_init, "[e1000]", NULL);
+    rx = (void *)kmalloc_i(sizeof(struct rx_desc) * E1000_NUM_RX_DESC + 16,
+                           &rx_phys);
+    for (int i = 0; i < E1000_NUM_RX_DESC; ++i) {
+        rx_virt[i] = (void *)kmalloc_i(8192 + 16, (uint32_t *)&rx[i].addr);
+        /*printk("rx[%d] 0x%x → 0x%x", i, rx_virt[i], (uint32_t)rx[i].addr);*/
+        rx[i].status = 0;
+    }
+
+    tx = (void *)kmalloc_i(sizeof(struct tx_desc) * E1000_NUM_TX_DESC + 16,
+                           &tx_phys);
+    for (int i = 0; i < E1000_NUM_TX_DESC; i++) {
+        tx_virt[i] = (void *)kmalloc_i(8192 + 16, (uint32_t *)&tx[i].addr);
+        /*printk("tx[%d] 0x%x → 0x%x", i, tx_virt[i], (uint32_t)tx[i].addr);*/
+        tx[i].status = 0;
+        tx[i].cmd = (1 << 0);
+    }
+
+    e1000_tasklet = process_spawn_tasklet(e1000_init, "[e1000]", NULL);
 
     return 0;
 }

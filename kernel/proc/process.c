@@ -138,10 +138,8 @@ int process_spawn_tasklet(tasklet_t tasklet, char *name, void *argp) {
 
     uint32_t esp, ebp;
 
-    page_dir_t *dir = _kernel_pd;
-
     process_t *new = process_create(CP);
-    new->pd = dir;
+    new->pd = _kernel_pd;
 
     esp = new->kstack;
     ebp = esp;

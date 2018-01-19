@@ -1,5 +1,6 @@
 #include "net/net.h"
 #include "kernel/process.h"
+#include "kernel/malloc.h"
 
 static int tasklet_pid = 0;
 
@@ -156,10 +157,13 @@ static void placeholder_dhcp(void) {
     printk("Sending DHCP discover");
 
     void *tmp = kmalloc(1024);
+    
     size_t packet_size = write_dhcp_packet(tmp);
     _netif.send_packet(tmp, packet_size);
+    
     kfree(tmp);
 
+    return ;
     while (1) {
         struct ethernet_packet *eth =
             (struct ethernet_packet *)_netif.get_packet();
@@ -199,7 +203,7 @@ void net_handler(char *name, void *data) {
 
     _dns_server = ip_aton("10.210.97.22");
 
-    ;  // placeholder_dhcp();
+    placeholder_dhcp();
 
     while (1) {
         process_sleep_until(CP, 1, 0);

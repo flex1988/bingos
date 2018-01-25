@@ -132,6 +132,9 @@
 .extern elf_load_sections
 .type elf_load_sections, @function
 
+.extern enable_paging
+.type enable_paging, @function
+
 .extern enter_userspace
 .type enter_userspace, @function
 
@@ -650,6 +653,9 @@
 
 .extern page_dir_clone
 .type page_dir_clone, @function
+
+.extern page_dir_switch
+.type page_dir_switch, @function
 
 .extern page_fault
 .type page_fault, @function
@@ -1248,6 +1254,9 @@ kernel_symbols_start:
 .long elf_load_sections
 .asciz "elf_load_sections"
 
+.long enable_paging
+.asciz "enable_paging"
+
 .long enter_userspace
 .asciz "enter_userspace"
 
@@ -1766,6 +1775,9 @@ kernel_symbols_start:
 
 .long page_dir_clone
 .asciz "page_dir_clone"
+
+.long page_dir_switch
+.asciz "page_dir_switch"
 
 .long page_fault
 .asciz "page_fault"

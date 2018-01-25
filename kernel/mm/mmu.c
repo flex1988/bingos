@@ -20,19 +20,26 @@ extern void copy_page_physical(uint32_t src, uint32_t dst);
 
 extern uint8_t* frame_buffer;
 
-static inline void page_dir_switch(page_dir_t* dir) {
+void page_dir_switch(page_dir_t* dir) {
     _current_pd = dir;
-    __asm__ __volatile__("mov %0, %%cr3" ::"r"(dir->physical));
+    __asm__ __volatile__(
+        "mov %0, %%cr3\n"
+        "mov %%cr0, %%eax\n"
+        "orl $0x80000000, %%eax\n"
+        "mov %%eax, %%cr0\n" ::"r"(dir->physical)
+        : "%eax");
 }
 
-static inline void enable_paging() {
+void enable_paging() {
     uint32_t r;
     __asm__ __volatile__("mov %%cr0, %0" : "=r"(r));
     r |= 0x80000000;
     __asm__ __volatile__("mov %0, %%cr0" ::"r"(r));
 }
 
-static inline void setup_pages() { __asm__ __volatile__("mov %0, %%cr3" ::"r"((uint32_t)_kernel_pd)); }
+static inline void setup_pages() {
+    __asm__ __volatile__("mov %0, %%cr3" ::"r"((uint32_t)_kernel_pd));
+}
 
 ptr_t get_physaddr(ptr_t virtualaddr) {
     int pdidx = virtualaddr >> 22;
@@ -55,8 +62,9 @@ int page_fault(registers_t* regs) {
     int present = !(regs->err_code & 0x1);  // Page not present
     int rw = regs->err_code & 0x2;          // Write operation?
     int us = regs->err_code & 0x4;          // Processor was in user-mode?
-    int reserved = regs->err_code & 0x8;    // Overwritten CPU-reserved bits of page entry?
-    int id = regs->err_code & 0x10;         // Caused by an instruction fetch?
+    int reserved =
+        regs->err_code & 0x8;  // Overwritten CPU-reserved bits of page entry?
+    int id = regs->err_code & 0x10;  // Caused by an instruction fetch?
 
     // Output an error message.
     printk("Page fault! ( ) at 0x%x", faulting_address);
@@ -72,13 +80,16 @@ page_t* get_page(uint32_t virt, int make, page_dir_t* pd) {
     if (tabl) {
         return &tabl->pages[PAGE_TABLE_INDEX(virt)];
     } else if (make) {
-        // memory before _placement_addr must be identical mapped, so page table always can be accessed
+        // memory before _placement_addr must be identical mapped, so page table
+        // always can be accessed
         uint32_t phys;
-        page_tabl_t* new = (page_tabl_t*)kmalloc_i(sizeof(page_tabl_t), 1, &phys);
+        page_tabl_t* new =
+            (page_tabl_t*)kmalloc_i(sizeof(page_tabl_t), 1, &phys);
 
         memset(new, 0, 4096);
         pd->tabls[PAGE_DIRECTORY_INDEX(virt)] = new;
-        paged_entry_t* entry = (paged_entry_t*)&pd->entries[PAGE_DIRECTORY_INDEX(virt)];
+        paged_entry_t* entry =
+            (paged_entry_t*)&pd->entries[PAGE_DIRECTORY_INDEX(virt)];
         entry->present = 1;
         entry->rw = 1;
         entry->user = 1;
@@ -146,7 +157,8 @@ page_tabl_t* table_clone(page_tabl_t* src, uint32_t* phys) {
         if (src->pages[i].dirty)
             tabl->pages[i].dirty = 1;
 
-        copy_page_physical(src->pages[i].addr * 0x1000, tabl->pages[i].addr * 0x1000);
+        copy_page_physical(src->pages[i].addr * 0x1000,
+                           tabl->pages[i].addr * 0x1000);
     }
     return tabl;
 }
@@ -195,7 +207,8 @@ void mmu_init() {
     ptr_t phys, virt;
     page_t* page;
 
-    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_MAX_SIZE; virt += 0x1000) {
+    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_MAX_SIZE;
+         virt += 0x1000) {
         get_page(virt, 1, _kernel_pd);
     }
 
@@ -213,7 +226,8 @@ void mmu_init() {
     }
 
     // map 0x100000 physic to virtual 0xc0000000
-    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE; virt += 0x1000) {
+    for (virt = KHEAP_START; virt < KHEAP_START + KHEAP_INITIAL_SIZE;
+         virt += 0x1000) {
         page = get_page(virt, 0, _kernel_pd);
         page_map(page, 1, 0);
     }
@@ -228,13 +242,11 @@ void mmu_init() {
     isrs_install_handler(14, page_fault);
 
     page_dir_switch(_kernel_pd);
-    enable_paging();
 
     kmalloc_init(0xc0000000, 0x10000000);
 
     _current_pd = page_dir_clone(_kernel_pd);
     page_dir_switch(_current_pd);
-    enable_paging();
 
     printk("paging init...");
 }

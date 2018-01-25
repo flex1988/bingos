@@ -74,4 +74,6 @@ void page_identical_map(page_t* page, int kernel, int rw, uint32_t virt);
 void page_unmap(page_t* page);
 page_dir_t* page_dir_clone(page_dir_t* src);
 page_tabl_t* table_clone(page_tabl_t* src, uint32_t* phys);
+void page_dir_switch(page_dir_t* dir);
+void enable_paging();
 #endif

@@ -35,7 +35,7 @@
 #define RTCL_RDMTS_HALF (0 << 8) /* Free Buffer Threshold is 1/2 of RDLEN */
 #define RTCL_RDMTS_QUARTER                                                  \
     (1 << 8)                       /* Free Buffer Threshold is 1/4 of RDLEN \
-                                                      */
+                                                       */
 #define RTCL_RDMTS_EIGHTH (2 << 8) /* Free Buffer Threshold is 1/8 of RDLEN */
 #define RCTL_MO_36 (0 << 12)       /* Multicast Offset - bits 47:36 */
 #define RCTL_MO_35 (1 << 12)       /* Multicast Offset - bits 46:35 */
@@ -183,9 +183,6 @@ static uint16_t eeprom_read(uint8_t addr) {
 }
 
 static int e1000_irq_handler(registers_t *regs) {
-    if (CP->id != e1000_tasklet)
-        return 0;
-
     uint32_t status = read_command(0xc0);
     irq_ack(e1000_irq);
 
@@ -203,7 +200,9 @@ static int e1000_irq_handler(registers_t *regs) {
             if (rx_index == (int)read_command(E1000_REG_RXDESCHEAD))
                 return 1;
             rx_index = (rx_index + 1) % E1000_NUM_RX_DESC;
+            printk("rx addr 0x%x",rx[rx_index].addr);
             if (rx[rx_index].status & 0x01) {
+                printk("recv pakcet");
                 uint8_t *pbuf = (uint8_t *)rx_virt[rx_index];
                 uint16_t plen = rx[rx_index].length;
 
@@ -371,6 +370,13 @@ int init(void) {
     for (uint32_t x = 0; x < 0x10000; x += 0x1000) {
         uint32_t addr = (mem_base & 0xfffff000) + x;
         printk("dma: 0x%x", addr);
+        page = get_page(addr, 1, CP->pd);
+        page_identical_map(page, 1, 1, addr);
+
+        // init process pd is not kernel pd, so inorder to make it work, need to
+        // alloc twice for tasklet process and other process
+        // maybe looks like ugly and stupid ,but works
+        // fix it some day later
         page = get_page(addr, 1, _kernel_pd);
         page_identical_map(page, 1, 1, addr);
     }

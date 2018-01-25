@@ -1,6 +1,6 @@
 #include "net/net.h"
-#include "kernel/process.h"
 #include "kernel/malloc.h"
+#include "kernel/process.h"
 
 static int tasklet_pid = 0;
 
@@ -82,7 +82,10 @@ static size_t write_dhcp_packet(uint8_t *buffer) {
     payload_size += sizeof(dhcp_options);
 
     struct ethernet_packet eth_out = {
-        .source = {}, .destination = BROADCAST_MAC, .type = htons(0x0800),
+        .source = {_netif.hwaddr[0], _netif.hwaddr[1], _netif.hwaddr[2],
+                   _netif.hwaddr[3], _netif.hwaddr[4], _netif.hwaddr[5]},
+        .destination = BROADCAST_MAC,
+        .type = htons(0x0800),
     };
 
     memcpy(&buffer[offset], &eth_out, sizeof(struct ethernet_packet));
@@ -95,7 +98,8 @@ static size_t write_dhcp_packet(uint8_t *buffer) {
     struct ipv4_packet ipv4_out = {
         .version_ihl = ((0x4 << 4) | (0x5 << 0)),
         .dscp_ecn = 0,
-        .length = _ident,
+        .length = _length,
+        .ident = _ident,
         .flags_fragment = 0,
         .ttl = 0x40,
         .protocol = IPV4_PROT_UDP,
@@ -157,13 +161,12 @@ static void placeholder_dhcp(void) {
     printk("Sending DHCP discover");
 
     void *tmp = kmalloc(1024);
-    
+
     size_t packet_size = write_dhcp_packet(tmp);
     _netif.send_packet(tmp, packet_size);
-    
+
     kfree(tmp);
 
-    return ;
     while (1) {
         struct ethernet_packet *eth =
             (struct ethernet_packet *)_netif.get_packet();
@@ -201,7 +204,7 @@ static void placeholder_dhcp(void) {
 void net_handler(char *name, void *data) {
     _netif.extra = NULL;
 
-    _dns_server = ip_aton("10.210.97.22");
+    _dns_server = ip_aton("10.0.2.3");
 
     placeholder_dhcp();
 

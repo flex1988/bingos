@@ -9,12 +9,7 @@ libc := build/libc.a
 lib := build/lib.a
 
 modules := lib	\
-	kernel/init \
-	kernel/print \
-	kernel/mm \
-	kernel/graphic \
-	kernel/proc	\
-	kernel/sys	\
+	kernel	\
 	libc \
 	hal \
 	fs	\

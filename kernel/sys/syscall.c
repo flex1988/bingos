@@ -89,8 +89,6 @@ int sys_printc(char c) {
     return 0;
 }
 
-int sys_write(int fd, const void* buf, size_t nbytes) { return 0; }
-
 int sys_execve(const char* filename, char* const argv[], char* const envp[]) {
     int argc = 0;
 

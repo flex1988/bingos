@@ -49,15 +49,35 @@ struct dhcp_packet {
     uint8_t options;
 } __attribute__((packed));
 
+struct arp {
+    uint16_t htype;
+    uint16_t proto;
+
+    uint8_t hlen;
+    uint8_t plen;
+
+    uint16_t oper;
+
+    uint8_t sender_ha[6];
+    uint32_t sender_ip;
+    uint8_t target_ha[6];
+    uint32_t target_ip;
+
+    uint8_t padding[18];
+} __attribute__((packed));
+
 #define BROADCAST_MAC \
     { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff }
 
-#define htonl(l)  ( (((l) & 0xFF) << 24) | (((l) & 0xFF00) << 8) | (((l) & 0xFF0000) >> 8) | (((l) & 0xFF000000) >> 24))
-#define htons(s)  ( (((s) & 0xFF) << 8) | (((s) & 0xFF00) >> 8) )
-#define ntohl(l)  htonl((l))
-#define ntohs(s)  htons((s))
+#define htonl(l)                                                        \
+    ((((l)&0xFF) << 24) | (((l)&0xFF00) << 8) | (((l)&0xFF0000) >> 8) | \
+     (((l)&0xFF000000) >> 24))
+#define htons(s) ((((s)&0xFF) << 8) | (((s)&0xFF00) >> 8))
+#define ntohl(l) htonl((l))
+#define ntohs(s) htons((s))
 
-#define BROADCAST_MAC {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
+#define BROADCAST_MAC \
+    { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }
 #define IPV4_PROT_UDP 17
 #define IPV4_PROT_TCP 6
 #define DHCP_MAGIC 0x63825363

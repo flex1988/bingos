@@ -157,6 +157,52 @@ static size_t write_dhcp_packet(uint8_t *buffer) {
     return offset;
 }
 
+static size_t write_arp_request(uint8_t *buffer, uint32_t ip) {
+    size_t offset = 0;
+    printk("Request ARP from gateway address %x", ip);
+
+    struct ethernet_packet eth_out = {
+        .source = {_netif.hwaddr[0], _netif.hwaddr[1], _netif.hwaddr[2],
+                   _netif.hwaddr[3], _netif.hwaddr[4], _netif.hwaddr[5]},
+        .destination = BROADCAST_MAC,
+        .type = htons(0x0806),
+    };
+
+    memcpy(&buffer[offset], &eth_out, sizeof(struct ethernet_packet));
+    offset += sizeof(struct ethernet_packet);
+
+    struct arp arp_out;
+
+    arp_out.htype = ntohs(1);
+
+    arp_out.proto = ntohs(0x0800);
+    arp_out.hlen = 6;
+    arp_out.plen = 4;
+    arp_out.oper = ntohs(1);
+
+    arp_out.sender_ha[0] = _netif.hwaddr[0];
+    arp_out.sender_ha[1] = _netif.hwaddr[1];
+    arp_out.sender_ha[2] = _netif.hwaddr[2];
+    arp_out.sender_ha[3] = _netif.hwaddr[3];
+    arp_out.sender_ha[4] = _netif.hwaddr[4];
+    arp_out.sender_ha[5] = _netif.hwaddr[5];
+    arp_out.sender_ip = ntohl(_netif.source);
+
+    arp_out.target_ha[0] = 0;
+    arp_out.target_ha[1] = 0;
+    arp_out.target_ha[2] = 0;
+    arp_out.target_ha[3] = 0;
+    arp_out.target_ha[4] = 0;
+    arp_out.target_ha[5] = 0;
+
+    arp_out.target_ip = ntohl(ip);
+
+    memcpy(&buffer[offset], &arp_out, sizeof(struct arp));
+    offset += sizeof(struct arp);
+
+    return offset;
+}
+
 static void placeholder_dhcp(void) {
     printk("Sending DHCP discover");
 
@@ -201,6 +247,11 @@ static void placeholder_dhcp(void) {
     }
 }
 
+static struct ethernet_packet *net_receive(void) {
+    struct ethernet_packet *eth = _netif.get_packet();
+    return eth;
+}
+
 void net_handler(char *name, void *data) {
     _netif.extra = NULL;
 
@@ -208,7 +259,19 @@ void net_handler(char *name, void *data) {
 
     placeholder_dhcp();
 
+    void *tmp = malloc(1024);
+    size_t packet_size = write_arp_request(tmp, ip_aton("10.0.2.4"));
+    _netif.send_packet(tmp, packet_size);
+    free(tmp);
+
     while (1) {
+        struct ethernet_packet *eth = net_receive();
+
+        if (!eth)
+            continue;
+
+        printk("0x%x", eth);
+
         process_sleep_until(CP, 1, 0);
         context_switch(0);
     }

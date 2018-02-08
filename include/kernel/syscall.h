@@ -9,7 +9,7 @@ int sys_printc(char c);
 extern int sys_exec(char *path, int argc, char **argv);
 extern int sys_open(const char *filename, int flags, int mode);
 extern int sys_read(int fd, void *buf, size_t nbytes);
-int sys_write(int fd, const void *buf, size_t nbytes);
+extern int sys_write(int fd, const void *buf, size_t nbytes);
 extern int sys_close(fd);
 extern int sys_gettimeofday(timeval_t *t, void *z);
 int sys_execve();

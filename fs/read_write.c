@@ -44,3 +44,14 @@ int sys_readdir(int fd, int index, dirent_t *dir) {
         return 1;
     }
 }
+
+int sys_write(int fd, const char *buf, uint32_t size) {
+    if (!validate_fd(fd)) {
+        printk("invalid fd");
+        return -1;
+    }
+
+    vfs_node_t *node = CP->fds->entries[fd];
+
+    return vfs_write(node, node->offset, size, buf);
+}

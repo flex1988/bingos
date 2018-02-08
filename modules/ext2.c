@@ -302,7 +302,7 @@ static void ext2_print_disk_info(ext2_fs_t *this) {
     printk("blocks per group \t %d", SB->s_blocks_per_group);
     printk("block number of sb \t %d", SB->s_first_data_block);
     printk("filesysten state \t %s", SB->s_state == 1 ? "clean" : "error");
-    printk("Creator Operating System \t %d", SB->s_creator_os);
+    printk("Creator OS \t %d", SB->s_creator_os);
 
     printk("-----------------------------");
 }

@@ -1,4 +1,4 @@
-## PhenixOS
+## BingOS
 
 ### Build && Run
 

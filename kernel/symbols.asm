@@ -627,6 +627,9 @@
 .extern _next_pid
 .type _next_pid, @function
 
+.extern now
+.type now, @function
+
 .extern nroot_nodes
 .type nroot_nodes, @function
 
@@ -930,6 +933,9 @@
 .extern syscall_gettimeofday
 .type syscall_gettimeofday, @function
 
+.extern syscall_mkdir
+.type syscall_mkdir, @function
+
 .extern syscall_open
 .type syscall_open, @function
 
@@ -977,6 +983,9 @@
 
 .extern sys_gettimeofday
 .type sys_gettimeofday, @function
+
+.extern sys_mkdir
+.type sys_mkdir, @function
 
 .extern sys_open
 .type sys_open, @function
@@ -1073,6 +1082,12 @@
 
 .extern vfs_lookup
 .type vfs_lookup, @function
+
+.extern vfs_lookup_child
+.type vfs_lookup_child, @function
+
+.extern vfs_mkdir
+.type vfs_mkdir, @function
 
 .extern vfs_mount
 .type vfs_mount, @function
@@ -1749,6 +1764,9 @@ kernel_symbols_start:
 .long _next_pid
 .asciz "_next_pid"
 
+.long now
+.asciz "now"
+
 .long nroot_nodes
 .asciz "nroot_nodes"
 
@@ -2052,6 +2070,9 @@ kernel_symbols_start:
 .long syscall_gettimeofday
 .asciz "syscall_gettimeofday"
 
+.long syscall_mkdir
+.asciz "syscall_mkdir"
+
 .long syscall_open
 .asciz "syscall_open"
 
@@ -2099,6 +2120,9 @@ kernel_symbols_start:
 
 .long sys_gettimeofday
 .asciz "sys_gettimeofday"
+
+.long sys_mkdir
+.asciz "sys_mkdir"
 
 .long sys_open
 .asciz "sys_open"
@@ -2195,6 +2219,12 @@ kernel_symbols_start:
 
 .long vfs_lookup
 .asciz "vfs_lookup"
+
+.long vfs_lookup_child
+.asciz "vfs_lookup_child"
+
+.long vfs_mkdir
+.asciz "vfs_mkdir"
 
 .long vfs_mount
 .asciz "vfs_mount"

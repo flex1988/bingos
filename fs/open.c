@@ -17,9 +17,9 @@ int do_open(const char *filename, int flags, int mode) {
 
     vfs_node_t *node = vfs_lookup(filename, flags);
     vfs_open(node, 0);
-
-    CP->fds->entries[fd] = node;
+    
     CP->fds->length++;
+    CP->fds->entries[fd] = node;
 
     return fd;
 }
@@ -41,9 +41,11 @@ int sys_close(int fd) {
 
     if (!(n = CP->fds->entries[fd]))
         return -EBADF;
-    
-    CP->fds->entries[fd] = NULL;
-    CP->fds->length--;
+
+    if (CP->fds->entries[fd]) {
+        CP->fds->entries[fd] = NULL;
+        CP->fds->length--;
+    }
 
     return vfs_close(n);
 }

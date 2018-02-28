@@ -115,6 +115,7 @@ process_t *process_create(process_t *parent) {
 
         for (uint32_t i = 0; i < parent->fds->length; i++) {
             p->fds->entries[i] = vfs_clone(parent->fds->entries[i]);
+            p->fds->length++;
         }
     } else {
         p->brk = 0;

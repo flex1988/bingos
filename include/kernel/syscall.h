@@ -20,5 +20,6 @@ extern int sys_waitpid(int pid);
 extern int sys_stat(char *filename, vfs_stat_t *statbuf);
 extern int sys_readdir(int fd, int index, dirent_t *dir);
 extern int sys_socketcall(int call, int *args);
+extern int sys_mkdir(const char *pathname, int flags);
 
 #endif

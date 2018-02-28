@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <errno.h>
-#include <syscall.h>
 #include <fcntl.h>
+#include <syscall.h>
 #include <types.h>
 
 DIR *opendir(const char *name) {
@@ -10,7 +10,7 @@ DIR *opendir(const char *name) {
         return NULL;
     }
 
-    int fd = open(name, O_RDONLY, 0);
+    int fd = open(name, O_RDONLY | O_TRUNC, 0);
     if (fd < 0)
         return NULL;
 
@@ -31,13 +31,18 @@ int closedir(DIR *dir) {
 
 dirent_t *readdir(DIR *dir) {
     static dirent_t ent;
-    memset(&ent,0x0,sizeof(dirent_t));
+    memset(&ent, 0x0, sizeof(dirent_t));
 
-    int ret = syscall_readdir(dir->fd, dir->current_entry++, &ent);
+    int ret = syscall_readdir(dir->fd, ++dir->current_entry, &ent);
     if (ret != 0) {
         memset(&ent, 0, sizeof(dirent_t));
         return NULL;
     }
 
     return &ent;
+}
+
+int mkdir(const char *path, int mode) {
+    println("mkdir %s",path);
+    return syscall_mkdir(path, mode);
 }

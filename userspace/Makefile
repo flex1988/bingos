@@ -8,7 +8,7 @@ libc := ../build/libc.a
 
 lib := ../build/lib.a
 
-target := $(bin_dir)/init $(bin_dir)/sh $(bin_dir)/helloworld $(bin_dir)/ls $(bin_dir)/date
+target := $(bin_dir)/init $(bin_dir)/sh $(bin_dir)/helloworld $(bin_dir)/ls $(bin_dir)/date $(bin_dir)/mkdir
 
 .PHONY: $(target)
 
@@ -32,6 +32,9 @@ $(bin_dir)/ls: $(obj_dir)/ls.o
 
 $(bin_dir)/date: $(obj_dir)/date.o
 	$(LD) $(LDFLAGS) -o $(bin_dir)/date $(obj_dir)/date.o $(libc) $(lib)
+
+$(bin_dir)/mkdir: $(obj_dir)/mkdir.o
+	$(LD) $(LDFLAGS) -o $(bin_dir)/mkdir $(obj_dir)/mkdir.o $(libc) $(lib)
 
 $(obj_dir)/%.o: %.c
 	$(CC) $(CFLAGS) -m32 -g -I../include/libc -c -o $@ $<

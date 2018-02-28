@@ -183,6 +183,7 @@ static uint32_t write_ata(vfs_node_t *node, uint32_t offset, uint32_t size, uint
     uint32_t x_offset = 0;
 
     if (offset > ata_max_offset(dev)) {
+        printk("write ata %d %d", offset, ata_max_offset(dev));
         return 0;
     }
 
@@ -323,6 +324,37 @@ static void ata_soft_reset(ata_device_t *dev) {
     outb(dev->control, 0x00);
 }
 
+static void ata_device_init(ata_device_t *dev) {
+    outb(dev->io_base + 1, 1);
+    outb(dev->control, 0);
+
+    outb(dev->io_base + ATA_REG_HDDEVSEL, 0xA0 | dev->slave << 4);
+    ata_io_wait(dev);
+
+    outb(dev->io_base + ATA_REG_COMMAND, ATA_CMD_IDENTIFY);
+    ata_io_wait(dev);
+
+    int status = inb(dev->io_base + ATA_REG_COMMAND);
+    ata_wait(dev, 0);
+
+    uint16_t *buf = (uint16_t *)&dev->identity;
+    for (int i = 0; i < 256; i++) {
+        buf[i] = ins(dev->io_base);
+    }
+
+    uint8_t *ptr = (uint8_t *)&dev->identity;
+    for (int i = 0; i < 39; i += 2) {
+        uint8_t tmp = ptr[i + 1];
+        ptr[i + 1] = ptr[i];
+        ptr[i] = tmp;
+    }
+
+    dev->is_atapi = 0;
+    printk("Device Name:    %s", dev->identity.model);
+    printk("Sectors (48):   %d", dev->identity.sectors_48);
+    printk("Sectors (24):   %d", dev->identity.sectors_28);
+}
+
 static int ata_device_detect(ata_device_t *dev) {
     uint8_t cl = inb(dev->io_base + ATA_REG_LBA1); /* CYL_LO */
     uint8_t ch = inb(dev->io_base + ATA_REG_LBA2); /* CYL_HI */
@@ -341,6 +373,8 @@ static int ata_device_detect(ata_device_t *dev) {
         vfs_node_t *node = ata_device_create(dev);
         vfs_mount(devname, node);
         ata_drive_char++;
+
+        ata_device_init(dev);
 
         return 1;
     } else if ((cl == 0x14 && ch == 0xeb) || (cl == 0x69 && ch == 0x96)) {

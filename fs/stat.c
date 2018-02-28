@@ -23,7 +23,5 @@ int sys_stat(char *filename, vfs_stat_t *statbuf) {
 
     copy_stat(node, statbuf);
 
-    // iput(node);
-
     return 0;
 }

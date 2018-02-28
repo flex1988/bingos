@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     if(buf.st_mode == S_DIRECTORY) {
         dirent_t *entry;
         DIR *dir = opendir(target);
+
         while(entry = readdir(dir)) {
             println("%s",entry->d_name);
         }

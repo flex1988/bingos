@@ -73,6 +73,7 @@ DECL_SYSCALL1(close,int);
 DECL_SYSCALL3(readdir,int,int,dirent_t *);
 DECL_SYSCALL2(socketcall,int,int *);
 DECL_SYSCALL2(gettimeofday,timeval_t *,void *);
+DECL_SYSCALL2(mkdir,const char *,int);
 
 void *sbrk(int increment);
 
@@ -92,5 +93,6 @@ void *sbrk(int increment);
 #define SYSCALL_READDIR 13
 #define SYSCALL_SOCKETCALL 14
 #define SYSCALL_GETTIMEOFDAY 15
+#define SYSCALL_MKDIR 16
 
 #endif

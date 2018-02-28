@@ -18,5 +18,6 @@ typedef struct dirent {
 DIR* opendir(const char* name);
 int closedir(DIR* dir);
 dirent_t* readdir(DIR* dir);
+int mkdir(const char *path, int mode);
 
 #endif

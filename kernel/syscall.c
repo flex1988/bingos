@@ -10,22 +10,23 @@
 static void syscall_handler(registers_t* regs);
 
 static void* syscalls[] = {
-    sys_exit,         // 0
-    sys_println,      // 1
-    sys_open,         // 2
-    sys_read,         // 3
-    sys_write,        // 4
-    sys_close,        // 5
-    sys_printc,       // 6
-    sys_execve,       // 7
-    sys_fork,         // 8
-    sys_getpid,       // 9
-    sys_waitpid,      // 10
-    sys_brk,          // 11
-    sys_stat,         // 12
-    sys_readdir,      // 13
-    sys_socketcall,   // 14
-    sys_gettimeofday  // 15
+    sys_exit,          // 0
+    sys_println,       // 1
+    sys_open,          // 2
+    sys_read,          // 3
+    sys_write,         // 4
+    sys_close,         // 5
+    sys_printc,        // 6
+    sys_execve,        // 7
+    sys_fork,          // 8
+    sys_getpid,        // 9
+    sys_waitpid,       // 10
+    sys_brk,           // 11
+    sys_stat,          // 12
+    sys_readdir,       // 13
+    sys_socketcall,    // 14
+    sys_gettimeofday,  // 15
+    sys_mkdir          // 16
 };
 
 uint32_t NR_syscalls = sizeof(syscalls) / sizeof(void*);
@@ -62,8 +63,7 @@ void syscall_handler(registers_t* regs) {
             pop %%ebx;  \
             "
         : "=a"(ret)
-        : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx),
-          "r"(regs->ebx), "r"(location));
+        : "r"(regs->edi), "r"(regs->esi), "r"(regs->edx), "r"(regs->ecx), "r"(regs->ebx), "r"(location));
 
     if (CP->syscall_regs == regs || (location != (uint32_t)sys_fork)) {
         regs->eax = ret;

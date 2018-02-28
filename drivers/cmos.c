@@ -1,5 +1,5 @@
-#include <types.h>
 #include <time.h>
+#include <types.h>
 
 #include "kernel/timer.h"
 
@@ -8,14 +8,7 @@
 #define CMOS_ADDRESS 0x70
 #define CMOS_DATA 0x71
 
-enum {
-    CMOS_SECOND = 0,
-    CMOS_MINUTE = 2,
-    CMOS_HOUR = 4,
-    CMOS_DAY = 7,
-    CMOS_MONTH = 8,
-    CMOS_YEAR = 9
-};
+enum { CMOS_SECOND = 0, CMOS_MINUTE = 2, CMOS_HOUR = 4, CMOS_DAY = 7, CMOS_MONTH = 8, CMOS_YEAR = 9 };
 
 uint32_t boot_time = 0;
 
@@ -119,20 +112,14 @@ uint32_t read_cmos(void) {
             ;
 
         cmos_dump(values);
-    } while ((old_values[CMOS_SECOND] != values[CMOS_SECOND]) ||
-             (old_values[CMOS_MINUTE] != values[CMOS_MINUTE]) ||
-             (old_values[CMOS_HOUR] != values[CMOS_HOUR]) ||
-             (old_values[CMOS_DAY] != values[CMOS_DAY]) ||
-             (old_values[CMOS_MONTH] != values[CMOS_MONTH]) ||
-             (old_values[CMOS_YEAR] != values[CMOS_YEAR]));
+    } while ((old_values[CMOS_SECOND] != values[CMOS_SECOND]) || (old_values[CMOS_MINUTE] != values[CMOS_MINUTE]) ||
+             (old_values[CMOS_HOUR] != values[CMOS_HOUR]) || (old_values[CMOS_DAY] != values[CMOS_DAY]) ||
+             (old_values[CMOS_MONTH] != values[CMOS_MONTH]) || (old_values[CMOS_YEAR] != values[CMOS_YEAR]));
 
     uint32_t time = secs_of_years(from_bcd(values[CMOS_YEAR]) - 1) +
-                    secs_of_month(from_bcd(values[CMOS_MONTH]) - 1,
-                                  from_bcd(values[CMOS_YEAR])) +
-                    (from_bcd(values[CMOS_DAY]) - 1) * 86400 +
-                    (from_bcd(values[CMOS_HOUR])) * 3600 +
-                    (from_bcd(values[CMOS_MINUTE])) * 60 +
-                    from_bcd(values[CMOS_SECOND]) + 0;
+                    secs_of_month(from_bcd(values[CMOS_MONTH]) - 1, from_bcd(values[CMOS_YEAR])) +
+                    (from_bcd(values[CMOS_DAY]) - 1) * 86400 + (from_bcd(values[CMOS_HOUR])) * 3600 +
+                    (from_bcd(values[CMOS_MINUTE])) * 60 + from_bcd(values[CMOS_SECOND]) + 0;
 
     return time;
 }
@@ -142,3 +129,5 @@ int sys_gettimeofday(timeval_t* t, void* z) {
     t->tv_usec = timer_subticks * 1000;
     return 0;
 }
+
+uint32_t now(void) { return boot_time + timer_ticks + timer_drift; }

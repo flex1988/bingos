@@ -2,4 +2,5 @@
 #define __CMOS_H__
 extern uint32_t boot_time;
 uint32_t read_cmos(void);
+uint32_t now(void);
 #endif

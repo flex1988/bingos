@@ -79,6 +79,13 @@ vfs_node_t* vfs_clone(vfs_node_t* source) {
     return source;
 }
 
+int vfs_mkdir(vfs_node_t* dir, const char* name, int len, int mode) {
+    printk("vfs_mkdir 0x%x 0x%x",dir,dir->mkdir);
+    if (dir && dir->mkdir)
+        return dir->mkdir(dir, name, len, mode);
+    return -ENOENT;
+}
+
 // find file mount point
 vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, uint32_t* mount_depth) {
     size_t d;
@@ -105,6 +112,7 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
             vfs_entry_t* entry = (vfs_entry_t*)child->data;
 
             if (!strcmp(entry->name, p)) {
+                printk("%s %s",entry->name,p);
                 found = 1;
                 node = child;
                 p = p + strlen(p) + 1;
@@ -178,6 +186,24 @@ vfs_node_t* vfs_fetch_device(char* path) {
 
     vfs_entry_t* entry = (vfs_entry_t*)node->data;
     return entry->file;
+}
+
+int vfs_lookup_child(vfs_node_t* parent, const char* name, int len, vfs_node_t** ret) {
+    vfs_node_t* n;
+
+    char tmp[256];
+    memcpy(tmp, name, len);
+    tmp[len] = '\0';
+
+    n = vfs_finddir(parent, tmp);
+
+    if (!n)
+        return -ENOENT;
+
+    *ret = n;
+    kfree(n);
+
+    return 0;
 }
 
 vfs_node_t* vfs_lookup(const char* path, int type) {

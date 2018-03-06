@@ -342,7 +342,7 @@ static void ata_device_init(ata_device_t *dev) {
         buf[i] = ins(dev->io_base);
     }
 
-    uint8_t *ptr = (uint8_t *)&dev->identity;
+    uint8_t *ptr = (uint8_t *)&dev->identity.model;
     for (int i = 0; i < 39; i += 2) {
         uint8_t tmp = ptr[i + 1];
         ptr[i + 1] = ptr[i];
@@ -353,6 +353,36 @@ static void ata_device_init(ata_device_t *dev) {
     printk("Device Name:    %s", dev->identity.model);
     printk("Sectors (48):   %d", dev->identity.sectors_48);
     printk("Sectors (24):   %d", dev->identity.sectors_28);
+    printk("Setting up DMA...");
+
+    dev->dma_prdt = (void *)kmalloc_i(sizeof(prdt_t) * 1, 1, &dev->dma_prdt_phys);
+    dev->dma_start = (void *)kmalloc_i(4096, 1, &dev->dma_start_phys);
+
+    dev->dma_prdt[0].offset = dev->dma_start_phys;
+    dev->dma_prdt[0].bytes = 512;
+    dev->dma_prdt[0].last = 0x8000;
+    printk("ATA PCI device ID: 0x%x", ata_pci);
+
+    uint16_t command_reg = pci_read_field(ata_pci, PCI_COMMAND, 4);
+    printk("COMMAND register before: 0x%x", command_reg);
+    if (command_reg & (1 << 2)) {
+        printk("Bus mastering already enabled.");
+    } else {
+        command_reg |= (1 << 2);
+        printk("Enabling bus mastering...");
+        pci_write_field(ata_pci, PCI_COMMAND, 4, command_reg);
+        command_reg = pci_read_field(ata_pci, PCI_COMMAND, 4);
+        printk("COMMAND register after: 0x%4x", command_reg);
+    }
+
+    dev->bar4 = pci_read_field(ata_pci, PCI_BAR4, 4);
+    printk("BAR4: 0x%x", dev->bar4);
+
+    if (dev->bar4 & 0x00000001) {
+        dev->bar4 = dev->bar4 & 0xfffffffc;
+    } else {
+        printk("ATA bus master registers are /usually/ I/O ports.");
+    }
 }
 
 static int ata_device_detect(ata_device_t *dev) {
@@ -374,7 +404,7 @@ static int ata_device_detect(ata_device_t *dev) {
         vfs_mount(devname, node);
         ata_drive_char++;
 
-        ata_device_init(dev);
+        //ata_device_init(dev);
 
         return 1;
     } else if ((cl == 0x14 && ch == 0xeb) || (cl == 0x69 && ch == 0x96)) {

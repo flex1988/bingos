@@ -324,6 +324,24 @@ static void ata_soft_reset(ata_device_t *dev) {
     outb(dev->control, 0x00);
 }
 
+static int ata_irq_handler(registers_t *regs) {
+    inb(ata_primary_master.io_base + ATA_REG_STATUS);
+    if (atapi_in_progress) {
+        wakeup_from(atapi_waiter);
+    }
+    irq_ack(14);
+    return 1;
+}
+
+static int ata_irq_handler_s(registers_t *regs) {
+    inb(ata_secondary_master.io_base + ATA_REG_STATUS);
+    if (atapi_in_progress) {
+        wakeup_from(atapi_waiter);
+    }
+    irq_ack(15);
+    return 1;
+}
+
 static void ata_device_init(ata_device_t *dev) {
     outb(dev->io_base + 1, 1);
     outb(dev->control, 0);
@@ -386,6 +404,12 @@ static void ata_device_init(ata_device_t *dev) {
 }
 
 static int ata_device_detect(ata_device_t *dev) {
+    ata_soft_reset(dev);
+    ata_io_wait(dev);
+    outb(dev->io_base + ATA_REG_HDDEVSEL, 0xA0 | dev->slave << 4);
+    ata_io_wait(dev);
+    ata_status_wait(dev, 10000);
+
     uint8_t cl = inb(dev->io_base + ATA_REG_LBA1); /* CYL_LO */
     uint8_t ch = inb(dev->io_base + ATA_REG_LBA2); /* CYL_HI */
 
@@ -404,7 +428,7 @@ static int ata_device_detect(ata_device_t *dev) {
         vfs_mount(devname, node);
         ata_drive_char++;
 
-        //ata_device_init(dev);
+        ata_device_init(dev);
 
         return 1;
     } else if ((cl == 0x14 && ch == 0xeb) || (cl == 0x69 && ch == 0x96)) {
@@ -618,6 +642,11 @@ int ata_init(void) {
     printk("Loading ata module...");
 
     pci_scan(&find_ata_pci, -1, &ata_pci);
+
+    register_interrupt_handler(14, ata_irq_handler);
+    register_interrupt_handler(15, ata_irq_handler_s);
+
+    atapi_waiter = list_create();
 
     ata_device_detect(&ata_primary_master);
     ata_device_detect(&ata_primary_slave);

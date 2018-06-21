@@ -36,8 +36,9 @@ export PATH="$PREFIX/bin:$PATH"
 
 ### Build && Run
 
-1. sh build.sh
-2. qemu-system-x86_64 -cdrom build/os-x86_64.iso
+1. yum install nasm
+2. sh build.sh
+3. qemu-system-x86_64 -cdrom build/os-x86_64.iso
 
 ### GDB Debug
 
@@ -81,3 +82,7 @@ export PATH="$PREFIX/bin:$PATH"
 - [ ] ext2/3 filesystem
 
 - [ ] threads
+
+### SCREEN SHOT
+
+![SCREEN](resource/screen.png)

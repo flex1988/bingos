@@ -20,16 +20,21 @@
 uint32_t _initial_esp;
 
 static void message() {
-    printk(
-        "       _                _\n"
-        " _ __ | |__   ___ _ __ (_)_  __\n"
-        "| '_ \\| '_ \\ / _ \\ '_ \\| \\ \\/ /\n"
-        "| |_) | | | |  __/ | | | |>  <\n"
-        "| .__/|_| |_|\\___|_| |_|_/_/\\_\\\n"
-        "|_|\n");
+    printk("\n\n");
+    printk("          ______  _________ _        _______  _______  _______\n \ 
+        (  ___ \\ \\__   __/( (    /|(  ____ \\(  ___  )(  ____ \\\n\
+         | (   ) )   ) (   |  \\  ( || (    \\\/| (   ) || (    \\\/\n\
+         | (__/ /    | |   |   \\ | || |      | |   | || (_____ \n\
+         |  __ (     | |   | (\\ \\) || | ____ | |   | |(_____  )\n\
+         | (  \\ \\    | |   | | \\   || | \\_  )| |   | |      ) |\n\
+         | )___) )___) (___| )  \\  || (___) || (___) |/\\____) |\n\
+         |/ \\___/ \\_______/|/    )_)(_______)(_______)\\_______)\n\
+    ");
+    printk("\n\n");
+    
     printk("This is a mini x86 kernel");
-    printk("Author: github.com/flex1988 <gao_chenfei@163.com> beijing China");
-    printk("On 2017.10.20\n");
+    printk("Author: github.com/flex1988 <gao_chenfei@163.com> 2017.10.20,beijing,China");
+    printk("\n\n");
 }
 
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {

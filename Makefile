@@ -8,6 +8,8 @@ libc := build/libc.a
 
 lib := build/lib.a
 
+grub := grub2
+
 modules := lib	\
 	kernel	\
 	libc \
@@ -61,7 +63,7 @@ $(iso): $(kernel) $(grub_cfg) $(modules)
 	cp $(grub_cfg) build/isofiles/boot/grub
 	cp build/modules/* build/isofiles/boot
 	cp $(initrd) build/isofiles/boot/initrd.img
-	grub-mkrescue -o $(iso) build/isofiles 2>/dev/null
+	$(grub)-mkrescue -o $(iso) build/isofiles 2>/dev/null
 	rm -r build/isofiles
 	rm $(initrd)
 

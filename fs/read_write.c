@@ -16,7 +16,7 @@ static int validate_fd(uint32_t fd) {
 
 int sys_read(uint32_t fd, char *buf, uint32_t count) {
     if (!validate_fd(fd)) {
-        printk("invalid fd");
+        printk("sys_read invalid fd");
         return -1;
     }
 
@@ -31,7 +31,7 @@ int sys_read(uint32_t fd, char *buf, uint32_t count) {
 
 int sys_readdir(int fd, int index, dirent_t *dir) {
     if (!validate_fd(fd)) {
-        printk("invalid fd");
+        printk("sys_readdir invalid fd");
         return -1;
     }
 
@@ -47,7 +47,7 @@ int sys_readdir(int fd, int index, dirent_t *dir) {
 
 int sys_write(int fd, const char *buf, uint32_t size) {
     if (!validate_fd(fd)) {
-        printk("invalid fd");
+        printk("sys_write invalid fd");
         return -1;
     }
 

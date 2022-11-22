@@ -8,7 +8,7 @@ libc := build/libc.a
 
 lib := build/lib.a
 
-grub := grub2
+grub := grub
 
 modules := lib	\
 	kernel	\

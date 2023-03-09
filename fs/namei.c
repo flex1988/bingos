@@ -6,7 +6,10 @@ int namei(const char* path, vfs_node_t** res) {
     ret = vfs_lookup(path, 1);
 
     if(!ret)
+    {
+        printk("vfs not found node.");
         return -ENOENT;
+    }
     
     *res = ret;
 

@@ -1,3 +1,4 @@
+#include "kernel/printk.h"
 #include "kernel.h"
 #include "fs/fs.h"
 

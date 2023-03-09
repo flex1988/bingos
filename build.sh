@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make clean && make symbols && make
+make clean && make && make symbols && make

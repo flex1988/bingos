@@ -49,10 +49,10 @@ void vesa_init(console_t *console, multiboot_info_t *boot_info) {
 
     graphic_init(mode_info);
 
-    char_height = 11;
+    char_height = 10;
     char_width = 8;
 
-    console_height = mode_info->height / char_height - 1;
+    console_height = mode_info->height / char_height;
     console_width = mode_info->width / char_width + 1;
 
     cursor_x = cursor_y = 0;

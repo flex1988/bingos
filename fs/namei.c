@@ -7,7 +7,7 @@ int namei(const char* path, vfs_node_t** res) {
 
     if(!ret)
     {
-        printk("vfs not found node.");
+        printk("[namei] vfs not found node. %s", path);
         return -ENOENT;
     }
     

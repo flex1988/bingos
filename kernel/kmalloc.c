@@ -99,7 +99,7 @@ static uint32_t kmalloc_end;
 void kmalloc_init(uint32_t start, uint32_t size) {
     kmalloc_start = kmalloc_end = start;
     __huge_queue = list_create();
-    printk("kmalloc init...");
+    printk("[Kmalloc] kmalloc init...");
 }
 
 static uint32_t __get_free_page() {

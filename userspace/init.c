@@ -4,7 +4,7 @@
 #include <types.h>
 
 int main(int argc, char **argv) {
-    printf("Init process started %d.\n", getpid());
+    printf("[Init] Init process started %d.\n", getpid());
     int pid;
 
     if ((pid = fork()) == 0) {

@@ -376,13 +376,16 @@ static vfs_node_t *ext2_mount(char *device, char *mount_path) {
     vfs_node_t *dev = vfs_fetch_device(device);
 
     if (!dev)
+    {
+        printk("[Module][ext2] not found device %s to mount path %s", device, mount_path);
         return NULL;
+    }
 
     return ext2_do_mount(dev, 0);
 }
 
 int ext2_init(void) {
-    printk("Loading ext2 module...");
+    printk("[Module][ext2] Loading ext2 module...");
     vfs_register("ext2", ext2_mount);
     return 0;
 }

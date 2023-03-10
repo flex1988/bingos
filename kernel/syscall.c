@@ -31,7 +31,7 @@ static void* syscalls[] = {
 uint32_t NR_syscalls = sizeof(syscalls) / sizeof(void*);
 
 void syscalls_init() {
-    printk("Init syscall table size: %d", NR_syscalls);
+    printk("[Syscall] Init syscall table size: %d", NR_syscalls);
     isrs_install_handler(0x80, syscall_handler);
 }
 

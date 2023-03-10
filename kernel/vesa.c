@@ -49,8 +49,8 @@ void vesa_init(console_t *console, multiboot_info_t *boot_info) {
 
     graphic_init(mode_info);
 
-    char_height = 10;
-    char_width = 8;
+    char_height = 18;
+    char_width = 16;
 
     console_height = mode_info->height / char_height;
     console_width = mode_info->width / char_width + 1;
@@ -126,7 +126,7 @@ static void vesa_clear_screen() {
     int i, j;
     for (i = 0; i < console_width; i++) {
         for (j = 0; j <= console_height; j++) {
-            draw_char(' ', i * char_width, j * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
+            draw_char(32, i * char_width, j * char_height, &SOLARIZED_BASE0, &SOLARIZED_BASE03);
         }
     }
 

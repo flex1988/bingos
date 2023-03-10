@@ -25,7 +25,7 @@ void sh_loop() {
 
     do {
         memset(tokens,0x0,LSH_TOK_BUFSIZE);
-        printf(">>> ");
+        printf("[%s@%s %s] ", "root", "localhost", "/");
         line = sh_read_line(buffer);
         sh_split_line(line, tokens, &tlen);
         status = sh_execute(tlen, tokens);

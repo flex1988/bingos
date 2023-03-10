@@ -158,13 +158,11 @@ void frame_init(struct multiboot_info *mbi) {
 
     _placement_addr = ((multiboot_module_t *)(mbi->mods_addr) + mbi->mods_count - 1)->mod_end + 0x1000;
 
-    printk("_placement_addr 0x%x", _placement_addr);
-
     if (!CHECK_FLAG(mbi->flags, 0)) {
         return;
     }
 
-    printk("mem_lower = %uKB, mem_upper = %uKB\n", (unsigned)mbi->mem_lower, (unsigned)mbi->mem_upper);
+    printk("[Physical] mem_lower = %uKB, mem_upper = %uKB", (unsigned)mbi->mem_lower, (unsigned)mbi->mem_upper);
 
     if (!CHECK_FLAG(mbi->flags, 6)) {
         printk("mmap not valid!");
@@ -177,7 +175,7 @@ void frame_init(struct multiboot_info *mbi) {
     _frame_map = pre_alloc(_max_frames / 32, 0, 0);
     memset(_frame_map, 0x0, _max_frames / 8);
 
-    printk("total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
+    printk("[Physical] total memory size: 0x%x%x max frames 0x%x used frames 0x%x", _total_memory_size, _max_frames, _used_frames);
 
-    printk("frame init...");
+    printk("[Physical] frame init...");
 }

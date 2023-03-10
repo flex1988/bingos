@@ -262,7 +262,7 @@ void move_stack(uint32_t new_stack_start, uint32_t size) {
 
     __asm__ __volatile__("mov %0, %%esp" ::"r"(new_stack_pointer));
     __asm__ __volatile__("mov %0, %%ebp" ::"r"(new_base_pointer));
-    printk("relocate esp 0x%x, ebp 0x%x", new_stack_pointer, new_base_pointer);
+    printk("[Process] relocate esp 0x%x, ebp 0x%x", new_stack_pointer, new_base_pointer);
 }
 
 void process_init() {

@@ -147,6 +147,7 @@ vfs_node_t* vfs_fetch_device(char* path) {
     p = pdup;
     p++;
     while (1) {
+        printk("path %s len %d", p, plen);
         if (p > pdup + plen) {
             break;
         }
@@ -156,6 +157,7 @@ vfs_node_t* vfs_fetch_device(char* path) {
             tree_node_t* child = node->children[i];
             vfs_entry_t* entry = (vfs_entry_t*)child->data;
 
+            printk("[VFS] node length %d entry %s p %s", node->length, entry->name, p);
             if (!strcmp(entry->name, p)) {
                 node = child;
                 found = 1;
@@ -331,9 +333,11 @@ int vfs_mount_type(char* type, char* arg, char* mount_point) {
     }
 
     vfs_node_t* n = mount(arg, mount_point);
-    printk("ext2 0x%x", n);
     if (!n)
+    {
+        printk("[VFS] mount ext2 vfs node 0x%x", n);
         return -EINVAL;
+    }
 
     tree_node_t* node = vfs_mount(mount_point, n);
     if (node && node->data) {

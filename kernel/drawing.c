@@ -17,8 +17,6 @@ color_t BLUE = {0x00, 0x00, 0xff, 0xff};
 color_t SOLARIZED_BASE03 = {0x43, 0x4b, 0x4d, 0xff};  // 002b36
 color_t SOLARIZED_BASE0 = {0xfd, 0xfd, 0xfd, 0x00};   // 839496
 
-static char *font_data[256];
-
 uint32_t frame_buffer_length() { return frame_height * frame_width * (frame_bpp / 8); }
 
 typedef struct { uint8_t data[8] } font_mono_t;
@@ -603,7 +601,7 @@ void draw_char(char c, int x, int y, color_t *fg, color_t *bg) {
 
     for (h = 0; h < char_height; h++) {
         for (v = 0; v < char_width; v++) {
-            if (fonts_system[c].data[(h * char_width + v) / 8] & (1 << ((h * char_width + v) % 8))) {
+            if (fonts_system_large[c].data[(h * char_width + v) / 8] & (1 << ((h * char_width + v) % 8))) {
                 draw_pixel(x + v, y + h, fg);
             } else {
                 draw_pixel(x + v, y + h, bg);

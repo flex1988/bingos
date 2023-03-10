@@ -337,7 +337,7 @@ void kbd_callback() {
 }
 
 int kbd_init(void) {
-    printk("Initializing keyboard driver");
+    printk("[Kbd] Initializing keyboard driver");
 
     kbd_pipe = create_pipe(256);
 

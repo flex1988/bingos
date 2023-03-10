@@ -248,5 +248,5 @@ void mmu_init() {
     _current_pd = page_dir_clone(_kernel_pd);
     page_dir_switch(_current_pd);
 
-    printk("paging init...");
+    printk("[Paging] paging init...");
 }

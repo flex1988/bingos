@@ -9,6 +9,7 @@
 vfs_node_t* vfs_root = NULL;
 tree_t* vfs_tree = NULL;
 hashmap_t* vfs_type_mounts = NULL;
+dirent_t tmp_dir;
 
 static vfs_node_t* vfs_lookup_internal(vfs_node_t* n, char* path, int depth) {
     char* dir = NULL;
@@ -47,25 +48,59 @@ uint32_t vfs_write(vfs_node_t* node, uint32_t offset, uint32_t size, uint8_t* bu
 void vfs_open(vfs_node_t* node, uint8_t flags) {
     if (node->open)
         return node->open(node);
+    else {
+        // printk("[VFS] open failed node->name %s", node->name);
+    }
 }
 
 int vfs_close(vfs_node_t* node) {
     if (node->close)
         return node->close(node);
+    else {
+        // printk("[VFS] close failed node->name %s", node->name);
+    }
 }
 
 dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
+    if (node == vfs_root)
+    {
+        tree_node_t* root = vfs_tree->root;
+        if (index == root->length)
+        {
+            return NULL;
+        }
+        strcpy(tmp_dir.d_name, root->children[index]->name);
+        tmp_dir.d_name[strlen(root->children[index]->name)] = 0;
+        return &tmp_dir;
+    }
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->readdir)
         return node->readdir(node, index);
-    else
+    else {
+        printk("[VFS] not a directory exit %s", node->name);
         return 0;
+    }
 }
 
 vfs_node_t* vfs_finddir(vfs_node_t* node, char* name) {
+    if (node == vfs_root)
+    {
+        tree_node_t* root = vfs_tree->root;
+        for (int i = 0; i < root->length; i++)
+        {
+            if (strcmp(root->children[i]->name, name) == 0)
+            {
+                printk("find dir %s %s %p", root->children[i]->name, name, ((vfs_entry_t*)root->children[i]->data)->file);
+                return ((vfs_entry_t*)root->children[i]->data)->file;
+            }
+        }
+        return NULL;
+    }
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->finddir) {
         return node->finddir(node, name);
-    } else
+    } else {
+        printk("[VFS] not a directory exit %s", node->name);
         return 0;
+    }
 }
 
 vfs_node_t* vfs_clone(vfs_node_t* source) {
@@ -91,7 +126,7 @@ vfs_node_t* vfs_get_mount_point(char* path, uint32_t depth, char** mount_path, u
     tree_node_t* node = vfs_tree->root;
 
     char* p = *mount_path;
-    *mount_depth = 1;
+    *mount_depth = 0;
 
     while (1) {
         if (p >= path) {
@@ -147,7 +182,6 @@ vfs_node_t* vfs_fetch_device(char* path) {
     p = pdup;
     p++;
     while (1) {
-        printk("path %s len %d", p, plen);
         if (p > pdup + plen) {
             break;
         }
@@ -218,6 +252,7 @@ vfs_node_t* vfs_lookup(const char* path, int type) {
 
     vfs_node_t* node = vfs_get_mount_point(p, pdepth, &mount_path, &mount_depth);
 
+    // printk("[vfs] get mount point %p %s %d %d", node, node->name, mount_depth, pdepth);
     if (mount_depth <= pdepth) {
         ret = vfs_lookup_internal(node, mount_path, pdepth - mount_depth);
     } else {
@@ -240,10 +275,13 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
         return NULL;
     }
 
-    // may be need spin lock
     tree_node_t* ret = NULL;
-
     int path_size = strlen(path);
+    if (path_size == 1)
+    {
+        printk("[VFS] root dir can't be mounted");
+        return NULL;
+    }
     char* buf = kmalloc(path_size + 1);
     memcpy(buf, path, path_size + 1);
 
@@ -260,58 +298,48 @@ void* vfs_mount(char* path, vfs_node_t* lroot) {
 
     tree_node_t* root_node = vfs_tree->root;
 
-    if (*i == '\0') {
-        // mount root
-        vfs_entry_t* root = (vfs_entry_t*)root_node->data;
-        if (root->file) {
-            printk("Path %s already mounted", path);
-        }
-        root->file = lroot;
-        vfs_root = lroot;
-        ret = root_node;
-    } else {
-        tree_node_t* node = root_node;
-        char* p = i;
+    tree_node_t* node = root_node;
+    char* p = i;
 
-        while (1) {
-            if (p >= buf + path_size)
+    while (1) {
+        if (p >= buf + path_size)
+            break;
+
+        int found = 0;
+
+        for (int j = 0; j < node->length; j++) {
+            tree_node_t* child = node->children[j];
+
+            if (!strcmp(child->name, p)) {
+                found = 1;
+                node = child;
+                ret = child;
                 break;
-
-            int found = 0;
-
-            for (int j = 0; j < node->length; j++) {
-                tree_node_t* child = node->children[j];
-
-                if (!strcmp(child->name, p)) {
-                    found = 1;
-                    node = child;
-                    ret = child;
-                    break;
-                }
             }
-
-            if (!found) {
-                vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
-                memcpy(entry->name, p, strlen(p) + 1);
-
-                entry->file = NULL;
-                entry->device = NULL;
-                entry->type = NULL;
-
-                node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
-                memcpy(node->name, entry->name, strlen(entry->name) + 1);
-            }
-
-            p = p + strlen(p) + 1;
         }
 
-        vfs_entry_t* entry = (vfs_entry_t*)node->data;
-        if (entry->file) {
-            printk("Path %s already mounted", path);
+        if (!found) {
+            vfs_entry_t* entry = kmalloc(sizeof(vfs_entry_t));
+            memcpy(entry->name, p, strlen(p) + 1);
+
+            entry->file = NULL;
+            entry->device = NULL;
+            entry->type = NULL;
+            printk("[VFS] vfs create new node %s parent %s %p", p, node->name, node);
+
+            node = tree_node_insert(node, entry->name, strlen(p) + 1, entry);
+            memcpy(node->name, entry->name, strlen(entry->name) + 1);
         }
-        entry->file = lroot;
-        ret = node;
+
+        p = p + strlen(p) + 1;
     }
+
+    vfs_entry_t* entry = (vfs_entry_t*)node->data;
+    if (entry->file) {
+        printk("[VFS] Path %s already mounted", path);
+    }
+    entry->file = lroot;
+    ret = node;
 
     kfree(buf);
 
@@ -352,19 +380,26 @@ int vfs_mount_type(char* type, char* arg, char* mount_point) {
 void vfs_init() {
     vfs_tree = create_tree();
     vfs_entry_t* root = kmalloc(sizeof(vfs_entry_t));
-
-    memcpy(root->name, "/", strlen("/") + 1);
-
+    memcpy(root->name, "/", 1);
+    root->name[1] = '\0';
     root->file = NULL;
     root->type = NULL;
     root->device = NULL;
+
+    vfs_root = kmalloc(sizeof(vfs_node_t));
+    vfs_root->name[0] = '/';
+    vfs_root->name[1] = '\0';
+    vfs_root->flags = VFS_DIRECTORY;
 
     tree_node_t* n = kmalloc(sizeof(tree_node_t));
     n->data = (void*)root;
     n->length = 0;
 
+    root->file = vfs_root;
+
     memcpy(n->name, root->name, strlen(root->name) + 1);
     memset(n->children, 0, MAX_TREE_CHILDREN * sizeof(tree_node_t*));
 
     set_tree_root(vfs_tree, n);
+    printk("[VFS] vfs init root %s %p vfs %p", root->name, root, vfs_root);
 }

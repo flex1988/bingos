@@ -99,6 +99,21 @@
 .extern data
 .type data, @function
 
+.extern devfs_init
+.type devfs_init, @function
+
+.extern devfs_register
+.type devfs_register, @function
+
+.extern devfs_root
+.type devfs_root, @function
+
+.extern devs
+.type devs, @function
+
+.extern dir_buf
+.type dir_buf, @function
+
 .extern dirent
 .type dirent, @function
 
@@ -320,9 +335,6 @@
 
 .extern _init_process
 .type _init_process, @function
-
-.extern initrd_dev
-.type initrd_dev, @function
 
 .extern initrd_header
 .type initrd_header, @function
@@ -627,6 +639,12 @@
 .extern _next_pid
 .type _next_pid, @function
 
+.extern nr_dev_count
+.type nr_dev_count, @function
+
+.extern nr_dev_max
+.type nr_dev_max, @function
+
 .extern nroot_nodes
 .type nroot_nodes, @function
 
@@ -755,6 +773,9 @@
 
 .extern process_wakeup_sleepers
 .type process_wakeup_sleepers, @function
+
+.extern ramdisk_init
+.type ramdisk_init, @function
 
 .extern read
 .type read, @function
@@ -1026,6 +1047,9 @@
 .extern timer_ticks
 .type timer_ticks, @function
 
+.extern tmp_dir
+.type tmp_dir, @function
+
 .extern traverse_tree
 .type traverse_tree, @function
 
@@ -1220,6 +1244,21 @@ kernel_symbols_start:
 
 .long data
 .asciz "data"
+
+.long devfs_init
+.asciz "devfs_init"
+
+.long devfs_register
+.asciz "devfs_register"
+
+.long devfs_root
+.asciz "devfs_root"
+
+.long devs
+.asciz "devs"
+
+.long dir_buf
+.asciz "dir_buf"
 
 .long dirent
 .asciz "dirent"
@@ -1442,9 +1481,6 @@ kernel_symbols_start:
 
 .long _init_process
 .asciz "_init_process"
-
-.long initrd_dev
-.asciz "initrd_dev"
 
 .long initrd_header
 .asciz "initrd_header"
@@ -1749,6 +1785,12 @@ kernel_symbols_start:
 .long _next_pid
 .asciz "_next_pid"
 
+.long nr_dev_count
+.asciz "nr_dev_count"
+
+.long nr_dev_max
+.asciz "nr_dev_max"
+
 .long nroot_nodes
 .asciz "nroot_nodes"
 
@@ -1877,6 +1919,9 @@ kernel_symbols_start:
 
 .long process_wakeup_sleepers
 .asciz "process_wakeup_sleepers"
+
+.long ramdisk_init
+.asciz "ramdisk_init"
 
 .long read
 .asciz "read"
@@ -2147,6 +2192,9 @@ kernel_symbols_start:
 
 .long timer_ticks
 .asciz "timer_ticks"
+
+.long tmp_dir
+.asciz "tmp_dir"
 
 .long traverse_tree
 .asciz "traverse_tree"

@@ -16,7 +16,6 @@ int main(int argc, char **argv) {
         println("stat error.");
         return 0;
     }
-    
     if(buf.st_mode == S_DIRECTORY) {
         dirent_t *entry;
         DIR *dir = opendir(target);
@@ -27,6 +26,9 @@ int main(int argc, char **argv) {
         closedir(dir);
     } else if(buf.st_mode == S_FILE) {
         println("%s",target);
+    } else {
+
+        println("file %s type %d",target, buf.st_mode);
     }
 
     return 0;

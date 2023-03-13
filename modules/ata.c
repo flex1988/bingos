@@ -1,6 +1,7 @@
 #include "drivers/ata.h"
 #include "drivers/pci.h"
 #include "fs/fs.h"
+#include "fs/devfs.h"
 #include "hal/common.h"
 #include "hal/isr.h"
 #include "kernel.h"
@@ -336,10 +337,10 @@ static int ata_device_detect(ata_device_t *dev) {
         char devname[64];
         sprintf((char *)&devname, "/dev/hd%c", ata_drive_char);
 
-        printk("detect device %s", devname);
+        printk("[ATA] detect device %s", devname);
 
         vfs_node_t *node = ata_device_create(dev);
-        vfs_mount(devname, node);
+        devfs_register(node);
         ata_drive_char++;
 
         return 1;
@@ -347,10 +348,10 @@ static int ata_device_detect(ata_device_t *dev) {
         char devname[64];
         sprintf((char *)devname, "/dev/cdrom%d", cdrom_number);
 
-        printk("detect device %s", devname);
+        printk("[ATA] detect device %s", devname);
 
         vfs_node_t *node = atapi_device_create(dev);
-        vfs_mount(devname, node);
+        devfs_register(node);
         cdrom_number++;
     }
 
@@ -551,7 +552,7 @@ static void ata_device_write_sector_retry(ata_device_t *dev, uint32_t lba, uint8
 }
 
 int ata_init(void) {
-    printk("Loading ata module...");
+    printk("[ATA] Loading ata module...");
 
     pci_scan(&find_ata_pci, -1, &ata_pci);
 

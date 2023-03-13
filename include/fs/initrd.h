@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "fs/fs.h"
+#include "multiboot.h"
 
 typedef struct { uint32_t nfiles; } initrd_header_t;
 
@@ -13,5 +14,5 @@ typedef struct {
     uint32_t length;
 } initrd_file_header_t;
 
-vfs_node_t *initrd_init(uint32_t location);
+void ramdisk_init(multiboot_info_t *boot_info);
 #endif

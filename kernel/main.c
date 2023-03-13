@@ -2,6 +2,7 @@
 
 #include "fs/fs.h"
 #include "fs/initrd.h"
+#include "fs/devfs.h"
 #include "hal/descriptor.h"
 #include "kernel.h"
 #include "kernel/console.h"
@@ -37,6 +38,11 @@ static void message() {
     printk("\n\n");
 }
 
+static void pci_print(uint32_t device, uint16_t vendor_id, uint16_t device_id, void* extra)
+{
+    printk("device %d vendor %d deviceid %d extra %p", device, vendor_id, device_id, extra);
+}
+
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
 
@@ -47,19 +53,17 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     process_init();
     timer_init();
     vfs_init();
+    devfs_init();
     modules_init(boot_info);
-
-    vfs_node_t *ramdisk = initrd_init(*(uint32_t *)(boot_info->mods_addr));
-    vfs_mount("/bin", ramdisk);
-    vfs_mount_type("ext2", "/dev/hda", "/");
+    ramdisk_init(boot_info);
+    vfs_mount_type("ext2", "/dev/hda", "/root");
 
     sock_init();
     syscalls_init();
 
-    message();
+    // message();
 
     sys_exec("/bin/init", 0, NULL);
-
     context_switch(0);
 
     return 0;

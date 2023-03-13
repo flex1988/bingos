@@ -374,6 +374,7 @@ static vfs_node_t *ext2_do_mount(vfs_node_t *block_device, int flags) {
 
 static vfs_node_t *ext2_mount(char *device, char *mount_path) {
     vfs_node_t *dev = vfs_fetch_device(device);
+    printk("[Ext2] mount device %s mount path %s", device, mount_path);
 
     if (!dev)
     {

@@ -4,7 +4,6 @@
 initrd_header_t *initrd_header;
 initrd_file_header_t *file_headers;
 vfs_node_t *initrd_root;
-vfs_node_t *initrd_dev;
 vfs_node_t *root_nodes;
 int nroot_nodes;
 
@@ -22,14 +21,7 @@ static uint32_t initrd_read(vfs_node_t *node, uint32_t offset, uint32_t size, ui
 }
 
 static dirent_t *initrd_readdir(vfs_node_t *node, uint32_t index) {
-    if (node == initrd_root && index == 0) {
-        strcpy(dirent.d_name, "dev");
-        dirent.d_name[3] = '\0';
-        dirent.d_ino = 0;
-        return &dirent;
-    }
-
-    if (index - 1 >= nroot_nodes)
+    if (index >= nroot_nodes)
         return 0;
 
     strcpy(dirent.d_name, root_nodes[index - 1].name);
@@ -39,9 +31,6 @@ static dirent_t *initrd_readdir(vfs_node_t *node, uint32_t index) {
 }
 
 static vfs_node_t *initrd_finddir(vfs_node_t *node, char *name) {
-    if (node == initrd_root && !strcmp(name, "dev"))
-        return initrd_dev;
-
     int i;
     for (i = 0; i < nroot_nodes; i++) {
         if (!strcmp(name, root_nodes[i].name))
@@ -68,19 +57,6 @@ vfs_node_t *initrd_init(uint32_t location) {
     initrd_root->ptr = 0;
     initrd_root->impl = 0;
 
-    initrd_dev = (vfs_node_t *)kmalloc(sizeof(vfs_node_t));
-    strcpy(initrd_dev->name, "dev");
-    initrd_dev->mask = initrd_dev->uid = initrd_dev->gid = initrd_dev->inode = initrd_dev->length = 0;
-    initrd_dev->flags = VFS_DIRECTORY;
-    initrd_dev->read = 0;
-    initrd_dev->write = 0;
-    initrd_dev->open = 0;
-    initrd_dev->close = 0;
-    initrd_dev->readdir = &initrd_readdir;
-    initrd_dev->finddir = &initrd_finddir;
-    initrd_dev->ptr = 0;
-    initrd_dev->impl = 0;
-
     root_nodes = (vfs_node_t *)kmalloc(sizeof(vfs_node_t) * initrd_header->nfiles);
     nroot_nodes = initrd_header->nfiles;
     int i;
@@ -101,4 +77,11 @@ vfs_node_t *initrd_init(uint32_t location) {
     }
 
     return initrd_root;
+}
+
+void ramdisk_init(multiboot_info_t *boot_info)
+{
+    vfs_node_t *ramdisk = initrd_init(*(uint32_t *)(boot_info->mods_addr));
+    vfs_mount("/bin", ramdisk);
+    printk("[Ramdisk] init ramdisk...");
 }

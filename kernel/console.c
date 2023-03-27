@@ -4,15 +4,23 @@
 #include "kernel/vesa.h"
 #include "kernel/vga.h"
 
-/* The I/O ports */
-#define FB_COMMAND_PORT 0x3D4
-#define FB_DATA_PORT 0x3D5
-
-/* The I/O port commands */
-#define FB_HIGH_BYTE_COMMAND 14
-#define FB_LOW_BYTE_COMMAND 15
-
 console_t console;
+
+static void serial_clear_screen()
+{
+    ;
+}
+
+static void serial_printc(char c)
+{
+    outb(0x3F8, c);
+}
+
+static void serial_println(char* s)
+{
+    while (*s != '\0') serial_printc(*s++);
+    serial_printc('\n');
+}
 
 void tty_init(multiboot_info_t *boot_info) {
     if (!(boot_info->flags & (1 << 11))) {
@@ -30,7 +38,11 @@ void tty_init(multiboot_info_t *boot_info) {
 
     vbe_mode_info_structure_t *mode_info = (vbe_mode_info_structure_t *)boot_info->vbe_mode_info;
 
-    if (boot_info->framebuffer_type != 1) {
+    if (0) {
+        console.println = serial_println;
+        console.printc = serial_printc;
+        console.clear = serial_clear_screen;
+    } else if (boot_info->framebuffer_type != 1) {
         vga_init(&console);
     } else {
         vesa_init(&console, boot_info);

@@ -60,7 +60,10 @@ typedef struct {
     uint16_t s_def_resuid;  // User ID that can use reserved blocks
     uint16_t s_def_resgid;  // Group ID that can use reserved blocks
 
-    uint32_t s_reserved[235];
+    uint32_t s_first_ino;
+	uint16_t s_inode_size;
+
+    uint32_t s_reserved[229];
 } __attribute__((packed)) ext2_superblock_t;
 
 typedef struct {
@@ -95,7 +98,7 @@ typedef struct {
     uint8_t i_frag;        // fragment number
     uint8_t i_fsize;       // fragment size
     uint16_t i_pad1;
-    uint32_t i_reserved2[2];
+    uint32_t i_reserved2[1];
 } __attribute__((packed)) ext2_inode_t;
 
 #define EXT2_NAME_LEN 255
@@ -105,5 +108,69 @@ typedef struct {
     uint16_t name_len;
     char name[EXT2_NAME_LEN];
 } __attribute__((packed)) ext2_dir_entry_t;
+
+/*
+ * second extended file system inode data in memory
+ */
+typedef struct {
+	uint32_t	i_data[15];
+	uint32_t	i_flags;
+	uint32_t	i_faddr;
+	uint8_t	    i_frag_no;
+	uint8_t	    i_frag_size;
+	uint16_t	i_state;
+	uint32_t	i_file_acl;
+	uint32_t	i_dir_acl;
+	uint32_t	i_dtime;
+
+	/*
+	 * i_block_group is the number of the block group which contains
+	 * this file's inode.  Constant across the lifetime of the inode,
+	 * it is used for making block allocation decisions - we try to
+	 * place a file's data blocks near its inode block, and new inodes
+	 * near to their parent directory's inode.
+	 */
+	uint32_t	i_block_group;
+
+	/* block reservation info */
+	struct ext2_block_alloc_info *i_block_alloc_info;
+
+	uint32_t	i_dir_start_lookup;
+
+	/*
+	 * truncate_mutex is for serialising ext2_truncate() against
+	 * ext2_getblock().  It also protects the internals of the inode's
+	 * reservation data structures: ext2_reserve_window and
+	 * ext2_reserve_window_node.
+	 */
+	// struct inode	vfs_inode;
+	// struct list_head i_orphan;	/* unlinked but open inodes */
+} __attribute__((packed)) ext2_inode_info;
+
+typedef struct {
+    ext2_superblock_t *superblock;
+    ext2_group_desc_t *block_groups;
+
+    uint32_t block_size;
+    uint32_t pointers_per_block;
+    uint32_t inodes_per_group;
+    uint32_t block_group_count;
+
+    void *disk_cache;
+    uint32_t cache_entries;
+    uint32_t cache_time;
+
+    uint32_t lock[2];
+
+    uint8_t bgd_block_span;
+    uint8_t bgd_offset;
+    uint32_t inode_size;
+
+    uint8_t *cache_data;
+
+    int flags;
+} ext2_fs_t;
+
+int ext2_init();
 
 #endif

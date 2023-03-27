@@ -346,7 +346,7 @@ int kbd_init(void) {
 
     kbd_pipe->flags = VFS_CHARDEVICE;
 
-    vfs_mount("/dev/kbd", kbd_pipe);
+    devfs_register(kbd_pipe);
 
     register_interrupt_handler(KEY_IRQ, kbd_callback);
 

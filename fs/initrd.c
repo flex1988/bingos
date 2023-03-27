@@ -21,18 +21,17 @@ static uint32_t initrd_read(vfs_node_t *node, uint32_t offset, uint32_t size, ui
 }
 
 static dirent_t *initrd_readdir(vfs_node_t *node, uint32_t index) {
-    if (index >= nroot_nodes)
+    if (index > nroot_nodes - 1)
         return 0;
 
-    strcpy(dirent.d_name, root_nodes[index - 1].name);
-    dirent.d_name[strlen(root_nodes[index - 1].name)] = 0;
-    dirent.d_ino = root_nodes[index - 1].inode;
+    strcpy(dirent.d_name, root_nodes[index].name);
+    dirent.d_name[strlen(root_nodes[index].name)] = 0;
+    dirent.d_ino = root_nodes[index].inode;
     return &dirent;
 }
 
 static vfs_node_t *initrd_finddir(vfs_node_t *node, char *name) {
-    int i;
-    for (i = 0; i < nroot_nodes; i++) {
+    for (int i = 0; i < nroot_nodes; i++) {
         if (!strcmp(name, root_nodes[i].name))
             return &root_nodes[i];
     }
@@ -59,8 +58,7 @@ vfs_node_t *initrd_init(uint32_t location) {
 
     root_nodes = (vfs_node_t *)kmalloc(sizeof(vfs_node_t) * initrd_header->nfiles);
     nroot_nodes = initrd_header->nfiles;
-    int i;
-    for (i = 0; i < initrd_header->nfiles; i++) {
+    for (int i = 0; i < initrd_header->nfiles; i++) {
         file_headers[i].offset += location;
         strcpy(root_nodes[i].name, &file_headers[i].name);
         root_nodes[i].mask = root_nodes[i].uid = root_nodes[i].gid = 0;

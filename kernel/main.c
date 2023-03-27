@@ -1,6 +1,7 @@
 #include <types.h>
 
 #include "fs/fs.h"
+#include "fs/ext2.h"
 #include "fs/initrd.h"
 #include "fs/devfs.h"
 #include "hal/descriptor.h"
@@ -43,6 +44,7 @@ static void pci_print(uint32_t device, uint16_t vendor_id, uint16_t device_id, v
     printk("device %d vendor %d deviceid %d extra %p", device, vendor_id, device_id, extra);
 }
 
+
 void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     _initial_esp = initial_stack;
 
@@ -55,13 +57,12 @@ void kmain(multiboot_info_t *boot_info, uint32_t initial_stack) {
     vfs_init();
     devfs_init();
     modules_init(boot_info);
+    ext2_init();
     ramdisk_init(boot_info);
-    vfs_mount_type("ext2", "/dev/hda", "/root");
+    vfs_mount_type("ext2", "/dev/atadev0", "/root");
 
     sock_init();
     syscalls_init();
-
-    // message();
 
     sys_exec("/bin/init", 0, NULL);
     context_switch(0);

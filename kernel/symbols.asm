@@ -99,17 +99,14 @@
 .extern data
 .type data, @function
 
+.extern devfs_fetch_device
+.type devfs_fetch_device, @function
+
 .extern devfs_init
 .type devfs_init, @function
 
 .extern devfs_register
 .type devfs_register, @function
-
-.extern devfs_root
-.type devfs_root, @function
-
-.extern devs
-.type devs, @function
 
 .extern dir_buf
 .type dir_buf, @function
@@ -164,6 +161,9 @@
 
 .extern exit
 .type exit, @function
+
+.extern ext2_init
+.type ext2_init, @function
 
 .extern fault_handler
 .type fault_handler, @function
@@ -639,12 +639,6 @@
 .extern _next_pid
 .type _next_pid, @function
 
-.extern nr_dev_count
-.type nr_dev_count, @function
-
-.extern nr_dev_max
-.type nr_dev_max, @function
-
 .extern nroot_nodes
 .type nroot_nodes, @function
 
@@ -1083,9 +1077,6 @@
 .extern vfs_close
 .type vfs_close, @function
 
-.extern vfs_fetch_device
-.type vfs_fetch_device, @function
-
 .extern vfs_finddir
 .type vfs_finddir, @function
 
@@ -1245,17 +1236,14 @@ kernel_symbols_start:
 .long data
 .asciz "data"
 
+.long devfs_fetch_device
+.asciz "devfs_fetch_device"
+
 .long devfs_init
 .asciz "devfs_init"
 
 .long devfs_register
 .asciz "devfs_register"
-
-.long devfs_root
-.asciz "devfs_root"
-
-.long devs
-.asciz "devs"
 
 .long dir_buf
 .asciz "dir_buf"
@@ -1310,6 +1298,9 @@ kernel_symbols_start:
 
 .long exit
 .asciz "exit"
+
+.long ext2_init
+.asciz "ext2_init"
 
 .long fault_handler
 .asciz "fault_handler"
@@ -1785,12 +1776,6 @@ kernel_symbols_start:
 .long _next_pid
 .asciz "_next_pid"
 
-.long nr_dev_count
-.asciz "nr_dev_count"
-
-.long nr_dev_max
-.asciz "nr_dev_max"
-
 .long nroot_nodes
 .asciz "nroot_nodes"
 
@@ -2228,9 +2213,6 @@ kernel_symbols_start:
 
 .long vfs_close
 .asciz "vfs_close"
-
-.long vfs_fetch_device
-.asciz "vfs_fetch_device"
 
 .long vfs_finddir
 .asciz "vfs_finddir"

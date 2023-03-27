@@ -1,9 +1,9 @@
 #include "fs/devfs.h"
 
-vfs_node_t* devfs_root;
-vfs_node_t** devs;
-int nr_dev_max;
-int nr_dev_count;
+static vfs_node_t* devfs_root;
+static vfs_node_t** devs;
+static int nr_dev_max;
+static int nr_dev_count;
 struct dirent dir_buf;
 
 static dirent_t *devfs_readdir(vfs_node_t *node, uint32_t index) {
@@ -34,6 +34,24 @@ int devfs_register(vfs_node_t* target) {
     }
     devs[nr_dev_count++] = target;
     return 0;
+}
+
+vfs_node_t* devfs_fetch_device(char* path)
+{
+    if (path[0] != '/' || path[1] != 'd' || path[2] != 'e' || path[3] != 'v' || path[4] != '/')
+    {
+        printk("[Devfs] invalid path %s", path);
+        return NULL;
+    }
+    char* dev = path + 5;
+    for (int i = 0; i < nr_dev_count; i++)
+    {
+        if (strcmp(devs[i]->name, dev) == 0)
+        {
+            return devs[i];
+        }
+    }
+    return NULL;
 }
 
 void devfs_init()

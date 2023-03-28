@@ -8,17 +8,17 @@ static vfs_node_t  ext2_root;
 static vfs_node_t* block_device;
 static ext2_fs_t*  ext2fs;
 static dirent_t tmpdir;
-#define BLOCKSIZE  1024
+#define BOOT_SECTOR_SIZE 1024
+#define BLOCK_SIZE  1024
 #define EXT2_DIRECT_BLOCKS 12
 
 static int ext2_read_block(uint32_t block_no, uint8_t *buf)
 {
     if (block_no == 0)
     {
-        printk("[EXT2] Invalid block number");
         return -1;
     }
-    vfs_read(block_device, block_no * BLOCKSIZE, BLOCKSIZE, buf);
+    vfs_read(block_device, BOOT_SECTOR_SIZE + (block_no - 1) * BLOCK_SIZE, BLOCK_SIZE, buf);
     return 0;
 }
 
@@ -59,6 +59,7 @@ static uint32_t ext2_get_block_number(ext2_inode_t* inode, uint32_t block)
 static int ext2_inode_read_block(ext2_inode_t* inode, uint32_t block, char* buf)
 {
     uint32_t real_block = ext2_get_block_number(inode, block);
+    printk("real block %d", real_block);
     ext2_read_block(real_block, buf);
     return real_block;
 }
@@ -102,15 +103,14 @@ static ext2_dir_entry_t* ext2_direntry(ext2_inode_t* inode, uint32_t ino, uint32
 static vfs_node_t* ext2_readdir(vfs_node_t* node, uint32_t index)
 {
     ext2_inode_t* inode = ext2_read_inode(node->inode);
-    printk("ext2 readdir %d %d %d", node->inode, index, inode->i_block[0]);
     ext2_dir_entry_t* dir = ext2_direntry(inode, node->inode, index);
     if (!dir)
     {
         kfree(inode);
         return NULL;
     }
-    strcpy(tmpdir.d_name, dir->name);
-    // tmp_dir.inode = dir->inode;
+    memcpy(tmpdir.d_name, dir->name, dir->name_len);
+    tmpdir.d_name[dir->name_len] = '\0';
     kfree(dir);
     kfree(inode);
     return &tmpdir;
@@ -118,7 +118,6 @@ static vfs_node_t* ext2_readdir(vfs_node_t* node, uint32_t index)
 
 static vfs_node_t *ext2_finddir(vfs_node_t *node, char *name)
 {
-
 
     return NULL;
 }
@@ -185,10 +184,11 @@ static vfs_node_t* ext2_mount(vfs_node_t* root, int flags)
         ext2_read_block(ext2fs->bgd_offset + i, (uint8_t*)ext2fs->block_groups + i * ext2fs->block_size);
     }
 
-    char* verify = kmalloc(ext2fs->block_size);
     for (int i = 0; i < ext2fs->block_group_count; i++)
     {
         printk("BlockGroupDescriptor %d %d", i, ext2fs->bgd_offset + i * super_block->s_blocks_per_group);
+        printk("BlockBitmap %d", ((ext2_group_desc_t*)ext2fs->block_groups + i)->block_bitmap);
+        printk("INodeBitmap %d", ((ext2_group_desc_t*)ext2fs->block_groups + i)->inode_bitmap);
         printk("InodeTable %d", ((ext2_group_desc_t*)ext2fs->block_groups + i)->inode_table);
         printk("FreeBlocks %d", ((ext2_group_desc_t*)ext2fs->block_groups + i)->free_blocks_count);
         printk("FreeINodes %d", ((ext2_group_desc_t*)ext2fs->block_groups + i)->free_inodes_count);
@@ -199,9 +199,19 @@ static vfs_node_t* ext2_mount(vfs_node_t* root, int flags)
     printk("Ext2 blocksize \t %d", ext2fs->block_size);
     printk("Ext2 pointers_per_block \t %d", ext2fs->pointers_per_block);
     printk("Ext2 block_group_count \t %d", ext2fs->block_group_count);
+    printk("Ext2 inodes_per_block \t %d", ext2fs->block_size / sizeof(ext2_inode_t));
     printk("Ext2 inodes_per_group \t %d", ext2fs->inodes_per_group);
     printk("Ext2 bgd_block_span \t %d", ext2fs->bgd_block_span);
     printk("Ext2 bgd_offset \t %d", ext2fs->bgd_offset);
+
+    ext2_group_desc_t* first = ext2fs->block_groups;
+    char* buf = kmalloc(BLOCK_SIZE);
+    ext2_read_block(first->inode_table, buf);
+    ext2_inode_t* inode = buf;
+    for (int i = 0; i < BLOCK_SIZE / sizeof(ext2_inode_t); i++)
+    {
+        printk("INode inode %d block %d", i, (inode + i)->i_block[0]);
+    }
 
     // inode number start at no 1, inode of number 2 is root directory
     ext2_inode_t* ext2root = ext2_read_inode(ext2_root.inode);
@@ -225,7 +235,7 @@ int ext2_init()
 {
     printk("[Ext2] ext2 init...");
     ext2fs = kmalloc(sizeof(ext2_fs_t));
-    ext2fs->superblock = kmalloc(BLOCKSIZE);
+    ext2fs->superblock = kmalloc(BLOCK_SIZE);
     int ret = vfs_register("ext2", on_ext2_mount);
     return 0;
 }

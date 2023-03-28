@@ -9,8 +9,9 @@
 - [ATA](http://wiki.osdev.org/ATA_read/write_sectors)
 - [IDE Tutorial](http://forum.osdev.org/viewtopic.php?f=1&p=167798#p167798)
 - [Ext2](http://wiki.osdev.org/Ext2)
+- [Ext2](https://www.science.smith.edu/~nhowe/262/oldlabs/ext2.html)
 
-### Projects help a lot
+### Projects
 
 - https://github.com/klange/toaruos
 - https://github.com/maxdev1/ghost

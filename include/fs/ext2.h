@@ -85,9 +85,9 @@ typedef struct {
     uint32_t i_ctime;        // creation time
     uint32_t i_mtime;        // modification time
     uint32_t i_dtime;        // deletion time
-    uint32_t i_gid;          // group id
-    uint32_t i_links_count;  // links count
-    uint32_t i_sectors;       // blocks count
+    uint16_t i_gid;          // group id
+    uint16_t i_links_count;  // links count
+    uint32_t i_blocks;       // blocks count
     uint32_t i_flags;        // file flags
     uint32_t i_reserved1;
     uint32_t i_block[15];  // pointers to blocks
@@ -98,15 +98,15 @@ typedef struct {
     uint8_t i_frag;        // fragment number
     uint8_t i_fsize;       // fragment size
     uint16_t i_pad1;
-    uint32_t i_reserved2[1];
+    uint32_t i_reserved2[2];
 } __attribute__((packed)) ext2_inode_t;
 
-#define EXT2_NAME_LEN 255
 typedef struct {
     uint32_t inode;
     uint16_t rec_len; //Total size of this entry (Including all subfields)
-    uint16_t name_len;
-    char name[EXT2_NAME_LEN];
+    uint8_t name_len;
+    uint8_t file_type;
+    char name[];
 } __attribute__((packed)) ext2_dir_entry_t;
 
 /*

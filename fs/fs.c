@@ -96,8 +96,11 @@ dirent_t* vfs_readdir(vfs_node_t* node, uint32_t index) {
         return &tmp_dir;
     }
     if ((node->flags & 0x7) == VFS_DIRECTORY && node->readdir)
+    {
         return node->readdir(node, index);
-    else {
+    }
+    else
+    {
         printk("[VFS] not a directory exit %s %p %d %p", node->name, node, node->flags, node->readdir);
         return 0;
     }

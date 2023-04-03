@@ -12,6 +12,15 @@ static dirent_t tmpdir;
 #define BLOCK_SIZE  1024
 #define EXT2_DIRECT_BLOCKS 12
 
+/* File Types */
+#define EXT2_S_IFSOCK	0xC000
+#define EXT2_S_IFLNK	0xA000
+#define EXT2_S_IFREG	0x8000
+#define EXT2_S_IFBLK	0x6000
+#define EXT2_S_IFDIR	0x4000
+#define EXT2_S_IFCHR	0x2000
+#define EXT2_S_IFIFO	0x1000
+
 static int ext2_read_block(uint32_t block_no, uint8_t *buf)
 {
     if (block_no == 0)
@@ -59,7 +68,6 @@ static uint32_t ext2_get_block_number(ext2_inode_t* inode, uint32_t block)
 static int ext2_inode_read_block(ext2_inode_t* inode, uint32_t block, char* buf)
 {
     uint32_t real_block = ext2_get_block_number(inode, block);
-    printk("real block %d", real_block);
     ext2_read_block(real_block, buf);
     return real_block;
 }
@@ -100,7 +108,7 @@ static ext2_dir_entry_t* ext2_direntry(ext2_inode_t* inode, uint32_t ino, uint32
     return NULL;
 }
 
-static vfs_node_t* ext2_readdir(vfs_node_t* node, uint32_t index)
+static dirent_t* ext2_readdir(vfs_node_t* node, uint32_t index)
 {
     ext2_inode_t* inode = ext2_read_inode(node->inode);
     ext2_dir_entry_t* dir = ext2_direntry(inode, node->inode, index);
@@ -111,6 +119,7 @@ static vfs_node_t* ext2_readdir(vfs_node_t* node, uint32_t index)
     }
     memcpy(tmpdir.d_name, dir->name, dir->name_len);
     tmpdir.d_name[dir->name_len] = '\0';
+    tmpdir.d_ino = dir->inode;
     kfree(dir);
     kfree(inode);
     return &tmpdir;
@@ -118,6 +127,47 @@ static vfs_node_t* ext2_readdir(vfs_node_t* node, uint32_t index)
 
 static vfs_node_t *ext2_finddir(vfs_node_t *node, char *name)
 {
+    ext2_inode_t* inode = ext2_read_inode(node->inode);
+    char* buf = kmalloc(ext2fs->block_size);
+    int block_index = 0;
+    ext2_inode_read_block(inode, block_index, buf);
+
+    uint32_t dir_offset = 0;
+    uint32_t total_offset = 0;
+    while (total_offset < inode->i_size)
+    {
+        ext2_dir_entry_t* entry = (ext2_dir_entry_t*)(buf + dir_offset);
+        dir_offset += entry->rec_len;
+        total_offset += entry->rec_len;
+        if (entry->inode != 0 && memcmp(entry->name, name, entry->name_len) == 0)
+        {
+            vfs_node_t* n = kmalloc(sizeof(vfs_node_t));
+            n->inode = entry->inode;
+            ext2_inode_t* i = ext2_read_inode(n->inode);
+            if (i->i_mode & EXT2_S_IFDIR)
+            {
+                n->flags |= VFS_DIRECTORY;
+            }
+            if (i->i_mode & EXT2_S_IFREG)
+            {
+                n->flags |= VFS_FILE;
+            }
+            n->readdir = ext2_readdir;
+            n->finddir = ext2_finddir;
+
+            memcpy(n->name, entry->name, strlen(entry->name_len + 1));
+            kfree(inode);
+            return n;
+        }
+        if (dir_offset >= ext2fs->block_size)
+        {
+            dir_offset -= ext2fs->block_size;
+            block_index++;
+            ext2_inode_read_block(inode, block_index, buf);
+        }
+    }
+    kfree(inode);
+    kfree(buf);
 
     return NULL;
 }

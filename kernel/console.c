@@ -38,7 +38,7 @@ void tty_init(multiboot_info_t *boot_info) {
 
     vbe_mode_info_structure_t *mode_info = (vbe_mode_info_structure_t *)boot_info->vbe_mode_info;
 
-    if (1) {
+    if (0) {
         console.println = serial_println;
         console.printc = serial_printc;
         console.clear = serial_clear_screen;

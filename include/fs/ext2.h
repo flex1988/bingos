@@ -102,11 +102,11 @@ typedef struct {
 } __attribute__((packed)) ext2_inode_t;
 
 typedef struct {
-    uint32_t inode;
-    uint16_t rec_len; //Total size of this entry (Including all subfields)
-    uint8_t name_len;
-    uint8_t file_type;
-    char name[];
+    uint32_t    inode;
+    uint16_t    rec_len; //Total size of this entry (Including all subfields)
+    uint8_t     name_len;
+    uint8_t     file_type;
+    char        name[];
 } __attribute__((packed)) ext2_dir_entry_t;
 
 /*

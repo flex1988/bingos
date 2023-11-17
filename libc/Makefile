@@ -11,7 +11,7 @@ objs := $(obj_dir)/string.o $(obj_dir)/stdio.o $(obj_dir)/crt0.o $(obj_dir)/sysc
 all: libc
 
 libc: $(objs)
-	ar -crv ../build/libc.a $(objs) ../build/lib.a
+	ar -crv ../build/libc.a $(objs) ../build/libcommon.a
 
 $(obj_dir)/%.o: %.c
 	test -d ../build/libc/objs || mkdir -p ../build/libc/objs

@@ -6,7 +6,7 @@ obj_dir := ../build/libc/objs
 
 libc := ../build/libc.a
 
-lib := ../build/lib.a
+lib := ../build/libcommon.a
 
 target := $(bin_dir)/init $(bin_dir)/sh $(bin_dir)/helloworld $(bin_dir)/ls $(bin_dir)/date
 

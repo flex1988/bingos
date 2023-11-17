@@ -6,19 +6,20 @@ kernel := build/kernel-$(arch).bin
 
 libc := build/libc.a
 
-lib := build/lib.a
+lib := build/libcommon.a
 
 grub := grub2
 
-modules := lib	\
-	kernel	\
-	libc \
-	hal \
-	fs	\
-	net	\
-	drivers \
-	userspace	\
-	modules		\
+modules :=        \
+        common    \
+	kernel	  \
+	libc      \
+	hal       \
+	fs	  \
+	net	  \
+	drivers   \
+	userspace \
+	modules	  \
 	tools
 
 obj_dir:= build/objs

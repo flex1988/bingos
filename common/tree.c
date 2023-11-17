@@ -1,5 +1,4 @@
 #include "lib/tree.h"
-#include <string.h>
 #include "kernel.h"
 #include "kernel/kheap.h"
 

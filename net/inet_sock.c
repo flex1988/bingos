@@ -1,6 +1,7 @@
 #ifndef __INET_SOCK_H__
 #define __INET_SOCK_H__
 
+#if 0
 static proto_ops_t inet_proto_ops = {
     AF_INET,         inet_create,   inet_dup,        inet_release,
     inet_bind,       inet_connect,  inet_socketpair, inet_accept,
@@ -11,5 +12,6 @@ static proto_ops_t inet_proto_ops = {
 };
 
 void inet_proto_init() { ; }
+#endif
 
 #endif

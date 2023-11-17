@@ -10,13 +10,13 @@ lib := build/libcommon.a
 
 grub := grub2
 
-modules :=        \
-        common    \
+modules :=    \
+    common    \
 	kernel	  \
 	libc      \
 	hal       \
-	fs	  \
-	net	  \
+	fs	  	  \
+	net	      \
 	drivers   \
 	userspace \
 	modules	  \
